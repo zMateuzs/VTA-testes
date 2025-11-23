@@ -22,8 +22,13 @@ def get_db_connection():
 
 # --- ROTAS DE PÁGINAS E AUTENTICAÇÃO ---
 
-# Rota para a página de Login (GET)
+# Rota para a página de Landing (GET)
 @app.route('/')
+def landing_page():
+    return render_template('0.Landing_page.html')
+
+# Rota para a página de Login (GET)
+@app.route('/login', methods=['GET'])
 def login_page():
     return render_template('1. login_vta.html')
 
