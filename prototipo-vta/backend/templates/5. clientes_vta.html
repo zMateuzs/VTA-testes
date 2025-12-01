@@ -307,7 +307,7 @@
 
         .search-row {
             display: grid;
-            grid-template-columns: 1fr auto auto;
+            grid-template-columns: 1fr 1fr;
             gap: 1rem;
             align-items: end;
         }
@@ -613,6 +613,59 @@
             border-top: 1px solid var(--gray-light);
         }
 
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--white);
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--vta-green), var(--vta-green-light));
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--vta-green), var(--vta-green-light));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 1.5rem;
+            margin: 0 auto 1rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--gray-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--gray-medium);
+        }
+
         /* Responsive */
         @media (max-width: 1024px) {
             .main-content {
@@ -798,6 +851,38 @@
                     </div>
                 </section>
 
+                <!-- Metrics Section -->
+                <section class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-value">156</div>
+                        <div class="stat-label">Total de Clientes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <div class="stat-value">12</div>
+                        <div class="stat-label">Novos Clientes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-repeat"></i>
+                        </div>
+                        <div class="stat-value">89</div>
+                        <div class="stat-label">Clientes Recorrentes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-value">142</div>
+                        <div class="stat-label">Clientes Ativos</div>
+                    </div>
+                </section>
+
                 <!-- Search and Filters -->
                 <section class="search-filters">
                     <div class="search-row">
@@ -809,17 +894,12 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Status</label>
-                            <select class="form-input" id="statusFilter">
-                                <option value="">Todos</option>
-                                <option value="active">Ativo</option>
-                                <option value="inactive">Inativo</option>
-                            </select>
+                            <label class="form-label">Buscar por Pet</label>
+                            <div class="search-input">
+                                <i class="fas fa-paw"></i>
+                                <input type="text" class="form-input" placeholder="Nome do pet..." id="petSearchInput">
+                            </div>
                         </div>
-                        <button class="btn btn-secondary" onclick="clearFilters()">
-                            <i class="fas fa-filter"></i>
-                            Limpar Filtros
-                        </button>
                     </div>
                 </section>
 
@@ -836,9 +916,9 @@
                                 <tr>
                                     <th>Cliente</th>
                                     <th>Telefone</th>
-                                    <th>CPF</th>
                                     <th>Pets</th>
                                     <th>Status</th>
+                                    <th>Última Visita</th>
                                     <th>Cadastro</th>
                                     <th>Ações</th>
                                 </tr>
@@ -1075,8 +1155,10 @@
                 phone: '(11) 99999-9999',
                 cpf: '123.456.789-00',
                 pets: 2,
+                petNames: ['Fluffy', 'Mittens'],
                 status: 'active',
                 createdAt: '15/01/2024',
+                lastVisit: '10/11/2024',
                 address: 'Rua das Flores, 123, Centro, São Paulo - 01234-567',
                 birthDate: '1985-05-15',
                 notes: 'Cliente preferencial, possui 2 gatos'
@@ -1088,8 +1170,10 @@
                 phone: '(11) 88888-8888',
                 cpf: '987.654.321-00',
                 pets: 1,
+                petNames: ['Mimi'],
                 status: 'active',
                 createdAt: '22/01/2024',
+                lastVisit: '08/11/2024',
                 address: 'Av. Paulista, 456, Bela Vista, São Paulo - 01310-100',
                 birthDate: '1990-08-22',
                 notes: 'Dono do cachorro Mimi'
@@ -1101,8 +1185,10 @@
                 phone: '(11) 77777-7777',
                 cpf: '456.789.123-00',
                 pets: 3,
+                petNames: ['Thor', 'Luna', 'Bolt'],
                 status: 'active',
                 createdAt: '05/02/2024',
+                lastVisit: '25/11/2024',
                 address: 'Rua Augusta, 789, Consolação, São Paulo - 01305-000',
                 birthDate: '1992-12-03',
                 notes: 'Possui 3 pets: Thor, Luna e Bolt'
@@ -1114,8 +1200,10 @@
                 phone: '(11) 66666-6666',
                 cpf: '789.123.456-00',
                 pets: 1,
+                petNames: ['Rex'],
                 status: 'inactive',
                 createdAt: '12/02/2024',
+                lastVisit: '-',
                 address: 'Rua Oscar Freire, 321, Jardins, São Paulo - 01426-001',
                 birthDate: '1988-03-10',
                 notes: 'Cliente inativo desde março'
@@ -1127,8 +1215,10 @@
                 phone: '(11) 55555-5555',
                 cpf: '321.654.987-00',
                 pets: 2,
+                petNames: ['Bella', 'Max'],
                 status: 'active',
                 createdAt: '18/02/2024',
+                lastVisit: '20/11/2024',
                 address: 'Alameda Santos, 654, Cerqueira César, São Paulo - 01418-002',
                 birthDate: '1995-07-28',
                 notes: 'Novos pets recentemente adotados'
@@ -1159,9 +1249,9 @@
                         </div>
                     </td>
                     <td>${client.phone}</td>
-                    <td>${client.cpf}</td>
                     <td>${client.pets}</td>
                     <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                    <td>${client.lastVisit}</td>
                     <td>${client.createdAt}</td>
                     <td>
                         <div class="action-buttons">
@@ -1238,14 +1328,13 @@
         // Função para limpar filtros
         function clearFilters() {
             document.getElementById('searchInput').value = '';
-            document.getElementById('statusFilter').value = '';
             renderTable();
         }
 
         // Função de busca
         function searchClients() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const statusFilter = document.getElementById('statusFilter').value;
+            const petSearchTerm = document.getElementById('petSearchInput').value.toLowerCase();
 
             let filteredData = clientsData;
 
@@ -1257,8 +1346,10 @@
                 );
             }
 
-            if (statusFilter) {
-                filteredData = filteredData.filter(client => client.status === statusFilter);
+            if (petSearchTerm) {
+                filteredData = filteredData.filter(client =>
+                    client.petNames.some(pet => pet.toLowerCase().includes(petSearchTerm))
+                );
             }
 
             renderTable(filteredData);
@@ -1287,7 +1378,7 @@
 
             // Busca em tempo real
             document.getElementById('searchInput').addEventListener('input', searchClients);
-            document.getElementById('statusFilter').addEventListener('change', searchClients);
+            document.getElementById('petSearchInput').addEventListener('input', searchClients);
 
             // Formatação de campos
             document.getElementById('clientCPF').addEventListener('input', function(e) {
