@@ -967,8 +967,13 @@
 
         .modal-actions {
             display: flex;
+            gap: 1.2rem;
+            margin-top: 2.5rem;
+        }
+
+        .confirm-modal-content .modal-actions {
             gap: 1rem;
-            margin-top: 2rem;
+            margin-top: 0;
         }
 
         /* Modal de Detalhes */
@@ -1048,59 +1053,95 @@
             color: var(--white);
         }
 
+        /* Botão de exclusão estilo X vermelho */
+        .btn-delete-checkin {
+            background: linear-gradient(135deg, #D62828, #FF6B6B) !important;
+            color: var(--white) !important;
+            padding: 0.75rem 1.5rem !important;
+        }
+
+        .btn-delete-checkin:hover {
+            background: linear-gradient(135deg, #B91C1C, #D62828) !important;
+            transform: translateY(-1px);
+        }
+
+        .btn-delete-checkin i::before {
+            content: '✕' !important;
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+
         /* Modal de Confirmação */
         .confirm-modal-content {
-            max-width: 400px;
+            max-width: 450px;
             text-align: center;
+            padding: 2.5rem 2rem;
         }
 
         .confirm-icon {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 1.5rem;
-            background: rgba(247, 127, 0, 0.15);
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 2rem;
+            background: linear-gradient(135deg, rgba(214, 40, 40, 0.1), rgba(255, 107, 107, 0.1));
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2.5rem;
-            color: var(--vta-orange);
+            font-size: 2.8rem;
+            color: #D62828;
+            box-shadow: 0 4px 12px rgba(214, 40, 40, 0.15);
         }
 
         .confirm-icon.warning {
-            background: rgba(247, 127, 0, 0.1);
+            background: linear-gradient(135deg, rgba(247, 127, 0, 0.1), rgba(252, 191, 73, 0.1));
             color: var(--vta-orange);
+            box-shadow: 0 4px 12px rgba(247, 127, 0, 0.15);
         }
 
         .confirm-message {
-            font-size: 1.1rem;
+            font-size: 1.4rem;
             color: var(--gray-dark);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+            letter-spacing: -0.3px;
         }
 
         .confirm-submessage {
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             color: var(--gray-medium);
-            margin-bottom: 2rem;
+            margin-bottom: 2.5rem;
+            line-height: 1.5;
         }
 
         .info-box {
-            background: var(--gray-light);
-            padding: 1rem;
-            border-radius: 8px;
-            margin: 1rem 0;
+            background: linear-gradient(135deg, #F8F9FA 0%, #FFFFFF 100%);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1.5rem 0 2rem 0;
             text-align: left;
+            border-left: 4px solid var(--vta-orange);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
 
         .info-box-title {
-            font-weight: 600;
+            font-weight: 700;
             color: var(--gray-dark);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--vta-orange);
         }
 
         .info-box-text {
-            font-size: 0.9rem;
-            color: var(--gray-medium);
+            font-size: 0.95rem;
+            color: var(--gray-dark);
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-box-text:last-child {
+            margin-bottom: 0;
         }
 
         /* Responsive */
@@ -2226,8 +2267,8 @@
                         <i class="fas fa-edit"></i>
                         Editar
                     </button>
-                    <button class="btn btn-danger" onclick="solicitarExclusao(${agendamento.id})" style="flex: 1;">>
-                        <i class="fas fa-trash"></i>
+                    <button class="btn btn-delete-checkin" onclick="solicitarExclusao(${agendamento.id})" style="flex: 1;">
+                        <i class="fas fa-times"></i>
                         Excluir
                     </button>
                 </div>
