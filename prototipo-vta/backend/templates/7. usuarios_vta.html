@@ -334,12 +334,13 @@
 
         .form-label {
             font-weight: 500;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.75rem;
             color: var(--gray-dark);
+            font-size: 0.95rem;
         }
 
         .form-control {
-            padding: 0.75rem;
+            padding: 0.85rem;
             border: 2px solid var(--gray-light);
             border-radius: 8px;
             font-size: 1rem;
@@ -536,8 +537,8 @@
         .modal {
             background: var(--white);
             border-radius: 15px;
-            padding: 2rem;
-            max-width: 500px;
+            padding: 2.5rem;
+            max-width: 550px;
             width: 90%;
             max-height: 90vh;
             overflow-y: auto;
@@ -556,14 +557,14 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--gray-light);
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid var(--gray-light);
         }
 
         .modal-title {
-            font-size: 1.5rem;
-            font-weight: 600;
+            font-size: 1.6rem;
+            font-weight: 700;
             color: var(--gray-dark);
         }
 
@@ -585,13 +586,13 @@
 
         .modal-form {
             display: grid;
-            gap: 1.5rem;
+            gap: 2rem;
         }
 
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 1rem;
+            gap: 1.5rem;
         }
 
         .modal-actions {
@@ -1087,8 +1088,19 @@
                         <input type="text" class="form-control" id="userName" required>
                     </div>
                     <div class="form-group">
+                        <label class="form-label">CPF</label>
+                        <input type="text" class="form-control" id="userCPF" placeholder="000.000.000-00" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
                         <label class="form-label">Email</label>
                         <input type="email" class="form-control" id="userEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Telefone</label>
+                        <input type="tel" class="form-control" id="userPhone" placeholder="(00) 00000-0000">
                     </div>
                 </div>
                 
@@ -1111,11 +1123,6 @@
                     </div>
                 </div>
                 
-                <div class="form-group">
-                    <label class="form-label">Telefone</label>
-                    <input type="tel" class="form-control" id="userPhone" placeholder="(00) 00000-0000">
-                </div>
-                
                 <div class="form-row" id="passwordFields">
                     <div class="form-group">
                         <label class="form-label">Senha</label>
@@ -1124,24 +1131,6 @@
                     <div class="form-group">
                         <label class="form-label">Confirmar Senha</label>
                         <input type="password" class="form-control" id="userPasswordConfirm" minlength="6">
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Permissões Especiais</label>
-                    <div style="display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 0.5rem;">
-                        <label style="display: flex; align-items: center; gap: 0.5rem;">
-                            <input type="checkbox" id="permRelatorios">
-                            <span>Visualizar Relatórios</span>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 0.5rem;">
-                            <input type="checkbox" id="permUsuarios">
-                            <span>Gerenciar Usuários</span>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 0.5rem;">
-                            <input type="checkbox" id="permBackup">
-                            <span>Backup/Restaurar</span>
-                        </label>
                     </div>
                 </div>
                 
@@ -1159,14 +1148,14 @@
     <script>
         // Dados dos usuários (simulação)
         let users = [
-            { id: 1, name: 'Admin Sistema', email: 'admin@vta.com', role: 'admin', status: 'ativo', phone: '(51) 99999-0001', lastAccess: 'Hoje, 14:30' },
-            { id: 2, name: 'Dr. Silva', email: 'silva@vta.com', role: 'veterinario', status: 'ativo', phone: '(51) 99999-0002', lastAccess: 'Hoje, 13:15' },
-            { id: 3, name: 'Dr. Costa', email: 'costa@vta.com', role: 'veterinario', status: 'ativo', phone: '(51) 99999-0003', lastAccess: 'Hoje, 09:45' },
-            { id: 4, name: 'Maria Atendente', email: 'maria@vta.com', role: 'atendente', status: 'ativo', phone: '(51) 99999-0004', lastAccess: 'Ontem, 18:00' },
-            { id: 5, name: 'João Atendente', email: 'joao@vta.com', role: 'atendente', status: 'ativo', phone: '(51) 99999-0005', lastAccess: '2 dias atrás' },
-            { id: 6, name: 'Dra. Rodrigues', email: 'rodrigues@vta.com', role: 'veterinario', status: 'ativo', phone: '(51) 99999-0006', lastAccess: '3 dias atrás' },
-            { id: 7, name: 'Pedro Santos', email: 'pedro@vta.com', role: 'atendente', status: 'inativo', phone: '(51) 99999-0007', lastAccess: '1 semana atrás' },
-            { id: 8, name: 'Dr. Fernandes', email: 'fernandes@vta.com', role: 'veterinario', status: 'ativo', phone: '(51) 99999-0008', lastAccess: '1 semana atrás' }
+            { id: 1, name: 'Admin Sistema', email: 'admin@vta.com', cpf: '123.456.789-00', role: 'admin', status: 'ativo', phone: '(51) 99999-0001', lastAccess: 'Hoje, 14:30' },
+            { id: 2, name: 'Dr. Silva', email: 'silva@vta.com', cpf: '234.567.890-11', role: 'veterinario', status: 'ativo', phone: '(51) 99999-0002', lastAccess: 'Hoje, 13:15' },
+            { id: 3, name: 'Dr. Costa', email: 'costa@vta.com', cpf: '345.678.901-22', role: 'veterinario', status: 'ativo', phone: '(51) 99999-0003', lastAccess: 'Hoje, 09:45' },
+            { id: 4, name: 'Maria Atendente', email: 'maria@vta.com', cpf: '456.789.012-33', role: 'atendente', status: 'ativo', phone: '(51) 99999-0004', lastAccess: 'Ontem, 18:00' },
+            { id: 5, name: 'João Atendente', email: 'joao@vta.com', cpf: '567.890.123-44', role: 'atendente', status: 'ativo', phone: '(51) 99999-0005', lastAccess: '2 dias atrás' },
+            { id: 6, name: 'Dra. Rodrigues', email: 'rodrigues@vta.com', cpf: '678.901.234-55', role: 'veterinario', status: 'ativo', phone: '(51) 99999-0006', lastAccess: '3 dias atrás' },
+            { id: 7, name: 'Pedro Santos', email: 'pedro@vta.com', cpf: '789.012.345-66', role: 'atendente', status: 'inativo', phone: '(51) 99999-0007', lastAccess: '1 semana atrás' },
+            { id: 8, name: 'Dr. Fernandes', email: 'fernandes@vta.com', cpf: '890.123.456-77', role: 'veterinario', status: 'ativo', phone: '(51) 99999-0008', lastAccess: '1 semana atrás' }
         ];
 
         let currentUser = null;
@@ -1195,6 +1184,7 @@
                 // Preencher dados do usuário
                 if (currentUser) {
                     document.getElementById('userName').value = currentUser.name;
+                    document.getElementById('userCPF').value = currentUser.cpf;
                     document.getElementById('userEmail').value = currentUser.email;
                     document.getElementById('userRole').value = currentUser.role;
                     document.getElementById('userStatus').value = currentUser.status;
@@ -1215,6 +1205,7 @@
             event.preventDefault();
             
             const name = document.getElementById('userName').value;
+            const cpf = document.getElementById('userCPF').value;
             const email = document.getElementById('userEmail').value;
             const role = document.getElementById('userRole').value;
             const status = document.getElementById('userStatus').value;
@@ -1223,6 +1214,20 @@
             const passwordConfirm = document.getElementById('userPasswordConfirm').value;
             
             // Validações
+            // Validar CPF: deve ter exatamente 11 dígitos (formato XXX.XXX.XXX-XX)
+            const cpfDigits = cpf.replace(/\D/g, '');
+            if (cpfDigits.length !== 11) {
+                alert('CPF deve ter exatamente 11 dígitos (formato: 000.000.000-00)');
+                return;
+            }
+            
+            // Validar Telefone: deve ter exatamente 11 dígitos com DDD (formato (XX) XXXXX-XXXX)
+            const phoneDigits = phone.replace(/\D/g, '');
+            if (phoneDigits.length !== 11) {
+                alert('Telefone deve ter exatamente 11 dígitos com DDD (formato: (00) 00000-0000)');
+                return;
+            }
+            
             if (password && password !== passwordConfirm) {
                 alert('As senhas não coincidem!');
                 return;
@@ -1231,6 +1236,7 @@
             if (currentUser) {
                 // Editar usuário existente
                 currentUser.name = name;
+                currentUser.cpf = cpf;
                 currentUser.email = email;
                 currentUser.role = role;
                 currentUser.status = status;
@@ -1241,6 +1247,7 @@
                 const newUser = {
                     id: users.length + 1,
                     name: name,
+                    cpf: cpf,
                     email: email,
                     role: role,
                     status: status,
@@ -1371,6 +1378,34 @@
         document.addEventListener('DOMContentLoaded', function() {
             renderUsers();
             updateStats();
+            
+            // Formatação de CPF com limite de 11 dígitos
+            const cpfInput = document.getElementById('userCPF');
+            if (cpfInput) {
+                cpfInput.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\D/g, '');
+                    // Limitar a 11 dígitos
+                    if (value.length > 11) {
+                        value = value.slice(0, 11);
+                    }
+                    // Aplicar máscara XXX.XXX.XXX-XX
+                    e.target.value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+                });
+            }
+            
+            // Formatação de telefone com limite de 11 dígitos
+            const phoneInput = document.getElementById('userPhone');
+            if (phoneInput) {
+                phoneInput.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\D/g, '');
+                    // Limitar a 11 dígitos
+                    if (value.length > 11) {
+                        value = value.slice(0, 11);
+                    }
+                    // Aplicar máscara (XX) XXXXX-XXXX
+                    e.target.value = value.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+                });
+            }
         });
     </script>
     <!-- Navegação e controle de sessão -->
