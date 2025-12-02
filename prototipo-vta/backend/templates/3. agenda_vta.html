@@ -1012,6 +1012,29 @@
             color: var(--vta-orange-dark);
         }
 
+        .status-badge.checkin {
+            background: linear-gradient(135deg, #52B788, #74C69D);
+            color: var(--white);
+            font-weight: 600;
+        }
+
+        /* Estilo para agendamento com check-in */
+        .appointment.checkin-realizado {
+            background: linear-gradient(135deg, #52B788, #74C69D) !important;
+            box-shadow: 0 4px 12px rgba(82, 183, 136, 0.3);
+            border: 2px solid #40916C;
+        }
+
+        .appointment.checkin-realizado::before {
+            content: '✓';
+            position: absolute;
+            top: 0.25rem;
+            left: 0.5rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--white);
+        }
+
         /* Modal de Confirmação */
         .confirm-modal-content {
             max-width: 400px;
@@ -1976,7 +1999,8 @@
 
         function criarElementoAgendamento(agendamento, mostrarSala = false) {
             const appointmentDiv = document.createElement('div');
-            appointmentDiv.className = `appointment ${agendamento.sala}`;
+            const temCheckin = agendamento.checkin && agendamento.checkin.realizado;
+            appointmentDiv.className = `appointment ${agendamento.sala} ${temCheckin ? 'checkin-realizado' : ''}`;
             appointmentDiv.draggable = true;
             appointmentDiv.dataset.id = agendamento.id;
 
@@ -2123,6 +2147,20 @@
 
         function mostrarDetalhesAgendamento(agendamento) {
             const detalhesContent = document.getElementById('detalhesContent');
+            const temCheckin = agendamento.checkin && agendamento.checkin.realizado;
+
+            let statusHTML = `<span class="status-badge ${agendamento.status}">${agendamento.status.toUpperCase()}</span>`;
+            
+            if (temCheckin) {
+                statusHTML += `
+                    <span class="status-badge checkin" style="margin-left: 0.5rem;">
+                        <i class="fas fa-check-circle"></i> CHECK-IN REALIZADO
+                    </span>
+                    <div style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--gray-medium);">
+                        📍 ${agendamento.checkin.data} às ${agendamento.checkin.horario}
+                    </div>
+                `;
+            }
 
             detalhesContent.innerHTML = `
                 <div class="detail-group">
@@ -2152,7 +2190,7 @@
                 <div class="detail-group">
                     <div class="detail-label">Status</div>
                     <div class="detail-value">
-                        <span class="status-badge ${agendamento.status}">${agendamento.status.toUpperCase()}</span>
+                        ${statusHTML}
                     </div>
                 </div>
                 <div class="detail-group">
@@ -2164,7 +2202,18 @@
                         <i class="fas fa-times"></i>
                         Fechar
                     </button>
-                    <button class="btn btn-primary" onclick="editarAgendamento(${agendamento.id})">
+                    ${!temCheckin ? `
+                        <button class="btn btn-primary" onclick="realizarCheckIn(${agendamento.id})" style="background: linear-gradient(135deg, #52B788, #74C69D);">
+                            <i class="fas fa-check-circle"></i>
+                            Check-in
+                        </button>
+                    ` : `
+                        <button class="btn" onclick="desfazerCheckIn(${agendamento.id})" style="background: #E8E8E8; color: #666;">
+                            <i class="fas fa-undo"></i>
+                            Desfazer Check-in
+                        </button>
+                    `}
+                    <button class="btn btn-secondary" onclick="editarAgendamento(${agendamento.id})">
                         <i class="fas fa-edit"></i>
                         Editar
                     </button>
@@ -2180,6 +2229,39 @@
 
         function fecharDetalhes() {
             document.getElementById('detalhesModal').classList.remove('show');
+        }
+
+        function realizarCheckIn(id) {
+            const agendamento = agendamentos.find(a => a.id === id);
+            if (!agendamento) return;
+
+            agendamento.checkin = {
+                realizado: true,
+                horario: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+                data: new Date().toLocaleDateString('pt-BR')
+            };
+
+            salvarAgendamentos();
+            mostrarDetalhesAgendamento(agendamento);
+            renderizarGrade();
+
+            const nomeCliente = agendamento.cliente;
+            const nomePet = agendamento.pet;
+
+            mostrarToast(`Bem-vindo! Check-in realizado para ${nomePet} (${nomeCliente})`, 'success');
+        }
+
+        function desfazerCheckIn(id) {
+            const agendamento = agendamentos.find(a => a.id === id);
+            if (!agendamento) return;
+
+            agendamento.checkin = null;
+
+            salvarAgendamentos();
+            mostrarDetalhesAgendamento(agendamento);
+            renderizarGrade();
+
+            mostrarToast('Check-in cancelado', 'warning');
         }
 
         function editarAgendamento(id) {
