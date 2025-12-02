@@ -893,18 +893,25 @@
         .modal-content {
             background: var(--white);
             border-radius: 15px;
-            padding: 2rem;
+            padding: 0;
             max-width: 600px;
             width: 90%;
             max-height: 90vh;
-            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
         }
 
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1.5rem;
+            padding: 2rem 2rem 1.5rem 2rem;
+            border-bottom: 1px solid var(--gray-light);
+            position: sticky;
+            top: 0;
+            background: var(--white);
+            z-index: 10;
+            flex-shrink: 0;
         }
 
         .modal-title {
@@ -950,6 +957,12 @@
         .form-group textarea {
             min-height: 100px;
             resize: vertical;
+        }
+
+        .modal-body {
+            padding: 2rem;
+            overflow-y: auto;
+            flex: 1;
         }
 
         .modal-actions {
@@ -1029,7 +1042,7 @@
             content: '✓';
             position: absolute;
             top: 0.25rem;
-            left: 0.5rem;
+            right: 0.5rem;
             font-size: 1.2rem;
             font-weight: bold;
             color: var(--white);
@@ -2198,26 +2211,22 @@
                     <div class="detail-value">${agendamento.obs || 'Nenhuma observação'}</div>
                 </div>
                 <div class="modal-actions">
-                    <button class="btn btn-secondary" onclick="fecharDetalhes()">
-                        <i class="fas fa-times"></i>
-                        Fechar
-                    </button>
                     ${!temCheckin ? `
-                        <button class="btn btn-primary" onclick="realizarCheckIn(${agendamento.id})" style="background: linear-gradient(135deg, #52B788, #74C69D);">
+                        <button class="btn btn-primary" onclick="realizarCheckIn(${agendamento.id})" style="background: linear-gradient(135deg, #52B788, #74C69D); flex: 1;">
                             <i class="fas fa-check-circle"></i>
                             Check-in
                         </button>
                     ` : `
-                        <button class="btn" onclick="desfazerCheckIn(${agendamento.id})" style="background: #E8E8E8; color: #666;">
+                        <button class="btn" onclick="desfazerCheckIn(${agendamento.id})" style="background: #E8E8E8; color: #666; flex: 1;">
                             <i class="fas fa-undo"></i>
                             Desfazer Check-in
                         </button>
                     `}
-                    <button class="btn btn-secondary" onclick="editarAgendamento(${agendamento.id})">
+                    <button class="btn btn-secondary" onclick="editarAgendamento(${agendamento.id})" style="flex: 1;">
                         <i class="fas fa-edit"></i>
                         Editar
                     </button>
-                    <button class="btn btn-danger" onclick="solicitarExclusao(${agendamento.id})">
+                    <button class="btn btn-danger" onclick="solicitarExclusao(${agendamento.id})" style="flex: 1;">>
                         <i class="fas fa-trash"></i>
                         Excluir
                     </button>
@@ -2241,6 +2250,9 @@
                 data: new Date().toLocaleDateString('pt-BR')
             };
 
+            // Alterar status para confirmado quando fizer check-in
+            agendamento.status = 'confirmado';
+
             salvarAgendamentos();
             mostrarDetalhesAgendamento(agendamento);
             renderizarGrade();
@@ -2256,6 +2268,9 @@
             if (!agendamento) return;
 
             agendamento.checkin = null;
+            
+            // Voltar para agendado quando desfazer check-in
+            agendamento.status = 'agendado';
 
             salvarAgendamentos();
             mostrarDetalhesAgendamento(agendamento);
