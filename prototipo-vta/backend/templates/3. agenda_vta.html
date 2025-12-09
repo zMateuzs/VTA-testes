@@ -1508,79 +1508,37 @@
             salaFiltro: 'todas'
         };
 
-        let agendamentos = [
-            {
-                id: 1,
-                cliente: "Maria Silva",
-                pet: "Rex",
-                sala: "sala1",
-                data: new Date(),
-                horario: "08:00",
-                duracao: 30,
-                status: "confirmado",
-                tipo: "Consulta",
-                obs: "Primeira consulta"
-            },
-            {
-                id: 2,
-                cliente: "João Santos",
-                pet: "Luna",
-                sala: "sala2",
-                data: new Date(),
-                horario: "09:30",
-                duracao: 60,
-                status: "agendado",
-                tipo: "Cirurgia",
-                obs: "Cirurgia de castração"
-            },
-            {
-                id: 3,
-                cliente: "Ana Costa",
-                pet: "Mimi",
-                sala: "sala1",
-                data: new Date(),
-                horario: "10:00",
-                duracao: 30,
-                status: "realizado",
-                tipo: "Consulta",
-                obs: "Vacinação"
-            }
-        ];
+        let agendamentos = []; // Inicialmente vazio, carregado do backend
 
-        let proximoId = 4;
+        let proximoId = 0; // Gerado pelo backend
         let agendamentoParaExcluir = null;
         let agendamentoEditando = null;
         let movimentacaoPendente = null;
         let visualizacaoSemana = 'agendados'; // 'agendados' ou 'livres'
 
-        // Funções de persistência
-        function salvarAgendamentos() {
-            const agendamentosParaSalvar = agendamentos.map(a => ({
-                ...a,
-                data: a.data.toISOString()
-            }));
-            localStorage.setItem('agendamentos_vta', JSON.stringify(agendamentosParaSalvar));
-            localStorage.setItem('proximoId_vta', proximoId.toString());
-        }
-
-        function carregarAgendamentos() {
-            const salvos = localStorage.getItem('agendamentos_vta');
-            const idSalvo = localStorage.getItem('proximoId_vta');
-
-            if (salvos) {
-                const agendamentosCarregados = JSON.parse(salvos);
-                agendamentos = agendamentosCarregados.map(a => ({
+        // Função para carregar agendamentos do backend
+        async function carregarAgendamentos() {
+            try {
+                const response = await fetch('/api/agendamentos');
+                if (!response.ok) throw new Error('Erro ao carregar agendamentos');
+                
+                const dados = await response.json();
+                
+                // Converter strings de data para objetos Date
+                agendamentos = dados.map(a => ({
                     ...a,
-                    data: new Date(a.data)
+                    data: new Date(a.data + 'T00:00:00'), // Ajuste para garantir data correta
+                    // O backend retorna HH:MM, o frontend espera isso mesmo
                 }));
-            }
-
-            if (idSalvo) {
-                proximoId = parseInt(idSalvo);
+                
+                renderizarGrade();
+            } catch (error) {
+                console.error('Erro:', error);
+                mostrarToast('Erro ao carregar agendamentos', 'error');
             }
         }
 
-
+        // Função salvarAgendamentos removida pois agora salvamos diretamente no backend a cada ação
 
         function gerarHorarios() {
             const horarios = [];
@@ -1600,7 +1558,9 @@
         function getInicioSemana(data) {
             const d = new Date(data);
             const dia = d.getDay();
-            const diff = d.getDate() - dia;
+            const diff = d.getDate() - dia; // Ajuste para domingo ser 0
+            // Se domingo for o primeiro dia da semana no calendário, ok.
+            // Se for segunda, precisa ajustar. O código original usava getDay() direto.
             return new Date(d.setDate(diff));
         }
 
@@ -2151,19 +2111,35 @@
             document.getElementById('confirmarMoverModal').classList.add('show');
         }
 
-        function confirmarMovimentacao() {
+        async function confirmarMovimentacao() {
             if (!movimentacaoPendente) return;
 
             const { agendamento, novaSala, novoHorario, novaData } = movimentacaoPendente;
 
-            agendamento.sala = novaSala;
-            agendamento.horario = novoHorario;
-            agendamento.data = novaData;
+            try {
+                const response = await fetch(`/api/agendamentos/${agendamento.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sala: novaSala,
+                        horario: novoHorario,
+                        data: novaData.toISOString().split('T')[0],
+                        cliente: agendamento.cliente,
+                        pet: agendamento.pet,
+                        status: agendamento.status,
+                        obs: agendamento.obs
+                    })
+                });
 
-            salvarAgendamentos();
-            fecharMover();
-            renderizarGrade();
-            mostrarToast('Agendamento movido com sucesso!', 'success');
+                if (!response.ok) throw new Error('Erro ao mover agendamento');
+
+                await carregarAgendamentos();
+                fecharMover();
+                mostrarToast('Agendamento movido com sucesso!', 'success');
+            } catch (error) {
+                console.error('Erro:', error);
+                mostrarToast('Erro ao mover agendamento', 'error');
+            }
         }
 
         function cancelarMovimentacao() {
@@ -2211,7 +2187,7 @@
                         <i class="fas fa-check-circle"></i> CHECK-IN REALIZADO
                     </span>
                     <div style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--gray-medium);">
-                        📍 ${agendamento.checkin.data} às ${agendamento.checkin.horario}
+                        📍 ${agendamento.checkin.data || ''} às ${agendamento.checkin.horario}
                     </div>
                 `;
             }
@@ -2227,7 +2203,7 @@
                 </div>
                 <div class="detail-group">
                     <div class="detail-label">Tipo de Atendimento</div>
-                    <div class="detail-value">${agendamento.tipo}</div>
+                    <div class="detail-value">${agendamento.tipo || 'Consulta'}</div>
                 </div>
                 <div class="detail-group">
                     <div class="detail-label">Sala</div>
@@ -2236,10 +2212,6 @@
                 <div class="detail-group">
                     <div class="detail-label">Data e Horário</div>
                     <div class="detail-value">${agendamento.data.toLocaleDateString('pt-BR')} às ${agendamento.horario}</div>
-                </div>
-                <div class="detail-group">
-                    <div class="detail-label">Duração</div>
-                    <div class="detail-value">${agendamento.duracao} minutos</div>
                 </div>
                 <div class="detail-group">
                     <div class="detail-label">Status</div>
@@ -2281,43 +2253,63 @@
             document.getElementById('detalhesModal').classList.remove('show');
         }
 
-        function realizarCheckIn(id) {
+        async function realizarCheckIn(id) {
             const agendamento = agendamentos.find(a => a.id === id);
             if (!agendamento) return;
 
-            agendamento.checkin = {
-                realizado: true,
-                horario: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-                data: new Date().toLocaleDateString('pt-BR')
-            };
+            const horario = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
-            // Alterar status para confirmado quando fizer check-in
-            agendamento.status = 'confirmado';
+            try {
+                const response = await fetch(`/api/agendamentos/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        checkin: {
+                            horario: horario
+                        }
+                    })
+                });
 
-            salvarAgendamentos();
-            mostrarDetalhesAgendamento(agendamento);
-            renderizarGrade();
+                if (!response.ok) throw new Error('Erro ao realizar check-in');
 
-            const nomeCliente = agendamento.cliente;
-            const nomePet = agendamento.pet;
-
-            mostrarToast(`Bem-vindo! Check-in realizado para ${nomePet} (${nomeCliente})`, 'success');
+                await carregarAgendamentos();
+                
+                // Re-encontrar o agendamento atualizado para mostrar detalhes
+                const agendamentoAtualizado = agendamentos.find(a => a.id === id);
+                mostrarDetalhesAgendamento(agendamentoAtualizado);
+                
+                mostrarToast(`Bem-vindo! Check-in realizado para ${agendamentoAtualizado.pet}`, 'success');
+            } catch (error) {
+                console.error('Erro:', error);
+                mostrarToast('Erro ao realizar check-in', 'error');
+            }
         }
 
-        function desfazerCheckIn(id) {
+        async function desfazerCheckIn(id) {
             const agendamento = agendamentos.find(a => a.id === id);
             if (!agendamento) return;
 
-            agendamento.checkin = null;
-            
-            // Voltar para agendado quando desfazer check-in
-            agendamento.status = 'agendado';
+            try {
+                const response = await fetch(`/api/agendamentos/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        checkin: null
+                    })
+                });
 
-            salvarAgendamentos();
-            mostrarDetalhesAgendamento(agendamento);
-            renderizarGrade();
+                if (!response.ok) throw new Error('Erro ao desfazer check-in');
 
-            mostrarToast('Check-in cancelado', 'warning');
+                await carregarAgendamentos();
+                
+                const agendamentoAtualizado = agendamentos.find(a => a.id === id);
+                mostrarDetalhesAgendamento(agendamentoAtualizado);
+                
+                mostrarToast('Check-in cancelado', 'warning');
+            } catch (error) {
+                console.error('Erro:', error);
+                mostrarToast('Erro ao desfazer check-in', 'error');
+            }
         }
 
         function editarAgendamento(id) {
@@ -2368,16 +2360,22 @@
             agendamentoParaExcluir = null;
         }
 
-        function confirmarExclusao() {
+        async function confirmarExclusao() {
             if (!agendamentoParaExcluir) return;
 
-            const index = agendamentos.findIndex(a => a.id === agendamentoParaExcluir.id);
-            if (index !== -1) {
-                agendamentos.splice(index, 1);
-                salvarAgendamentos(); // ← ADICIONE AQUI
+            try {
+                const response = await fetch(`/api/agendamentos/${agendamentoParaExcluir.id}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) throw new Error('Erro ao excluir agendamento');
+
+                await carregarAgendamentos();
                 fecharConfirmacao();
-                renderizarGrade();
                 mostrarToast('Agendamento excluído com sucesso!', 'success');
+            } catch (error) {
+                console.error('Erro:', error);
+                mostrarToast('Erro ao excluir agendamento', 'error');
             }
         }
         function selecionarHorario(sala, horario) {
@@ -2538,7 +2536,7 @@
             });
         });
 
-        document.getElementById('agendamentoForm').addEventListener('submit', function (e) {
+        document.getElementById('agendamentoForm').addEventListener('submit', async function (e) {
             e.preventDefault();
 
             const clienteInput = document.getElementById('clienteInput');
@@ -2549,39 +2547,52 @@
 
             const dataHora = new Date(dataHoraInput.value);
             const horario = dataHoraInput.value.split('T')[1];
+            const dataStr = dataHoraInput.value.split('T')[0];
 
-            if (agendamentoEditando) {
-                agendamentoEditando.cliente = clienteInput.value;
-                agendamentoEditando.pet = petInput.value;
-                agendamentoEditando.sala = salaSelect.value;
-                agendamentoEditando.data = dataHora;
-                agendamentoEditando.horario = horario;
-                agendamentoEditando.obs = obsTextarea.value;
+            try {
+                if (agendamentoEditando) {
+                    const response = await fetch(`/api/agendamentos/${agendamentoEditando.id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            cliente: clienteInput.value,
+                            pet: petInput.value,
+                            sala: salaSelect.value,
+                            data: dataStr,
+                            horario: horario,
+                            status: agendamentoEditando.status,
+                            obs: obsTextarea.value
+                        })
+                    });
 
-                salvarAgendamentos(); // ← ADICIONE AQUI
-                mostrarToast('Agendamento atualizado com sucesso!', 'success');
-            } else {
-                const novoAgendamentoObj = {
-                    id: proximoId++,
-                    cliente: clienteInput.value,
-                    pet: petInput.value,
-                    sala: salaSelect.value,
-                    data: dataHora,
-                    horario: horario,
-                    duracao: 30,
-                    status: "agendado",
-                    tipo: "Consulta",
-                    obs: obsTextarea.value
-                };
+                    if (!response.ok) throw new Error('Erro ao atualizar agendamento');
+                    mostrarToast('Agendamento atualizado com sucesso!', 'success');
+                } else {
+                    const response = await fetch('/api/agendamentos', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            cliente: clienteInput.value,
+                            pet: petInput.value,
+                            sala: salaSelect.value,
+                            data: dataStr,
+                            horario: horario,
+                            status: "agendado",
+                            obs: obsTextarea.value
+                        })
+                    });
 
-                agendamentos.push(novoAgendamentoObj);
-                salvarAgendamentos(); // ← ADICIONE AQUI
-                mostrarToast('Agendamento criado com sucesso!', 'success');
+                    if (!response.ok) throw new Error('Erro ao criar agendamento');
+                    mostrarToast('Agendamento criado com sucesso!', 'success');
+                }
+
+                await carregarAgendamentos();
+                fecharModal();
+                this.reset();
+            } catch (error) {
+                console.error('Erro:', error);
+                mostrarToast('Erro ao salvar agendamento', 'error');
             }
-
-            fecharModal();
-            this.reset();
-            renderizarGrade();
         });
 
         const style = document.createElement('style');
@@ -2596,7 +2607,7 @@
         carregarAgendamentos();
 
         atualizarPeriodo();
-        renderizarGrade();
+        // renderizarGrade(); // carregarAgendamentos já chama renderizarGrade
 
         function alternarVisualizacaoSemana() {
             const textoElement = document.getElementById('textoVisualizacao');

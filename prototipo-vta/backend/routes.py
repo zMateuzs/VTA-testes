@@ -1,8 +1,5 @@
-# routes.py CORRIGIDO
-
 from flask import request, jsonify, session, render_template, redirect, url_for
-import psycopg2
-import psycopg2.extras # Importante para o cursor como dicionário
+import sqlite3
 from werkzeug.security import check_password_hash
 import os
 
@@ -10,14 +7,12 @@ import os
 from app import app
 
 # --- Configuração da Conexão com o Banco de Dados ---
-DB_HOST = os.getenv("DB_HOST")
-DB_NAME = os.getenv("DB_NAME")
-DB_USER = os.getenv("DB_USER")
-DB_PASS = os.getenv("DB_PASS")
+DB_FILE = 'agenda.db'
 
 def get_db_connection():
-    """Cria e retorna uma nova conexão com o banco de dados."""
-    conn = psycopg2.connect(host=DB_HOST, database=DB_NAME, user=DB_USER, password=DB_PASS)
+    """Cria e retorna uma nova conexão com o banco de dados SQLite."""
+    conn = sqlite3.connect(DB_FILE)
+    conn.row_factory = sqlite3.Row
     return conn
 
 # --- ROTAS DE PÁGINAS E AUTENTICAÇÃO ---
@@ -45,9 +40,9 @@ def login():
     conn = None
     try:
         conn = get_db_connection()
-        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cur = conn.cursor()
         
-        cur.execute("SELECT id, email, senha_hash, perfil FROM usuarios WHERE email = %s", (email,))
+        cur.execute("SELECT id, email, senha_hash, perfil FROM usuarios WHERE email = ?", (email,))
         user = cur.fetchone()
         
         cur.close()
@@ -143,5 +138,164 @@ def usuarios_page():
     if 'user_id' not in session:
         return redirect(url_for('login_page'))
     return render_template('7. usuarios_vta.html')
-# Adicione aqui outras rotas para as demais páginas (clientes, pets, etc.)
-# seguindo o mesmo modelo.
+
+# --- API AGENDAMENTOS ---
+
+@app.route('/api/agendamentos', methods=['GET'])
+def get_agendamentos():
+    if 'user_id' not in session:
+        return jsonify({"message": "Não autorizado"}), 401
+    
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM agendamentos ORDER BY data_agendamento, horario")
+        agendamentos = cur.fetchall()
+        
+        # Converter objetos datetime/date/time para string e formatar para o frontend
+        result = []
+        for agendamento in agendamentos:
+            item = {
+                'id': agendamento['id'],
+                'cliente': agendamento['cliente'],
+                'pet': agendamento['pet'],
+                'sala': agendamento['sala'],
+                'data': str(agendamento['data_agendamento']),
+                'horario': str(agendamento['horario'])[:5], # Pega HH:MM
+                'status': agendamento['status'],
+                'obs': agendamento['observacoes']
+            }
+            
+            if agendamento['checkin_realizado']:
+                item['checkin'] = {
+                    'realizado': True,
+                    'horario': str(agendamento['checkin_horario'])
+                }
+            else:
+                item['checkin'] = None
+                
+            result.append(item)
+                
+        cur.close()
+        return jsonify(result), 200
+    except Exception as e:
+        print(f"Erro ao buscar agendamentos: {e}")
+        return jsonify({"message": "Erro ao buscar agendamentos"}), 500
+    finally:
+        if conn:
+            conn.close()
+
+@app.route('/api/agendamentos', methods=['POST'])
+def create_agendamento():
+    if 'user_id' not in session:
+        return jsonify({"message": "Não autorizado"}), 401
+        
+    data = request.json
+    
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        cur.execute("""
+            INSERT INTO agendamentos (cliente, pet, sala, data_agendamento, horario, status, observacoes)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (
+            data.get('cliente'),
+            data.get('pet'),
+            data.get('sala'),
+            data.get('data'),
+            data.get('horario'),
+            data.get('status', 'agendado'),
+            data.get('obs')
+        ))
+        
+        new_id = cur.lastrowid
+        conn.commit()
+        cur.close()
+        
+        return jsonify({"message": "Agendamento criado com sucesso", "id": new_id}), 201
+    except Exception as e:
+        print(f"Erro ao criar agendamento: {e}")
+        return jsonify({"message": "Erro ao criar agendamento"}), 500
+    finally:
+        if conn:
+            conn.close()
+
+@app.route('/api/agendamentos/<int:id>', methods=['PUT'])
+def update_agendamento(id):
+    if 'user_id' not in session:
+        return jsonify({"message": "Não autorizado"}), 401
+        
+    data = request.json
+    
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Verifica se é uma atualização de check-in ou edição completa
+        if 'checkin' in data:
+            checkin = data['checkin']
+            if checkin:
+                cur.execute("""
+                    UPDATE agendamentos 
+                    SET checkin_realizado = ?, checkin_horario = ?, status = ?
+                    WHERE id = ?
+                """, (True, checkin.get('horario'), 'confirmado', id))
+            else:
+                cur.execute("""
+                    UPDATE agendamentos 
+                    SET checkin_realizado = ?, checkin_horario = NULL, status = ?
+                    WHERE id = ?
+                """, (False, 'agendado', id))
+        else:
+            cur.execute("""
+                UPDATE agendamentos 
+                SET cliente = ?, pet = ?, sala = ?, data_agendamento = ?, horario = ?, status = ?, observacoes = ?
+                WHERE id = ?
+            """, (
+                data.get('cliente'),
+                data.get('pet'),
+                data.get('sala'),
+                data.get('data'),
+                data.get('horario'),
+                data.get('status'),
+                data.get('obs'),
+                id
+            ))
+            
+        conn.commit()
+        cur.close()
+        
+        return jsonify({"message": "Agendamento atualizado com sucesso"}), 200
+    except Exception as e:
+        print(f"Erro ao atualizar agendamento: {e}")
+        return jsonify({"message": "Erro ao atualizar agendamento"}), 500
+    finally:
+        if conn:
+            conn.close()
+
+@app.route('/api/agendamentos/<int:id>', methods=['DELETE'])
+def delete_agendamento(id):
+    if 'user_id' not in session:
+        return jsonify({"message": "Não autorizado"}), 401
+        
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        cur.execute("DELETE FROM agendamentos WHERE id = ?", (id,))
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({"message": "Agendamento excluído com sucesso"}), 200
+    except Exception as e:
+        print(f"Erro ao excluir agendamento: {e}")
+        return jsonify({"message": "Erro ao excluir agendamento"}), 500
+    finally:
+        if conn:
+            conn.close()
