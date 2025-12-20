@@ -111,13 +111,27 @@ def dashboard():
         
         agenda_items = []
         
+        sala_nomes = {
+            '1': 'Consultório 1',
+            '2': 'Consultório 2',
+            '3': 'Cirurgia',
+            '4': 'Raio-X',
+            'sala1': 'Consultório 1',
+            'sala2': 'Consultório 2',
+            'sala3': 'Cirurgia',
+            'sala4': 'Raio-X'
+        }
+        
         for ag in agendamentos_hoje:
+            sala_val = str(ag['sala'])
+            sala_display = sala_nomes.get(sala_val, sala_val)
+            
             # Processamento para Agenda de Hoje
             item = {
                 'horario': str(ag['horario'])[:5],
                 'pet': ag['pet'],
                 'servico': ag['observacoes'] if ag['observacoes'] else 'Consulta',
-                'sala': ag['sala'],
+                'sala': sala_display,
                 'cliente': ag['cliente'],
                 'veterinario': 'Dr. VTA' # Placeholder
             }
