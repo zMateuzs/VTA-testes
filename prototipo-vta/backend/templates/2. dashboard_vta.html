@@ -224,42 +224,34 @@
                     <div class="schedule-card">
                         <h2 class="section-title">Notificações</h2>
                         <div class="notifications">
-                            <div class="notification-item">
-                                <div class="notification-icon info">
-                                    <i class="fas fa-info"></i>
+                            {% if notificacoes %}
+                                {% for notif in notificacoes %}
+                                <div class="notification-item">
+                                    <div class="notification-icon {{ notif.tipo }}">
+                                        {% if notif.tipo == 'info' %}
+                                            <i class="fas fa-info"></i>
+                                        {% elif notif.tipo == 'warning' %}
+                                            <i class="fas fa-exclamation"></i>
+                                        {% elif notif.tipo == 'success' %}
+                                            <i class="fas fa-check"></i>
+                                        {% else %}
+                                            <i class="fas fa-bell"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div class="notification-content">
+                                        <h5>{{ notif.titulo }}</h5>
+                                        <p>{{ notif.mensagem }}</p>
+                                        <p class="text-muted small" style="font-size: 0.75rem; margin-top: 2px;">{{ notif.created_at }}</p>
+                                    </div>
                                 </div>
-                                <div class="notification-content">
-                                    <h5>Novo agendamento</h5>
-                                    <p>Consulta marcada para amanhã às 10h</p>
+                                {% endfor %}
+                            {% else %}
+                                <div class="notification-item">
+                                    <div class="notification-content">
+                                        <p class="text-muted">Sem notificações no momento...</p>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="notification-item">
-                                <div class="notification-icon warning">
-                                    <i class="fas fa-exclamation"></i>
-                                </div>
-                                <div class="notification-content">
-                                    <h5>Consulta remarcada</h5>
-                                    <p>Rex - 14h movido para 15h hoje</p>
-                                </div>
-                            </div>
-                            <div class="notification-item">
-                                <div class="notification-icon success">
-                                    <i class="fas fa-check"></i>
-                                </div>
-                                <div class="notification-content">
-                                    <h5>Consulta confirmada</h5>
-                                    <p>Mimi - vacinação confirmada</p>
-                                </div>
-                            </div>
-                            <div class="notification-item">
-                                <div class="notification-icon info">
-                                    <i class="fas fa-bell"></i>
-                                </div>
-                                <div class="notification-content">
-                                    <h5>Lembrete</h5>
-                                    <p>Relatório mensal deve ser gerado</p>
-                                </div>
-                            </div>
+                            {% endif %}
                         </div>
                     </div>
                 </section>

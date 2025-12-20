@@ -141,6 +141,10 @@ def dashboard():
         salas_ocupadas_count = len(occupied_rooms)
         salas_disponiveis_count = max(0, TOTAL_SALAS - salas_ocupadas_count)
         
+        # 4. Notificações
+        cur.execute("SELECT * FROM notificacoes ORDER BY created_at DESC LIMIT 5")
+        notificacoes = cur.fetchall()
+        
         cur.close()
 
         return render_template('2. dashboard_vta.html', 
@@ -148,7 +152,8 @@ def dashboard():
                             clientes_ativos=clientes_ativos_count,
                             salas_disponiveis=salas_disponiveis_count,
                             salas_ocupadas=salas_ocupadas_count,
-                            agenda_hoje=agenda_items)
+                            agenda_hoje=agenda_items,
+                            notificacoes=notificacoes)
     except Exception as e:
         print(f"Erro no dashboard: {e}")
         # Em caso de erro, renderiza com valores zerados ou padrão
@@ -157,7 +162,8 @@ def dashboard():
                             clientes_ativos=0,
                             salas_disponiveis=5,
                             salas_ocupadas=0,
-                            agenda_hoje=[])
+                            agenda_hoje=[],
+                            notificacoes=[])
     finally:
         if conn:
             conn.close()
@@ -292,6 +298,19 @@ def create_agendamento():
         ))
         
         new_id = cur.lastrowid
+        
+        # Criar notificação
+        titulo = "Novo Agendamento"
+        # Formatar data para DD/MM/AAAA se possível, mas usando string direta por enquanto
+        try:
+            data_obj = datetime.strptime(data.get('data'), '%Y-%m-%d')
+            data_fmt = data_obj.strftime('%d/%m/%Y')
+        except:
+            data_fmt = data.get('data')
+            
+        msg = f"{data.get('pet')} - {data_fmt} às {data.get('horario')}"
+        cur.execute("INSERT INTO notificacoes (titulo, mensagem, tipo) VALUES (?, ?, ?)", (titulo, msg, 'info'))
+        
         conn.commit()
         cur.close()
         
@@ -324,6 +343,13 @@ def update_agendamento(id):
                     SET checkin_realizado = ?, checkin_horario = ?, status = ?
                     WHERE id = ?
                 """, (True, checkin.get('horario'), 'confirmado', id))
+                
+                # Notificação Check-in
+                cur.execute("SELECT pet FROM agendamentos WHERE id = ?", (id,))
+                row = cur.fetchone()
+                if row:
+                    cur.execute("INSERT INTO notificacoes (titulo, mensagem, tipo) VALUES (?, ?, ?)", 
+                               ("Check-in Realizado", f"{row['pet']}", 'success'))
             else:
                 cur.execute("""
                     UPDATE agendamentos 
@@ -346,6 +372,24 @@ def update_agendamento(id):
                 id
             ))
             
+            # Notificação Edição
+            status = data.get('status')
+            titulo = "Agendamento Atualizado"
+            msg = f"{data.get('pet')}"
+            tipo = 'info'
+            
+            if status == 'confirmado':
+                titulo = "Consulta Confirmada"
+                tipo = 'success'
+            elif status == 'cancelado':
+                titulo = "Consulta Cancelada"
+                tipo = 'warning'
+            elif status == 'realizado':
+                titulo = "Consulta Realizada"
+                tipo = 'success'
+                
+            cur.execute("INSERT INTO notificacoes (titulo, mensagem, tipo) VALUES (?, ?, ?)", (titulo, msg, tipo))
+            
         conn.commit()
         cur.close()
         
@@ -367,7 +411,16 @@ def delete_agendamento(id):
         conn = get_db_connection()
         cur = conn.cursor()
         
+        # Buscar nome do pet antes de excluir para a notificação
+        cur.execute("SELECT pet FROM agendamentos WHERE id = ?", (id,))
+        row = cur.fetchone()
+        pet_name = row['pet'] if row else "Desconhecido"
+        
         cur.execute("DELETE FROM agendamentos WHERE id = ?", (id,))
+        
+        # Notificação
+        cur.execute("INSERT INTO notificacoes (titulo, mensagem, tipo) VALUES (?, ?, ?)", 
+                   ("Agendamento Excluído", f"{pet_name}", 'warning'))
         
         conn.commit()
         cur.close()
