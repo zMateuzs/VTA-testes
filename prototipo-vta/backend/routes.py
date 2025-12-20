@@ -2,6 +2,7 @@ from flask import request, jsonify, session, render_template, redirect, url_for
 import sqlite3
 from werkzeug.security import check_password_hash
 import os
+from datetime import datetime, date
 
 # Importa a instância 'app' do arquivo app.py
 from app import app
@@ -79,8 +80,87 @@ def logout():
 def dashboard():
     if 'user_id' not in session:
         return redirect(url_for('login_page'))
-    # Renderiza o arquivo HTML do dashboard
-    return render_template('2. dashboard_vta.html')
+    
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Data de hoje
+        today = date.today()
+        today_str = today.isoformat()
+        
+        # 1. Consultas Hoje (Total)
+        cur.execute("SELECT COUNT(*) FROM agendamentos WHERE data_agendamento = ?", (today_str,))
+        consultas_hoje_count = cur.fetchone()[0]
+        
+        # 2. Clientes Ativos (Total de clientes únicos)
+        cur.execute("SELECT COUNT(DISTINCT cliente) FROM agendamentos")
+        clientes_ativos_count = cur.fetchone()[0]
+        
+        # 3. Salas Disponíveis e Ocupadas
+        # Buscando agendamentos de hoje para calcular ocupação e listar na agenda
+        cur.execute("SELECT * FROM agendamentos WHERE data_agendamento = ? ORDER BY horario", (today_str,))
+        agendamentos_hoje = cur.fetchall()
+        
+        TOTAL_SALAS = 5 # Definindo um total fixo de salas para o sistema
+        occupied_rooms = set()
+        
+        now = datetime.now()
+        current_minutes = now.hour * 60 + now.minute
+        
+        agenda_items = []
+        
+        for ag in agendamentos_hoje:
+            # Processamento para Agenda de Hoje
+            item = {
+                'horario': str(ag['horario'])[:5],
+                'pet': ag['pet'],
+                'servico': ag['observacoes'] if ag['observacoes'] else 'Consulta',
+                'sala': ag['sala'],
+                'cliente': ag['cliente'],
+                'veterinario': 'Dr. VTA' # Placeholder
+            }
+            agenda_items.append(item)
+            
+            # Cálculo de Salas Ocupadas (Assumindo duração de 1h)
+            try:
+                h_str = str(ag['horario'])
+                parts = h_str.split(':')
+                h = int(parts[0])
+                m = int(parts[1])
+                start_minutes = h * 60 + m
+                
+                # Se o horário atual está dentro da janela de 1h do agendamento
+                if start_minutes <= current_minutes < start_minutes + 60:
+                    occupied_rooms.add(ag['sala'])
+            except Exception as e:
+                print(f"Erro ao processar horário: {e}")
+                pass
+                
+        salas_ocupadas_count = len(occupied_rooms)
+        salas_disponiveis_count = max(0, TOTAL_SALAS - salas_ocupadas_count)
+        
+        cur.close()
+
+        return render_template('2. dashboard_vta.html', 
+                            consultas_hoje=consultas_hoje_count,
+                            clientes_ativos=clientes_ativos_count,
+                            salas_disponiveis=salas_disponiveis_count,
+                            salas_ocupadas=salas_ocupadas_count,
+                            agenda_hoje=agenda_items)
+    except Exception as e:
+        print(f"Erro no dashboard: {e}")
+        # Em caso de erro, renderiza com valores zerados ou padrão
+        return render_template('2. dashboard_vta.html', 
+                            consultas_hoje=0,
+                            clientes_ativos=0,
+                            salas_disponiveis=5,
+                            salas_ocupadas=0,
+                            agenda_hoje=[])
+    finally:
+        if conn:
+            conn.close()
 
 # Rota da Agenda
 @app.route('/agenda')

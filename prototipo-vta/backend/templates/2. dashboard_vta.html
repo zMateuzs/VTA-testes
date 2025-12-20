@@ -118,7 +118,7 @@
                     <div class="stat-card">
                         <div class="stat-header">
                             <div class="stat-info">
-                                <div class="stat-value">24</div>
+                                <div class="stat-value">{{ consultas_hoje }}</div>
                                 <div class="stat-label">Consultas Hoje</div>
                             </div>
                             <div class="stat-icon green">
@@ -134,7 +134,7 @@
                     <div class="stat-card">
                         <div class="stat-header">
                             <div class="stat-info">
-                                <div class="stat-value">3</div>
+                                <div class="stat-value">{{ salas_disponiveis }}</div>
                                 <div class="stat-label">Salas Disponíveis</div>
                             </div>
                             <div class="stat-icon blue">
@@ -143,14 +143,14 @@
                         </div>
                         <div class="stat-trend trend-positive">
                             <i class="fas fa-check-circle"></i>
-                            <span>2 ocupadas</span>
+                            <span>{{ salas_ocupadas }} ocupadas</span>
                         </div>
                     </div>
 
                     <div class="stat-card">
                         <div class="stat-header">
                             <div class="stat-info">
-                                <div class="stat-value">156</div>
+                                <div class="stat-value">{{ clientes_ativos }}</div>
                                 <div class="stat-label">Clientes Ativos</div>
                             </div>
                             <div class="stat-icon orange">
@@ -202,34 +202,23 @@
                 <section class="schedule-section">
                     <div class="schedule-card">
                         <h2 class="section-title">Agenda de Hoje</h2>
-                        <div class="schedule-item">
-                            <div class="schedule-time">09:00</div>
-                            <div class="schedule-details">
-                                <h4>Rex - Consulta de Rotina</h4>
-                                <p>Dr. Silva • Sala 1 • Maria Santos</p>
+                        {% if agenda_hoje %}
+                            {% for item in agenda_hoje %}
+                            <div class="schedule-item">
+                                <div class="schedule-time">{{ item.horario }}</div>
+                                <div class="schedule-details">
+                                    <h4>{{ item.pet }} - {{ item.servico }}</h4>
+                                    <p>{{ item.veterinario }} • {{ item.sala }} • {{ item.cliente }}</p>
+                                </div>
                             </div>
-                        </div>
-                        <div class="schedule-item">
-                            <div class="schedule-time">10:30</div>
-                            <div class="schedule-details">
-                                <h4>Mimi - Vacinação</h4>
-                                <p>Dr. Silva • Sala 2 • João Pedro</p>
+                            {% endfor %}
+                        {% else %}
+                            <div class="schedule-item">
+                                <div class="schedule-details">
+                                    <p>Nenhuma consulta agendada para hoje.</p>
+                                </div>
                             </div>
-                        </div>
-                        <div class="schedule-item">
-                            <div class="schedule-time">14:00</div>
-                            <div class="schedule-details">
-                                <h4>Thor - Cirurgia</h4>
-                                <p>Dr. Costa • Sala 3 • Ana Clara</p>
-                            </div>
-                        </div>
-                        <div class="schedule-item">
-                            <div class="schedule-time">15:30</div>
-                            <div class="schedule-details">
-                                <h4>Luna - Consulta</h4>
-                                <p>Dr. Silva • Sala 1 • Carlos Lima</p>
-                            </div>
-                        </div>
+                        {% endif %}
                     </div>
 
                     <div class="schedule-card">
