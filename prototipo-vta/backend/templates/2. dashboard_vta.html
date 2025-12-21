@@ -168,14 +168,14 @@
                 <section class="quick-actions">
                     <h2 class="section-title">Ações Rápidas</h2>
                     <div class="action-buttons">
-                        <button class="action-btn" onclick="novoAgendamento()">
+                        <button class="action-btn" onclick="window.location.href='{{ url_for('agendamento_page') }}'">
                             <i class="fas fa-plus-circle"></i>
                             <div>
                                 <h4>Novo Agendamento</h4>
                                 <p>Agendar consulta</p>
                             </div>
                         </button>
-                        <button class="action-btn" onclick="novoCliente()">
+                        <button class="action-btn" onclick="window.location.href='{{ url_for('clientes_page') }}'">
                             <i class="fas fa-user-plus"></i>
                             <div>
                                 <h4>Cadastrar Cliente</h4>
@@ -189,7 +189,7 @@
                                 <p>Agenda completa</p>
                             </div>
                         </button>
-                        <button class="action-btn" onclick="gerarRelatorio()">
+                        <button class="action-btn" onclick="window.location.href='{{ url_for('gerar_relatorio_dashboard_pdf') }}'">
                             <i class="fas fa-file-export"></i>
                             <div>
                                 <h4>Gerar Relatório</h4>

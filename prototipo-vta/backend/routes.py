@@ -1,8 +1,12 @@
-from flask import request, jsonify, session, render_template, redirect, url_for
+from flask import request, jsonify, session, render_template, redirect, url_for, send_file
 import sqlite3
 from werkzeug.security import check_password_hash
 import os
 from datetime import datetime, date
+import io
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
 
 # Importa a instância 'app' do arquivo app.py
 from app import app
@@ -238,6 +242,150 @@ def usuarios_page():
     if 'user_id' not in session:
         return redirect(url_for('login_page'))
     return render_template('7. usuarios_vta.html')
+
+# Rota para Gerar Relatório PDF do Dashboard
+@app.route('/relatorios/dashboard-pdf')
+def gerar_relatorio_dashboard_pdf():
+    if 'user_id' not in session:
+        return redirect(url_for('login_page'))
+    
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Data de hoje
+        today = date.today()
+        today_str = today.isoformat()
+        today_fmt = today.strftime('%d/%m/%Y')
+        
+        # 1. Consultas Hoje (Total)
+        cur.execute("SELECT COUNT(*) FROM agendamentos WHERE data_agendamento = ?", (today_str,))
+        consultas_hoje_count = cur.fetchone()[0]
+        
+        # 2. Clientes Ativos (Total de clientes únicos)
+        cur.execute("SELECT COUNT(DISTINCT cliente) FROM agendamentos")
+        clientes_ativos_count = cur.fetchone()[0]
+        
+        # 3. Salas Disponíveis e Ocupadas
+        cur.execute("SELECT * FROM agendamentos WHERE data_agendamento = ? ORDER BY horario", (today_str,))
+        agendamentos_hoje = cur.fetchall()
+        
+        TOTAL_SALAS = 5
+        occupied_rooms = set()
+        now = datetime.now()
+        current_minutes = now.hour * 60 + now.minute
+        
+        agenda_items = []
+        sala_nomes = {
+            '1': 'Consultório 1', '2': 'Consultório 2', '3': 'Cirurgia', '4': 'Raio-X',
+            'sala1': 'Consultório 1', 'sala2': 'Consultório 2', 'sala3': 'Cirurgia', 'sala4': 'Raio-X'
+        }
+        
+        for ag in agendamentos_hoje:
+            sala_val = str(ag['sala'])
+            sala_display = sala_nomes.get(sala_val, sala_val)
+            
+            item = {
+                'horario': str(ag['horario'])[:5],
+                'pet': ag['pet'],
+                'servico': ag['observacoes'] if ag['observacoes'] else 'Consulta',
+                'sala': sala_display,
+                'cliente': ag['cliente']
+            }
+            agenda_items.append(item)
+            
+            try:
+                h_str = str(ag['horario'])
+                parts = h_str.split(':')
+                h = int(parts[0])
+                m = int(parts[1])
+                start_minutes = h * 60 + m
+                if start_minutes <= current_minutes < start_minutes + 60:
+                    occupied_rooms.add(ag['sala'])
+            except:
+                pass
+                
+        salas_ocupadas_count = len(occupied_rooms)
+        salas_disponiveis_count = max(0, TOTAL_SALAS - salas_ocupadas_count)
+        
+        cur.close()
+        
+        # --- Geração do PDF ---
+        buffer = io.BytesIO()
+        c = canvas.Canvas(buffer, pagesize=letter)
+        width, height = letter
+        
+        # Cabeçalho
+        c.setFont("Helvetica-Bold", 24)
+        c.drawString(50, height - 50, "Relatório do Dashboard - Agenda VTA")
+        
+        c.setFont("Helvetica", 12)
+        c.drawString(50, height - 80, f"Data: {today_fmt}")
+        c.drawString(50, height - 100, f"Gerado por: Administrador") # Poderia pegar da sessão
+        
+        # Linha separadora
+        c.line(50, height - 110, width - 50, height - 110)
+        
+        # Resumo (Stats)
+        y = height - 150
+        c.setFont("Helvetica-Bold", 16)
+        c.drawString(50, y, "Resumo do Dia")
+        
+        y -= 30
+        c.setFont("Helvetica", 12)
+        c.drawString(50, y, f"Consultas Hoje: {consultas_hoje_count}")
+        c.drawString(250, y, f"Salas Disponíveis: {salas_disponiveis_count}")
+        
+        y -= 20
+        c.drawString(50, y, f"Clientes Ativos: {clientes_ativos_count}")
+        c.drawString(250, y, f"Salas Ocupadas: {salas_ocupadas_count}")
+        
+        # Agenda de Hoje
+        y -= 50
+        c.setFont("Helvetica-Bold", 16)
+        c.drawString(50, y, "Agenda de Hoje")
+        
+        y -= 30
+        # Cabeçalho da Tabela
+        c.setFont("Helvetica-Bold", 10)
+        c.drawString(50, y, "Horário")
+        c.drawString(120, y, "Pet")
+        c.drawString(220, y, "Serviço")
+        c.drawString(350, y, "Sala")
+        c.drawString(450, y, "Cliente")
+        
+        y -= 10
+        c.line(50, y, width - 50, y)
+        y -= 20
+        
+        c.setFont("Helvetica", 10)
+        if not agenda_items:
+            c.drawString(50, y, "Nenhuma consulta agendada para hoje.")
+        else:
+            for item in agenda_items:
+                if y < 50: # Nova página se acabar o espaço
+                    c.showPage()
+                    y = height - 50
+                
+                c.drawString(50, y, item['horario'])
+                c.drawString(120, y, str(item['pet'])[:15])
+                c.drawString(220, y, str(item['servico'])[:20])
+                c.drawString(350, y, str(item['sala'])[:15])
+                c.drawString(450, y, str(item['cliente'])[:20])
+                y -= 20
+                
+        c.save()
+        buffer.seek(0)
+        
+        return send_file(buffer, as_attachment=True, download_name=f'relatorio_dashboard_{today_str}.pdf', mimetype='application/pdf')
+
+    except Exception as e:
+        print(f"Erro ao gerar PDF: {e}")
+        return jsonify({"message": "Erro ao gerar relatório PDF"}), 500
+    finally:
+        if conn:
+            conn.close()
 
 # --- API AGENDAMENTOS ---
 
