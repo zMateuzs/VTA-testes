@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cadastro de Pets - Agenda VTA</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Bibliotecas para PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
     <style>
         /* Reset e configurações básicas */
         * {
@@ -288,16 +291,16 @@
         /* Form and Table Container */
         .content-grid {
             display: grid;
-            grid-template-columns: 1fr 2fr;
+            grid-template-columns: 1fr;
             gap: 2rem;
         }
 
-        /* Form Section */
+        /* Form Section - Agora dentro do Modal, estilos ajustados */
         .form-section {
-            background: var(--white);
-            padding: 2rem;
-            border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            /* background: var(--white); removido pois o modal já tem fundo */
+            /* padding: 2rem; removido */
+            /* border-radius: 15px; removido */
+            /* box-shadow: ... removido */
             height: fit-content;
         }
 
@@ -572,10 +575,15 @@
             z-index: 1000;
             align-items: center;
             justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
         }
 
         .modal.show {
             display: flex;
+            opacity: 1;
+            pointer-events: auto;
         }
 
         .modal-content {
@@ -587,6 +595,17 @@
             width: 90%;
             max-height: 90vh;
             overflow-y: auto;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+
+        .modal.show .modal-content {
+            transform: translateY(0);
+        }
+
+        /* Modal Grande para Formulário */
+        .modal-lg {
+            max-width: 800px;
         }
 
         /* Responsive */
@@ -755,9 +774,9 @@
                         Cadastro de Pets
                     </h1>
                     <div class="page-actions">
-                        <button class="btn btn-secondary" onclick="importarPets()">
-                            <i class="fas fa-upload"></i>
-                            Importar
+                        <button class="btn btn-secondary" onclick="exportarPets()">
+                            <i class="fas fa-download"></i>
+                            Exportar
                         </button>
                         <button class="btn btn-primary" onclick="novoPet()">
                             <i class="fas fa-plus"></i>
@@ -797,92 +816,7 @@
                     </div>
                 </section>
 
-                <section class="content-grid">
-                    <div class="form-section">
-                        <h2 class="form-title">
-                            <i class="fas fa-plus-circle"></i>
-                            Cadastrar Pet
-                        </h2>
-                        
-                        <form id="petForm" onsubmit="salvarPet(event)">
-                            <div class="form-group">
-                                <label class="form-label" for="nomePet">Nome do Pet *</label>
-                                <input type="text" class="form-control" id="nomePet" name="nomePet" required>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label class="form-label" for="especie">Espécie *</label>
-                                    <select class="form-control form-select" id="especie" name="especie" required onchange="atualizarRacas()">
-                                        <option value="">Selecione...</option>
-                                        <option value="cao">Cão</option>
-                                        <option value="gato">Gato</option>
-                                        <option value="ave">Ave</option>
-                                        <option value="roedor">Roedor</option>
-                                        <option value="reptil">Réptil</option>
-                                        <option value="outros">Outros</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label" for="raca">Raça</label>
-                                    <select class="form-control form-select" id="raca" name="raca">
-                                        <option value="">Selecione primeiro a espécie</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label class="form-label" for="sexo">Sexo *</label>
-                                    <select class="form-control form-select" id="sexo" name="sexo" required>
-                                        <option value="">Selecione...</option>
-                                        <option value="macho">Macho</option>
-                                        <option value="femea">Fêmea</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label" for="dataNascimento">Data de Nascimento</label>
-                                    <input type="date" class="form-control" id="dataNascimento" name="dataNascimento">
-                                </div>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label class="form-label" for="peso">Peso (kg)</label>
-                                    <input type="number" class="form-control" id="peso" name="peso" step="0.1" min="0">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label" for="cor">Cor/Pelagem</label>
-                                    <input type="text" class="form-control" id="cor" name="cor" placeholder="Ex: Marrom, Preto e branco">
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label" for="tutor">Tutor *</label>
-                                <select class="form-control form-select" id="tutor" name="tutor" required>
-                                    <option value="">Carregando clientes...</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label" for="observacoes">Observações</label>
-                                <textarea class="form-control form-textarea" id="observacoes" name="observacoes" 
-                                         placeholder="Informações adicionais, alergias, medicamentos, comportamento..."></textarea>
-                            </div>
-
-                            <div class="form-actions">
-                                <button type="button" class="btn btn-secondary" onclick="limparFormulario()">
-                                    <i class="fas fa-times"></i>
-                                    Cancelar
-                                </button>
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-save"></i>
-                                    Salvar Pet
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-
+                <section class="content-grid" id="contentGrid">
                     <div class="table-section">
                         <div class="table-header">
                             <h2 class="table-title">Pets Cadastrados</h2>
@@ -912,6 +846,92 @@
                         </div>
                     </div>
                 </section>
+
+    <!-- Modal de Cadastro/Edição de Pet -->
+    <div class="modal" id="modalFormPet">
+        <div class="modal-content modal-lg">
+            <div class="form-section">
+                <h2 class="form-title">
+                    <i class="fas fa-paw"></i>
+                    <span id="modalTitle">Cadastrar Pet</span>
+                </h2>
+                
+                <form id="petForm" onsubmit="salvarPet(event)">
+                    <div class="form-group">
+                        <label class="form-label" for="nomePet">Nome do Pet *</label>
+                        <input type="text" class="form-control" id="nomePet" name="nomePet" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="especie">Espécie *</label>
+                            <select class="form-control form-select" id="especie" name="especie" required onchange="atualizarRacas()">
+                                <option value="">Selecione...</option>
+                                <option value="cao">Cão</option>
+                                <option value="gato">Gato</option>
+                                <option value="outros">Outros</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="raca">Raça</label>
+                            <input type="text" class="form-control" id="raca" name="raca" list="listaRacas" placeholder="Digite ou selecione a raça">
+                            <datalist id="listaRacas"></datalist>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="sexo">Sexo *</label>
+                            <select class="form-control form-select" id="sexo" name="sexo" required>
+                                <option value="">Selecione...</option>
+                                <option value="macho">Macho</option>
+                                <option value="femea">Fêmea</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="dataNascimento">Data de Nascimento</label>
+                            <input type="date" class="form-control" id="dataNascimento" name="dataNascimento">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="peso">Peso (kg)</label>
+                            <input type="number" class="form-control" id="peso" name="peso" step="0.1" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="cor">Cor/Pelagem</label>
+                            <input type="text" class="form-control" id="cor" name="cor" placeholder="Ex: Marrom, Preto e branco">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="tutor">Tutor *</label>
+                        <select class="form-control form-select" id="tutor" name="tutor" required>
+                            <option value="">Carregando clientes...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="observacoes">Observações</label>
+                        <textarea class="form-control form-textarea" id="observacoes" name="observacoes" 
+                                 placeholder="Informações adicionais, alergias, medicamentos, comportamento..."></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="limparFormulario()">
+                            <i class="fas fa-times"></i>
+                            Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary" id="btnSalvar">
+                            <i class="fas fa-save"></i>
+                            Salvar Pet
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <div class="modal" id="modalConfirmacao">
         <div class="modal-content">
@@ -1076,18 +1096,19 @@
         // Função para atualizar raças baseado na espécie
         function atualizarRacas() {
             const especieSelect = document.getElementById('especie');
-            const racaSelect = document.getElementById('raca');
+            const racaInput = document.getElementById('raca');
+            const listaRacas = document.getElementById('listaRacas');
             const especieSelecionada = especieSelect.value;
 
-            // Limpar opções de raça
-            racaSelect.innerHTML = '<option value="">Selecione uma raça...</option>';
+            // Limpar input e lista
+            racaInput.value = '';
+            listaRacas.innerHTML = '';
 
             if (especieSelecionada && racasPorEspecie[especieSelecionada]) {
                 racasPorEspecie[especieSelecionada].forEach(raca => {
                     const option = document.createElement('option');
-                    option.value = raca.toLowerCase().replace(/\s+/g, '_');
-                    option.textContent = raca;
-                    racaSelect.appendChild(option);
+                    option.value = raca;
+                    listaRacas.appendChild(option);
                 });
             }
         }
@@ -1142,9 +1163,13 @@
         // Função para limpar formulário
         function limparFormulario() {
             document.getElementById('petForm').reset();
-            document.getElementById('raca').innerHTML = '<option value="">Selecione primeiro a espécie</option>';
+            document.getElementById('listaRacas').innerHTML = '';
             petEditando = null;
-            document.querySelector('button[type="submit"]').innerHTML = '<i class="fas fa-save"></i> Salvar Pet';
+            document.getElementById('btnSalvar').innerHTML = '<i class="fas fa-save"></i> Salvar Pet';
+            document.getElementById('modalTitle').textContent = 'Cadastrar Pet';
+            
+            // Fechar Modal
+            document.getElementById('modalFormPet').classList.remove('show');
         }
 
         // Função para editar pet
@@ -1152,6 +1177,7 @@
             const pet = petsList.find(p => p.id === id);
             if (pet) {
                 petEditando = id;
+                document.getElementById('modalTitle').textContent = 'Editar Pet';
                 document.getElementById('nomePet').value = pet.nome;
                 document.getElementById('especie').value = pet.especie;
                 atualizarRacas();
@@ -1163,8 +1189,10 @@
                 document.getElementById('tutor').value = pet.tutor_id;
                 document.getElementById('observacoes').value = pet.observacoes;
                 
-                document.querySelector('button[type="submit"]').innerHTML = '<i class="fas fa-save"></i> Atualizar Pet';
-                document.querySelector('.form-section').scrollIntoView({ behavior: 'smooth' });
+                document.getElementById('btnSalvar').innerHTML = '<i class="fas fa-save"></i> Atualizar Pet';
+                
+                // Abrir Modal
+                document.getElementById('modalFormPet').classList.add('show');
             }
         }
 
@@ -1212,15 +1240,99 @@
             renderizarTabela(petsFiltrados);
         }
 
-        // Função para novo pet (limpar formulário)
+        // Função para novo pet
         function novoPet() {
-            limparFormulario();
-            document.querySelector('.form-section').scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('petForm').reset();
+            document.getElementById('listaRacas').innerHTML = '';
+            petEditando = null;
+            document.getElementById('btnSalvar').innerHTML = '<i class="fas fa-save"></i> Salvar Pet';
+            document.getElementById('modalTitle').textContent = 'Cadastrar Pet';
+            
+            // Abrir Modal
+            document.getElementById('modalFormPet').classList.add('show');
         }
 
-        // Função para importar pets
-        function importarPets() {
-            alert('Funcionalidade de importação em desenvolvimento...');
+        // Função para exportar pets (PDF)
+        async function exportarPets() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Carregar logo
+            const logoUrl = '/static/img/logo.png';
+            let logoData = null;
+            try {
+                logoData = await new Promise((resolve) => {
+                    const img = new Image();
+                    img.src = logoUrl;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0);
+                        resolve(canvas.toDataURL('image/png'));
+                    };
+                    img.onerror = () => resolve(null);
+                });
+            } catch (e) {
+                console.error("Erro ao carregar logo", e);
+            }
+
+            // Configurações do PDF
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const margin = 14;
+
+            // Adicionar Logo se existir
+            if (logoData) {
+                doc.addImage(logoData, 'PNG', 30, 10, 20, 20);
+            }
+
+            // Título (sem fundo colorido)
+            doc.setTextColor(0, 0, 0); // Preto
+            doc.setFontSize(20);
+            doc.setFont("helvetica", "bold");
+            // Ajustar posição X baseado na presença do logo
+            doc.text('Relatório de Pets - Agenda VTA', logoData ? 60 : margin, 25);
+            
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "normal");
+            doc.text(`Gerado em: ${new Date().toLocaleDateString()} às ${new Date().toLocaleTimeString()}`, logoData ? 60 : margin, 32);
+
+            // Dados da tabela
+            const tableColumn = ["Pet", "Espécie", "Raça", "Sexo", "Tutor", "Idade"];
+            const tableRows = [];
+
+            petsList.forEach(pet => {
+                const petData = [
+                    pet.nome,
+                    pet.especie.charAt(0).toUpperCase() + pet.especie.slice(1),
+                    pet.raca || '-',
+                    pet.sexo.charAt(0).toUpperCase() + pet.sexo.slice(1),
+                    pet.tutor_nome,
+                    pet.idade
+                ];
+                tableRows.push(petData);
+            });
+
+            doc.autoTable({
+                head: [tableColumn],
+                body: tableRows,
+                startY: 50,
+                theme: 'plain',
+                styles: { fontSize: 10, cellPadding: 3 },
+                headStyles: { 
+                    fillColor: false, 
+                    textColor: 0, 
+                    fontStyle: 'bold',
+                    lineWidth: {bottom: 0.5},
+                    lineColor: 200
+                },
+                columnStyles: {
+                    0: { fontStyle: 'bold' }
+                }
+            });
+
+            doc.save('pets_vta.pdf');
         }
 
         // Função para logout
@@ -1232,9 +1344,14 @@
 
         // Fechar modal clicando fora dele
         window.onclick = function(event) {
-            const modal = document.getElementById('modalConfirmacao');
-            if (event.target === modal) {
+            const modalConfirm = document.getElementById('modalConfirmacao');
+            const modalForm = document.getElementById('modalFormPet');
+            
+            if (event.target === modalConfirm) {
                 fecharModal();
+            }
+            if (event.target === modalForm) {
+                limparFormulario();
             }
         }
 

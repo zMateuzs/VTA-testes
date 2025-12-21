@@ -1157,6 +1157,10 @@ def create_pet():
     data = request.json
     conn = None
     try:
+        # Helper to convert empty strings to None
+        def clean(val):
+            return val if val and str(val).strip() != "" else None
+
         conn = get_db_connection()
         cur = conn.cursor()
         
@@ -1166,13 +1170,13 @@ def create_pet():
         """, (
             data.get('nome'),
             data.get('especie'),
-            data.get('raca'),
+            clean(data.get('raca')),
             data.get('sexo'),
-            data.get('dataNascimento'),
-            data.get('peso'),
-            data.get('cor'),
+            clean(data.get('dataNascimento')),
+            clean(data.get('peso')),
+            clean(data.get('cor')),
             data.get('tutor'),
-            data.get('observacoes')
+            clean(data.get('observacoes'))
         ))
         
         conn.commit()
@@ -1182,7 +1186,7 @@ def create_pet():
         return jsonify({"message": "Pet criado com sucesso", "id": pet_id}), 201
     except Exception as e:
         print(f"Erro ao criar pet: {e}")
-        return jsonify({"message": "Erro ao criar pet"}), 500
+        return jsonify({"message": f"Erro ao criar pet: {str(e)}"}), 500
     finally:
         if conn:
             conn.close()
@@ -1195,6 +1199,10 @@ def update_pet(id):
     data = request.json
     conn = None
     try:
+        # Helper to convert empty strings to None
+        def clean(val):
+            return val if val and str(val).strip() != "" else None
+
         conn = get_db_connection()
         cur = conn.cursor()
         
@@ -1205,13 +1213,13 @@ def update_pet(id):
         """, (
             data.get('nome'),
             data.get('especie'),
-            data.get('raca'),
+            clean(data.get('raca')),
             data.get('sexo'),
-            data.get('dataNascimento'),
-            data.get('peso'),
-            data.get('cor'),
+            clean(data.get('dataNascimento')),
+            clean(data.get('peso')),
+            clean(data.get('cor')),
             data.get('tutor'),
-            data.get('observacoes'),
+            clean(data.get('observacoes')),
             id
         ))
         
@@ -1221,7 +1229,7 @@ def update_pet(id):
         return jsonify({"message": "Pet atualizado com sucesso"}), 200
     except Exception as e:
         print(f"Erro ao atualizar pet: {e}")
-        return jsonify({"message": "Erro ao atualizar pet"}), 500
+        return jsonify({"message": f"Erro ao atualizar pet: {str(e)}"}), 500
     finally:
         if conn:
             conn.close()
