@@ -307,7 +307,7 @@
 
         .search-row {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr 1fr 1fr;
             gap: 1rem;
             align-items: end;
         }
@@ -325,6 +325,7 @@
         }
 
         .form-input {
+            width: 100%;
             padding: 0.75rem 1rem;
             border: 2px solid var(--gray-light);
             border-radius: 10px;
@@ -857,28 +858,28 @@
                         <div class="stat-icon">
                             <i class="fas fa-users"></i>
                         </div>
-                        <div class="stat-value">156</div>
+                        <div class="stat-value">{{ all_clients_count }}</div>
                         <div class="stat-label">Total de Clientes</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon">
                             <i class="fas fa-user-plus"></i>
                         </div>
-                        <div class="stat-value">12</div>
+                        <div class="stat-value">{{ new_clients }}</div>
                         <div class="stat-label">Novos Clientes</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon">
                             <i class="fas fa-repeat"></i>
                         </div>
-                        <div class="stat-value">89</div>
+                        <div class="stat-value">{{ recurring_clients }}</div>
                         <div class="stat-label">Clientes Recorrentes</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon">
                             <i class="fas fa-check-circle"></i>
                         </div>
-                        <div class="stat-value">142</div>
+                        <div class="stat-value">{{ active_clients }}</div>
                         <div class="stat-label">Clientes Ativos</div>
                     </div>
                 </section>
@@ -900,6 +901,14 @@
                                 <input type="text" class="form-input" placeholder="Nome do pet..." id="petSearchInput">
                             </div>
                         </div>
+                        <div class="form-group">
+                            <label class="form-label">Filtrar por Status</label>
+                            <select class="form-input" id="statusFilter" onchange="filterByStatus()">
+                                <option value="">Todos</option>
+                                <option value="active" {% if current_status == 'active' %}selected{% endif %}>Ativos</option>
+                                <option value="inactive" {% if current_status == 'inactive' %}selected{% endif %}>Inativos</option>
+                            </select>
+                        </div>
                     </div>
                 </section>
 
@@ -907,7 +916,7 @@
                 <section class="clients-table">
                     <div class="table-header">
                         <h3 class="table-title">Lista de Clientes</h3>
-                        <p class="table-stats">Total: <strong>156</strong> clientes</p>
+                        <p class="table-stats">Total: <strong>{{ total_clients }}</strong> clientes</p>
                     </div>
                     
                     <div class="table-container">
@@ -932,20 +941,26 @@
                     <!-- Pagination -->
                     <div class="pagination">
                         <div class="pagination-info">
-                            Mostrando 1-5 de 156 clientes
+                            {% if total_clients > 0 %}
+                                Mostrando {{ (page - 1) * per_page + 1 }}-{{ [page * per_page, total_clients] | min }} de {{ total_clients }} clientes
+                            {% else %}
+                                Mostrando 0-0 de 0 clientes
+                            {% endif %}
                         </div>
                         <div class="pagination-controls">
-                            <button class="page-btn" disabled>
+                            <a href="{{ url_for('clientes_page', page=page-1, status=current_status) }}" class="page-btn" {% if page == 1 %}style="pointer-events: none; opacity: 0.5;"{% endif %}>
                                 <i class="fas fa-chevron-left"></i>
-                            </button>
-                            <button class="page-btn active">1</button>
-                            <button class="page-btn">2</button>
-                            <button class="page-btn">3</button>
-                            <button class="page-btn">...</button>
-                            <button class="page-btn">32</button>
-                            <button class="page-btn">
+                            </a>
+                            
+                            {% for p in range(1, total_pages + 1) %}
+                                <a href="{{ url_for('clientes_page', page=p, status=current_status) }}" class="page-btn {% if p == page %}active{% endif %}">
+                                    {{ p }}
+                                </a>
+                            {% endfor %}
+                            
+                            <a href="{{ url_for('clientes_page', page=page+1, status=current_status) }}" class="page-btn" {% if page >= total_pages %}style="pointer-events: none; opacity: 0.5;"{% endif %}>
                                 <i class="fas fa-chevron-right"></i>
-                            </button>
+                            </a>
                         </div>
                     </div>
                 </section>
@@ -1152,13 +1167,32 @@
 
         // Função para exportar clientes
         function exportClients() {
-            alert('Exportação de clientes em desenvolvimento...');
+            const status = document.getElementById('statusFilter').value;
+            let url = '/api/clientes/exportar';
+            if (status) {
+                url += `?status=${status}`;
+            }
+            window.location.href = url;
+        }
+
+        // Função para filtrar por status
+        function filterByStatus() {
+            const status = document.getElementById('statusFilter').value;
+            const url = new URL(window.location.href);
+            if (status) {
+                url.searchParams.set('status', status);
+            } else {
+                url.searchParams.delete('status');
+            }
+            url.searchParams.set('page', 1); // Reset to page 1
+            window.location.href = url.toString();
         }
 
         // Função para limpar filtros
         function clearFilters() {
             document.getElementById('searchInput').value = '';
-            renderTable();
+            document.getElementById('statusFilter').value = '';
+            filterByStatus(); // Reloads page without status
         }
 
         // Função de busca

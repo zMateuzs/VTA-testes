@@ -771,28 +771,28 @@
                         <div class="stat-icon">
                             <i class="fas fa-paw"></i>
                         </div>
-                        <div class="stat-value">89</div>
+                        <div class="stat-value">0</div>
                         <div class="stat-label">Total de Pets</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon">
                             <i class="fas fa-dog"></i>
                         </div>
-                        <div class="stat-value">52</div>
+                        <div class="stat-value">0</div>
                         <div class="stat-label">Cães</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon">
                             <i class="fas fa-cat"></i>
                         </div>
-                        <div class="stat-value">28</div>
+                        <div class="stat-value">0</div>
                         <div class="stat-label">Gatos</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon">
                             <i class="fas fa-dove"></i>
                         </div>
-                        <div class="stat-value">9</div>
+                        <div class="stat-value">0</div>
                         <div class="stat-label">Outros</div>
                     </div>
                 </section>
@@ -860,12 +860,7 @@
                             <div class="form-group">
                                 <label class="form-label" for="tutor">Tutor *</label>
                                 <select class="form-control form-select" id="tutor" name="tutor" required>
-                                    <option value="">Selecione o cliente...</option>
-                                    <option value="1">Maria Santos</option>
-                                    <option value="2">João Pedro Silva</option>
-                                    <option value="3">Ana Clara Costa</option>
-                                    <option value="4">Carlos Lima</option>
-                                    <option value="5">Sofia Rodrigues</option>
+                                    <option value="">Carregando clientes...</option>
                                 </select>
                             </div>
 
@@ -911,164 +906,12 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td>
-                                            <div class="pet-info">
-                                                <div class="pet-avatar">R</div>
-                                                <div class="pet-details">
-                                                    <h4>Rex</h4>
-                                                    <p>Golden Retriever • Macho</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td><span class="species-tag species-dog">Cão</span></td>
-                                        <td>Maria Santos</td>
-                                        <td>3 anos</td>
-                                        <td><span class="species-tag species-dog">Ativo</span></td>
-                                        <td>
-                                            <div class="actions">
-                                                <button class="btn-sm btn-edit" onclick="editarPet(1)" title="Editar">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                                <button class="btn-sm btn-delete" onclick="confirmarExclusao(1)" title="Excluir">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="pet-info">
-                                                <div class="pet-avatar">M</div>
-                                                <div class="pet-details">
-                                                    <h4>Mimi</h4>
-                                                    <p>Persa • Fêmea</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td><span class="species-tag species-cat">Gato</span></td>
-                                        <td>João Pedro Silva</td>
-                                        <td>2 anos</td>
-                                        <td><span class="species-tag species-dog">Ativo</span></td>
-                                        <td>
-                                            <div class="actions">
-                                                <button class="btn-sm btn-edit" onclick="editarPet(2)" title="Editar">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                                <button class="btn-sm btn-delete" onclick="confirmarExclusao(2)" title="Excluir">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="pet-info">
-                                                <div class="pet-avatar">T</div>
-                                                <div class="pet-details">
-                                                    <h4>Thor</h4>
-                                                    <p>Rottweiler • Macho</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td><span class="species-tag species-dog">Cão</span></td>
-                                        <td>Ana Clara Costa</td>
-                                        <td>5 anos</td>
-                                        <td><span class="species-tag species-dog">Ativo</span></td>
-                                        <td>
-                                            <div class="actions">
-                                                <button class="btn-sm btn-edit" onclick="editarPet(3)" title="Editar">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                                <button class="btn-sm btn-delete" onclick="confirmarExclusao(3)" title="Excluir">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="pet-info">
-                                                <div class="pet-avatar">L</div>
-                                                <div class="pet-details">
-                                                    <h4>Luna</h4>
-                                                    <p>SRD • Fêmea</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td><span class="species-tag species-dog">Cão</span></td>
-                                        <td>Carlos Lima</td>
-                                        <td>1 ano</td>
-                                        <td><span class="species-tag species-dog">Ativo</span></td>
-                                        <td>
-                                            <div class="actions">
-                                                <button class="btn-sm btn-edit" onclick="editarPet(4)" title="Editar">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                                <button class="btn-sm btn-delete" onclick="confirmarExclusao(4)" title="Excluir">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="pet-info">
-                                                <div class="pet-avatar">B</div>
-                                                <div class="pet-details">
-                                                    <h4>Bella</h4>
-                                                    <p>Siamês • Fêmea</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td><span class="species-tag species-cat">Gato</span></td>
-                                        <td>Sofia Rodrigues</td>
-                                        <td>4 anos</td>
-                                        <td><span class="species-tag species-dog">Ativo</span></td>
-                                        <td>
-                                            <div class="actions">
-                                                <button class="btn-sm btn-edit" onclick="editarPet(5)" title="Editar">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                                <button class="btn-sm btn-delete" onclick="confirmarExclusao(5)" title="Excluir">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="pet-info">
-                                                <div class="pet-avatar">P</div>
-                                                <div class="pet-details">
-                                                    <h4>Pingo</h4>
-                                                    <p>Canário • Macho</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td><span class="species-tag species-bird">Ave</span></td>
-                                        <td>Maria Santos</td>
-                                        <td>6 meses</td>
-                                        <td><span class="species-tag species-dog">Ativo</span></td>
-                                        <td>
-                                            <div class="actions">
-                                                <button class="btn-sm btn-edit" onclick="editarPet(6)" title="Editar">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                                <button class="btn-sm btn-delete" onclick="confirmarExclusao(6)" title="Excluir">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                    <!-- Dados carregados via backend -->
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </section>
-            </div>
-        </main>
-    </div>
 
     <div class="modal" id="modalConfirmacao">
         <div class="modal-content">
@@ -1093,6 +936,7 @@
         // Variável global para controle de edição
         let petEditando = null;
         let petParaExcluir = null;
+        let petsList = [];
 
         // Dados das raças por espécie
         const racasPorEspecie = {
@@ -1122,6 +966,113 @@
             outros: ['Outros']
         };
 
+        // Carregar dados ao iniciar
+        document.addEventListener('DOMContentLoaded', () => {
+            carregarClientes();
+            carregarPets();
+            
+            // Animações
+            const animatedElements = document.querySelectorAll('.stat-card, .form-section, .table-section');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            });
+            
+            animatedElements.forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(20px)';
+                el.style.transition = 'all 0.6s ease';
+                observer.observe(el);
+            });
+        });
+
+        async function carregarClientes() {
+            try {
+                const response = await fetch('/api/clientes/all');
+                const clientes = await response.json();
+                const select = document.getElementById('tutor');
+                select.innerHTML = '<option value="">Selecione o cliente...</option>';
+                clientes.forEach(cliente => {
+                    const option = document.createElement('option');
+                    option.value = cliente.id;
+                    option.textContent = cliente.nome;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Erro ao carregar clientes:', error);
+            }
+        }
+
+        async function carregarPets() {
+            try {
+                const response = await fetch('/api/pets');
+                petsList = await response.json();
+                renderizarTabela(petsList);
+                atualizarEstatisticas(petsList);
+            } catch (error) {
+                console.error('Erro ao carregar pets:', error);
+            }
+        }
+
+        function renderizarTabela(pets) {
+            const tbody = document.querySelector('#tabelaPets tbody');
+            tbody.innerHTML = '';
+            
+            pets.forEach(pet => {
+                const tr = document.createElement('tr');
+                
+                let speciesClass = 'species-other';
+                let speciesLabel = 'Outros';
+                
+                if (pet.especie === 'cao') { speciesClass = 'species-dog'; speciesLabel = 'Cão'; }
+                else if (pet.especie === 'gato') { speciesClass = 'species-cat'; speciesLabel = 'Gato'; }
+                else if (pet.especie === 'ave') { speciesClass = 'species-bird'; speciesLabel = 'Ave'; }
+                
+                tr.innerHTML = `
+                    <td>
+                        <div class="pet-info">
+                            <div class="pet-avatar">${pet.nome.charAt(0).toUpperCase()}</div>
+                            <div class="pet-details">
+                                <h4>${pet.nome}</h4>
+                                <p>${pet.raca || 'Raça não informada'} • ${pet.sexo}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="species-tag ${speciesClass}">${speciesLabel}</span></td>
+                    <td>${pet.tutor_nome}</td>
+                    <td>${pet.idade}</td>
+                    <td><span class="species-tag species-dog">Ativo</span></td>
+                    <td>
+                        <div class="actions">
+                            <button class="btn-sm btn-edit" onclick="editarPet(${pet.id})" title="Editar">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-sm btn-delete" onclick="confirmarExclusao(${pet.id})" title="Excluir">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function atualizarEstatisticas(pets) {
+            const total = pets.length;
+            const caes = pets.filter(p => p.especie === 'cao').length;
+            const gatos = pets.filter(p => p.especie === 'gato').length;
+            const outros = total - caes - gatos;
+            
+            document.querySelectorAll('.stat-value')[0].textContent = total;
+            document.querySelectorAll('.stat-value')[1].textContent = caes;
+            document.querySelectorAll('.stat-value')[2].textContent = gatos;
+            document.querySelectorAll('.stat-value')[3].textContent = outros;
+        }
+
         // Função para atualizar raças baseado na espécie
         function atualizarRacas() {
             const especieSelect = document.getElementById('especie');
@@ -1142,7 +1093,7 @@
         }
 
         // Função para salvar pet
-        function salvarPet(event) {
+        async function salvarPet(event) {
             event.preventDefault();
             
             const formData = new FormData(event.target);
@@ -1158,24 +1109,34 @@
                 observacoes: formData.get('observacoes')
             };
 
-            // Validação básica
-            if (!petData.nome || !petData.especie || !petData.sexo || !petData.tutor) {
-                alert('Por favor, preencha todos os campos obrigatórios!');
-                return;
+            try {
+                let url = '/api/pets';
+                let method = 'POST';
+                
+                if (petEditando) {
+                    url = `/api/pets/${petEditando}`;
+                    method = 'PUT';
+                }
+                
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(petData)
+                });
+                
+                if (response.ok) {
+                    alert(petEditando ? 'Pet atualizado com sucesso!' : 'Pet cadastrado com sucesso!');
+                    limparFormulario();
+                    carregarPets();
+                } else {
+                    alert('Erro ao salvar pet.');
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao salvar pet.');
             }
-
-            // Simular salvamento
-            if (petEditando) {
-                alert('Pet atualizado com sucesso!');
-                petEditando = null;
-                document.querySelector('button[type="submit"]').innerHTML = '<i class="fas fa-save"></i> Salvar Pet';
-            } else {
-                alert('Pet cadastrado com sucesso!');
-                atualizarEstatisticas();
-            }
-
-            limparFormulario();
-            // Aqui você adicionaria o pet à tabela dinamicamente
         }
 
         // Função para limpar formulário
@@ -1188,27 +1149,21 @@
 
         // Função para editar pet
         function editarPet(id) {
-            petEditando = id;
-            
-            // Dados mockados para demonstração
-            const petData = {
-                1: { nome: 'Rex', especie: 'cao', raca: 'golden_retriever', sexo: 'macho', tutor: '1' },
-                2: { nome: 'Mimi', especie: 'gato', raca: 'persa', sexo: 'femea', tutor: '2' },
-                3: { nome: 'Thor', especie: 'cao', raca: 'rottweiler', sexo: 'macho', tutor: '3' }
-            };
-
-            if (petData[id]) {
-                const pet = petData[id];
+            const pet = petsList.find(p => p.id === id);
+            if (pet) {
+                petEditando = id;
                 document.getElementById('nomePet').value = pet.nome;
                 document.getElementById('especie').value = pet.especie;
                 atualizarRacas();
                 document.getElementById('raca').value = pet.raca;
                 document.getElementById('sexo').value = pet.sexo;
-                document.getElementById('tutor').value = pet.tutor;
+                document.getElementById('dataNascimento').value = pet.data_nascimento;
+                document.getElementById('peso').value = pet.peso;
+                document.getElementById('cor').value = pet.cor;
+                document.getElementById('tutor').value = pet.tutor_id;
+                document.getElementById('observacoes').value = pet.observacoes;
                 
                 document.querySelector('button[type="submit"]').innerHTML = '<i class="fas fa-save"></i> Atualizar Pet';
-                
-                // Scroll para o formulário
                 document.querySelector('.form-section').scrollIntoView({ behavior: 'smooth' });
             }
         }
@@ -1220,12 +1175,24 @@
         }
 
         // Função para excluir pet
-        function excluirPet() {
+        async function excluirPet() {
             if (petParaExcluir) {
-                alert(`Pet ${petParaExcluir} excluído com sucesso!`);
-                atualizarEstatisticas();
+                try {
+                    const response = await fetch(`/api/pets/${petParaExcluir}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (response.ok) {
+                        alert('Pet excluído com sucesso!');
+                        carregarPets();
+                    } else {
+                        alert('Erro ao excluir pet.');
+                    }
+                } catch (error) {
+                    console.error('Erro:', error);
+                    alert('Erro ao excluir pet.');
+                }
                 fecharModal();
-                // Aqui você removeria a linha da tabela
             }
         }
 
@@ -1237,34 +1204,12 @@
 
         // Função para filtrar pets
         function filtrarPets(termo) {
-            const tabela = document.getElementById('tabelaPets');
-            const linhas = tabela.querySelectorAll('tbody tr');
-            
-            linhas.forEach(linha => {
-                const texto = linha.textContent.toLowerCase();
-                if (texto.includes(termo.toLowerCase())) {
-                    linha.style.display = '';
-                } else {
-                    linha.style.display = 'none';
-                }
-            });
-        }
-
-        // Função para atualizar estatísticas
-        function atualizarEstatisticas() {
-            const statValues = document.querySelectorAll('.stat-value');
-            statValues.forEach(stat => {
-                const currentValue = parseInt(stat.textContent);
-                const change = Math.random() > 0.5 ? 1 : -1;
-                const newValue = Math.max(0, currentValue + change);
-                stat.textContent = newValue;
-                
-                // Animação
-                stat.style.transform = 'scale(1.1)';
-                setTimeout(() => {
-                    stat.style.transform = 'scale(1)';
-                }, 200);
-            });
+            const termoLower = termo.toLowerCase();
+            const petsFiltrados = petsList.filter(pet => 
+                pet.nome.toLowerCase().includes(termoLower) || 
+                pet.tutor_nome.toLowerCase().includes(termoLower)
+            );
+            renderizarTabela(petsFiltrados);
         }
 
         // Função para novo pet (limpar formulário)
@@ -1281,38 +1226,9 @@
         // Função para logout
         function logout() {
             if (confirm('Tem certeza que deseja sair do sistema?')) {
-                alert('Logout realizado com sucesso!');
-                // window.location.href = 'login.html';
+                window.location.href = '/logout';
             }
         }
-
-        // Navegação do menu (comportamento igual ao dashboard)
-        (function () {
-            'use strict';
-            const navLinks = document.querySelectorAll('.nav-link');
-            if (!navLinks || !navLinks.length) return;
-
-            navLinks.forEach(function (link) {
-                link.addEventListener('click', function (e) {
-                    const href = (link.getAttribute('href') || '').trim();
-
-                    // Se for rota do servidor (começa com /) ou URL externa, permite navegação nativa
-                    if (href.startsWith('/') || href.startsWith('http')) {
-                        navLinks.forEach(function (l) { l.classList.remove('active'); });
-                        link.classList.add('active');
-                        return;
-                    }
-
-                    // Se for link relativo para arquivo estático, navega explicitamente
-                    if (href && href !== '#') {
-                        e.preventDefault();
-                        navLinks.forEach(function (l) { l.classList.remove('active'); });
-                        link.classList.add('active');
-                        window.location.href = href;
-                    }
-                }, { passive: true });
-            });
-        })();
 
         // Fechar modal clicando fora dele
         window.onclick = function(event) {

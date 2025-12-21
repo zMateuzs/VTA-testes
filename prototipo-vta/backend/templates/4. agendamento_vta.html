@@ -967,9 +967,11 @@
                 <div class="modal-body">
                     <form id="agendamentoForm">
                         <div class="row g-3">
-                            <div class="col-md-6">
+                            <div class="col-md-6 position-relative">
                                 <label class="form-label">Cliente *</label>
-                                <input type="text" class="form-control" id="cliente" placeholder="Nome do Cliente" required>
+                                <input type="hidden" id="cliente_id">
+                                <input type="text" class="form-control" id="cliente" placeholder="Nome do Cliente" required autocomplete="off">
+                                <div id="clienteSuggestions" class="list-group position-absolute w-100" style="z-index: 1000; display: none; max-height: 200px; overflow-y: auto;"></div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Pet *</label>
@@ -1213,6 +1215,7 @@
             carregarHorarios();
             carregarAgendamentos();
             configurarFiltros();
+            configurarAutocompleteCliente();
             // configurarFormulario(); // Não precisamos mais configurar o change do cliente
             definirDataAtual();
         });
@@ -1688,6 +1691,7 @@
 
             const dados = {
                 cliente: document.getElementById('cliente').value,
+                cliente_id: document.getElementById('cliente_id').value || null,
                 pet: document.getElementById('pet').value,
                 data: data,
                 horario: horario,
@@ -2055,6 +2059,77 @@
                 }, { passive: true });
             });
         })();
+
+        // Configurar Autocomplete do Cliente
+        function configurarAutocompleteCliente() {
+            const input = document.getElementById('cliente');
+            const suggestions = document.getElementById('clienteSuggestions');
+            const hiddenId = document.getElementById('cliente_id');
+            let timeout = null;
+
+            input.addEventListener('input', function() {
+                const query = this.value;
+                
+                // Limpar ID se o usuário alterar o nome
+                if (hiddenId.value) {
+                    hiddenId.value = '';
+                }
+
+                clearTimeout(timeout);
+                
+                if (query.length < 2) {
+                    suggestions.style.display = 'none';
+                    return;
+                }
+
+                timeout = setTimeout(() => {
+                    fetch(`/api/clientes/search?q=${encodeURIComponent(query)}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            suggestions.innerHTML = '';
+                            if (data.length > 0) {
+                                data.forEach(client => {
+                                    const item = document.createElement('a');
+                                    item.className = 'list-group-item list-group-item-action';
+                                    item.href = '#';
+                                    item.innerHTML = `
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h6 class="mb-1">${client.nome}</h6>
+                                            <small>${client.cpf || ''}</small>
+                                        </div>
+                                        <small class="text-muted">${client.email} - ${client.telefone}</small>
+                                    `;
+                                    item.onclick = (e) => {
+                                        e.preventDefault();
+                                        input.value = client.nome;
+                                        hiddenId.value = client.id;
+                                        
+                                        // Preencher observações se houver
+                                        if (client.observacoes) {
+                                            const obsField = document.getElementById('observacoes');
+                                            if (!obsField.value) obsField.value = client.observacoes;
+                                        }
+                                        
+                                        suggestions.style.display = 'none';
+                                    };
+                                    suggestions.appendChild(item);
+                                });
+                                suggestions.style.display = 'block';
+                            } else {
+                                suggestions.style.display = 'none';
+                            }
+                        })
+                        .catch(err => console.error('Erro na busca:', err));
+                }, 300);
+            });
+
+            // Fechar sugestões ao clicar fora
+            document.addEventListener('click', function(e) {
+                if (e.target !== input && e.target !== suggestions) {
+                    suggestions.style.display = 'none';
+                }
+            });
+        }
     </script>
     <!-- Navegação e controle de sessão -->
     <script src="{{ url_for('static', filename='assets/js/vta-nav.js') }}" defer></script>

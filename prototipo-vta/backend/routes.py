@@ -304,11 +304,107 @@ def clientes_page():
     if 'user_id' not in session:
         return redirect(url_for('login_page'))
     
+    page = request.args.get('page', 1, type=int)
+    status_filter = request.args.get('status')
+    per_page = 10
+    offset = (page - 1) * per_page
+    
     conn = get_db_connection()
-    clients = conn.execute('SELECT * FROM clientes ORDER BY created_at DESC').fetchall()
+    
+    # Base query for clients
+    query = 'SELECT * FROM clientes'
+    count_query = 'SELECT COUNT(*) FROM clientes'
+    params = []
+    
+    if status_filter and status_filter in ['active', 'inactive']:
+        query += ' WHERE status = ?'
+        count_query += ' WHERE status = ?'
+        params.append(status_filter)
+        
+    query += ' ORDER BY created_at DESC LIMIT ? OFFSET ?'
+    query_params = params + [per_page, offset]
+    
+    # Fetch paginated clients
+    clients = conn.execute(query, query_params).fetchall()
+    
+    # Filtered count for pagination
+    filtered_count = conn.execute(count_query, params).fetchone()[0]
+    
+    # 1. Total Clients (Global)
+    all_clients_count = conn.execute('SELECT COUNT(*) FROM clientes').fetchone()[0]
+    
+    # Calculate total pages
+    total_pages = (filtered_count + per_page - 1) // per_page
+    
+    # 2. New Clients (Current Month)
+    current_month = datetime.now().strftime('%Y-%m')
+    # Note: created_at is TIMESTAMP, strftime works on it in SQLite
+    new_clients = conn.execute("SELECT COUNT(*) FROM clientes WHERE strftime('%Y-%m', created_at) = ?", (current_month,)).fetchone()[0]
+    
+    # 3. Active Clients
+    active_clients = conn.execute("SELECT COUNT(*) FROM clientes WHERE status = 'active'").fetchone()[0]
+    
+    # 4. Recurring Clients (> 1 appointment in current year)
+    current_year = datetime.now().strftime('%Y')
+    # We count distinct clients in agendamentos who have > 1 appointment this year
+    recurring_clients = conn.execute("""
+        SELECT COUNT(*) FROM (
+            SELECT cliente 
+            FROM agendamentos 
+            WHERE strftime('%Y', data_agendamento) = ?
+            GROUP BY cliente
+            HAVING COUNT(*) > 1
+        )
+    """, (current_year,)).fetchone()[0]
+    
     conn.close()
     
-    return render_template('5. clientes_vta.html', clients=clients)
+    return render_template('5. clientes_vta.html', 
+                           clients=clients,
+                           total_clients=filtered_count,
+                           all_clients_count=all_clients_count,
+                           new_clients=new_clients,
+                           active_clients=active_clients,
+                           recurring_clients=recurring_clients,
+                           page=page,
+                           total_pages=total_pages,
+                           per_page=per_page,
+                           current_status=status_filter)
+
+@app.route('/api/clientes/search')
+def search_clientes():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    query = request.args.get('q', '').lower()
+    if not query:
+        return jsonify([])
+        
+    conn = get_db_connection()
+    # Search by name, email or cpf
+    # Using LIKE for partial match
+    sql = """
+        SELECT id, nome, email, telefone, cpf, observacoes 
+        FROM clientes 
+        WHERE lower(nome) LIKE ? OR lower(email) LIKE ? OR cpf LIKE ?
+        LIMIT 10
+    """
+    search_term = f"%{query}%"
+    clients = conn.execute(sql, (search_term, search_term, search_term)).fetchall()
+    conn.close()
+    
+    result = []
+    for client in clients:
+        result.append({
+            'id': client['id'],
+            'nome': client['nome'],
+            'email': client['email'],
+            'telefone': client['telefone'],
+            'cpf': client['cpf'],
+            'observacoes': client['observacoes']
+        })
+        
+    return jsonify(result)
 
 @app.route('/api/clientes', methods=['POST'])
 def create_cliente():
@@ -385,6 +481,77 @@ def delete_cliente(client_id):
         return jsonify({'error': str(e)}), 500
     finally:
         conn.close()
+
+@app.route('/api/clientes/exportar')
+def export_clientes():
+    if 'user_id' not in session:
+        return redirect(url_for('login_page'))
+
+    status_filter = request.args.get('status')
+    conn = get_db_connection()
+    
+    query = 'SELECT * FROM clientes'
+    params = []
+    
+    if status_filter and status_filter in ['active', 'inactive']:
+        query += ' WHERE status = ?'
+        params.append(status_filter)
+        
+    query += ' ORDER BY nome'
+    
+    clients = conn.execute(query, params).fetchall()
+    conn.close()
+
+    buffer = io.BytesIO()
+    c = canvas.Canvas(buffer, pagesize=letter)
+    width, height = letter
+
+    # Logo
+    logo_path = os.path.join(os.path.dirname(__file__), 'static', 'img', 'logo.png')
+    if os.path.exists(logo_path):
+        try:
+            c.drawImage(logo_path, 30, height - 80, width=50, height=50, preserveAspectRatio=True, mask='auto')
+        except Exception as e:
+            print(f"Erro ao carregar logo: {e}")
+
+    # Title
+    c.setFont("Helvetica-Bold", 20)
+    c.drawString(100, height - 50, "Relatório de Clientes - Agenda VTA")
+    c.setFont("Helvetica", 10)
+    c.drawString(100, height - 70, f"Gerado em: {datetime.now().strftime('%d/%m/%Y %H:%M')}")
+
+    # Table Header
+    y = height - 120
+    c.setFont("Helvetica-Bold", 10)
+    c.drawString(30, y, "Nome")
+    c.drawString(200, y, "Email")
+    c.drawString(380, y, "Telefone")
+    c.drawString(500, y, "Status")
+    
+    y -= 10
+    c.line(30, y + 5, 580, y + 5)
+    y -= 15
+
+    # Table Content
+    c.setFont("Helvetica", 9)
+    for client in clients:
+        if y < 50:
+            c.showPage()
+            y = height - 50
+        
+        c.drawString(30, y, str(client['nome'])[:35])
+        c.drawString(200, y, str(client['email'])[:35])
+        c.drawString(380, y, str(client['telefone']))
+        
+        status = "Ativo" if client['status'] == 'active' else "Inativo"
+        c.drawString(500, y, status)
+        
+        y -= 15
+
+    c.save()
+    buffer.seek(0)
+    
+    return send_file(buffer, as_attachment=True, download_name=f'clientes_vta_{datetime.now().strftime("%Y%m%d")}.pdf', mimetype='application/pdf')
 
 # Nova rota para Salas
 @app.route('/salas')
@@ -775,10 +942,11 @@ def create_agendamento():
         cur = conn.cursor()
         
         cur.execute("""
-            INSERT INTO agendamentos (cliente, pet, sala, data_agendamento, horario, status, observacoes)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO agendamentos (cliente, cliente_id, pet, sala, data_agendamento, horario, status, observacoes)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             data.get('cliente'),
+            data.get('cliente_id'), # Pode ser None
             data.get('pet'),
             data.get('sala'),
             data.get('data'),
@@ -919,6 +1087,187 @@ def delete_agendamento(id):
     except Exception as e:
         print(f"Erro ao excluir agendamento: {e}")
         return jsonify({"message": "Erro ao excluir agendamento"}), 500
+    finally:
+        if conn:
+            conn.close()
+
+# --- ROTAS DE PETS ---
+
+@app.route('/api/pets', methods=['GET'])
+def list_pets():
+    if 'user_id' not in session:
+        return jsonify({"message": "Não autorizado"}), 401
+    
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Join with clientes to get tutor name
+        cur.execute("""
+            SELECT p.*, c.nome as tutor_nome 
+            FROM pets p
+            LEFT JOIN clientes c ON p.tutor_id = c.id
+            ORDER BY p.nome
+        """)
+        pets = cur.fetchall()
+        
+        pets_list = []
+        for pet in pets:
+            # Calculate age (simplified)
+            idade = "Desconhecida"
+            if pet['data_nascimento']:
+                try:
+                    dob = datetime.strptime(pet['data_nascimento'], '%Y-%m-%d').date()
+                    today = date.today()
+                    years = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+                    idade = f"{years} anos"
+                except:
+                    pass
+
+            pets_list.append({
+                'id': pet['id'],
+                'nome': pet['nome'],
+                'especie': pet['especie'],
+                'raca': pet['raca'],
+                'sexo': pet['sexo'],
+                'data_nascimento': pet['data_nascimento'],
+                'peso': pet['peso'],
+                'cor': pet['cor'],
+                'tutor_id': pet['tutor_id'],
+                'tutor_nome': pet['tutor_nome'] or 'Sem Tutor',
+                'observacoes': pet['observacoes'],
+                'idade': idade
+            })
+            
+        cur.close()
+        return jsonify(pets_list), 200
+    except Exception as e:
+        print(f"Erro ao listar pets: {e}")
+        return jsonify({"message": "Erro ao listar pets"}), 500
+    finally:
+        if conn:
+            conn.close()
+
+@app.route('/api/pets', methods=['POST'])
+def create_pet():
+    if 'user_id' not in session:
+        return jsonify({"message": "Não autorizado"}), 401
+    
+    data = request.json
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        cur.execute("""
+            INSERT INTO pets (nome, especie, raca, sexo, data_nascimento, peso, cor, tutor_id, observacoes)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            data.get('nome'),
+            data.get('especie'),
+            data.get('raca'),
+            data.get('sexo'),
+            data.get('dataNascimento'),
+            data.get('peso'),
+            data.get('cor'),
+            data.get('tutor'),
+            data.get('observacoes')
+        ))
+        
+        conn.commit()
+        pet_id = cur.lastrowid
+        cur.close()
+        
+        return jsonify({"message": "Pet criado com sucesso", "id": pet_id}), 201
+    except Exception as e:
+        print(f"Erro ao criar pet: {e}")
+        return jsonify({"message": "Erro ao criar pet"}), 500
+    finally:
+        if conn:
+            conn.close()
+
+@app.route('/api/pets/<int:id>', methods=['PUT'])
+def update_pet(id):
+    if 'user_id' not in session:
+        return jsonify({"message": "Não autorizado"}), 401
+    
+    data = request.json
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        cur.execute("""
+            UPDATE pets 
+            SET nome=?, especie=?, raca=?, sexo=?, data_nascimento=?, peso=?, cor=?, tutor_id=?, observacoes=?
+            WHERE id=?
+        """, (
+            data.get('nome'),
+            data.get('especie'),
+            data.get('raca'),
+            data.get('sexo'),
+            data.get('dataNascimento'),
+            data.get('peso'),
+            data.get('cor'),
+            data.get('tutor'),
+            data.get('observacoes'),
+            id
+        ))
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({"message": "Pet atualizado com sucesso"}), 200
+    except Exception as e:
+        print(f"Erro ao atualizar pet: {e}")
+        return jsonify({"message": "Erro ao atualizar pet"}), 500
+    finally:
+        if conn:
+            conn.close()
+
+@app.route('/api/pets/<int:id>', methods=['DELETE'])
+def delete_pet(id):
+    if 'user_id' not in session:
+        return jsonify({"message": "Não autorizado"}), 401
+    
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        cur.execute("DELETE FROM pets WHERE id = ?", (id,))
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({"message": "Pet excluído com sucesso"}), 200
+    except Exception as e:
+        print(f"Erro ao excluir pet: {e}")
+        return jsonify({"message": "Erro ao excluir pet"}), 500
+    finally:
+        if conn:
+            conn.close()
+
+@app.route('/api/clientes/all', methods=['GET'])
+def list_all_clientes():
+    if 'user_id' not in session:
+        return jsonify({"message": "Não autorizado"}), 401
+        
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT id, nome FROM clientes ORDER BY nome")
+        clientes = cur.fetchall()
+        
+        result = [{'id': c['id'], 'nome': c['nome']} for c in clientes]
+        
+        cur.close()
+        return jsonify(result), 200
+    except Exception as e:
+        print(f"Erro ao listar clientes: {e}")
+        return jsonify({"message": "Erro ao listar clientes"}), 500
     finally:
         if conn:
             conn.close()
