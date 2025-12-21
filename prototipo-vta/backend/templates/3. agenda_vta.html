@@ -2086,6 +2086,27 @@
             }
         }
 
+        function verificarHorarioOcupado(sala, data, horario, idIgnorar = null) {
+            // Normaliza a data para objeto Date para usar a função mesmaData
+            let dataObj;
+            if (typeof data === 'string') {
+                // Assume formato YYYY-MM-DD vindo do input
+                dataObj = new Date(data + 'T00:00:00');
+            } else {
+                dataObj = data;
+            }
+
+            return agendamentos.some(a => {
+                // Se estiver editando, ignora o próprio agendamento
+                if (idIgnorar && a.id === idIgnorar) return false;
+                
+                // Verifica se é a mesma sala, mesmo horário e mesma data
+                return a.sala === sala && 
+                       a.horario === horario && 
+                       mesmaData(a.data, dataObj);
+            });
+        }
+
         function solicitarMovimentacao(agendamento, novaSala, novoHorario, novaData) {
             movimentacaoPendente = {
                 agendamento: agendamento,
@@ -2115,6 +2136,13 @@
             if (!movimentacaoPendente) return;
 
             const { agendamento, novaSala, novoHorario, novaData } = movimentacaoPendente;
+
+            // VERIFICAÇÃO DE CONFLITO
+            if (verificarHorarioOcupado(novaSala, novaData, novoHorario, agendamento.id)) {
+                mostrarToast('Erro: Já existe um agendamento neste horário e sala!', 'error');
+                fecharMover();
+                return;
+            }
 
             try {
                 const response = await fetch(`/api/agendamentos/${agendamento.id}`, {
@@ -2548,6 +2576,13 @@
             const dataHora = new Date(dataHoraInput.value);
             const horario = dataHoraInput.value.split('T')[1];
             const dataStr = dataHoraInput.value.split('T')[0];
+
+            // VERIFICAÇÃO DE CONFLITO
+            const idIgnorar = agendamentoEditando ? agendamentoEditando.id : null;
+            if (verificarHorarioOcupado(salaSelect.value, dataStr, horario, idIgnorar)) {
+                mostrarToast('Erro: Já existe um agendamento neste horário e sala!', 'error');
+                return; // Interrompe o salvamento
+            }
 
             try {
                 if (agendamentoEditando) {
