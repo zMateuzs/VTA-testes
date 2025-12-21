@@ -13,6 +13,17 @@ from reportlab.lib import colors
 # Importa a instância 'app' do arquivo app.py
 from app import app
 
+@app.after_request
+def add_header(response):
+    """
+    Adiciona headers para desabilitar o cache do navegador.
+    Isso impede que o usuário volte para páginas protegidas após o logout.
+    """
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
+
 # --- Configuração da Conexão com o Banco de Dados ---
 DB_FILE = 'agenda.db'
 

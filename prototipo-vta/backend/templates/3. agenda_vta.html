@@ -1203,6 +1203,9 @@
                         <p class="user-role">admin@vta.com</p>
                     </div>
                 </div>
+                <button class="logout-btn" onclick="logout()" title="Sair do sistema" style="background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; margin-left: 1rem;">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
             </div>
         </div>
     </header>
@@ -2661,6 +2664,12 @@
             }
 
             renderizarGradeSemana();
+        }
+
+        function logout() {
+            if (confirm('Tem certeza que deseja sair do sistema?')) {
+                window.location.href = '/logout';
+            }
         }
 
     </script>

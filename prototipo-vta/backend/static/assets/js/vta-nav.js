@@ -152,8 +152,10 @@ const ROUTES = {
     logoutBtns.forEach((btn) => {
       btn.addEventListener('click', (e) => {
         e.preventDefault();
-        clearSession();
-        goTo(ROUTES.login);
+        if (confirm('Tem certeza que deseja sair do sistema?')) {
+            clearSession();
+            window.location.href = '/logout';
+        }
       });
     });
   }
@@ -168,9 +170,11 @@ const ROUTES = {
 
   // Pequeno fix de layout para garantir estrutura entre sidebar e conteúdo
   function applyLayoutFixIfNeeded() {
-    const hasSidebar = document.querySelector('.sidebar');
+    const sidebar = document.querySelector('.sidebar');
     const main = document.querySelector('.main-content');
-    if (hasSidebar && main) {
+    
+    // Só aplica o fix se a sidebar estiver DENTRO do main-content (estrutura antiga)
+    if (sidebar && main && main.contains(sidebar)) {
       const s = document.createElement('style');
       s.textContent = `
         .main-content { display: grid !important; grid-template-columns: 250px 1fr !important; gap: 2rem !important; }
@@ -192,12 +196,12 @@ const ROUTES = {
 
   // Execução ao carregar documento
   document.addEventListener('DOMContentLoaded', () => {
-    enforceAuth();
-    wireLogin();
-    wireSidebarLinks();
+    // enforceAuth(); // Desabilitado: Autenticação gerenciada pelo Backend (Flask)
+    // wireLogin();   // Desabilitado: Login gerenciado pelo Backend
+    // wireSidebarLinks(); // Desabilitado: Links gerenciados pelo Jinja2
     wireLogout();
     wireBack();
     applyLayoutFixIfNeeded();
-    hydrateUserHeader();
+    // hydrateUserHeader(); // Desabilitado: Dados do usuário renderizados pelo Backend
   });
 })();

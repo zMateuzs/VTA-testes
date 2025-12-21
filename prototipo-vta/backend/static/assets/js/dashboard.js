@@ -7,9 +7,7 @@
  */
 function logout() {
     if (confirm('Tem certeza que deseja sair do sistema?')) {
-        alert('Logout realizado com sucesso!');
-        // Em um ambiente de produção, redirecionar para a página de login:
-        // window.location.href = '/logout';
+        window.location.href = '/logout';
     }
 }
 
