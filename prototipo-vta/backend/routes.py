@@ -1,3 +1,5 @@
+from flask import render_template, request, redirect, url_for, flash, jsonify
+from datetime import datetime
 from flask import request, jsonify, session, render_template, redirect, url_for, send_file
 import sqlite3
 from werkzeug.security import check_password_hash
@@ -572,7 +574,72 @@ def relatorios_dashboard():
 def relatorios_pets():
     if 'user_id' not in session:
         return redirect(url_for('login_page'))
-    return render_template('10. relatorios_pets.html')
+        
+    conn = get_db_connection()
+    
+    # Buscar todos os pets com dados dos tutores
+    query_pets = '''
+        SELECT p.*, c.nome as tutor_nome, c.telefone, c.email, c.endereco 
+        FROM pets p 
+        LEFT JOIN clientes c ON p.tutor_id = c.id
+    '''
+    pets_db = conn.execute(query_pets).fetchall()
+    
+    pets_data = []
+    for pet in pets_db:
+        # Calcular idade aproximada
+        idade = "Desconhecida"
+        if pet['data_nascimento']:
+            try:
+                nasc = datetime.strptime(pet['data_nascimento'], '%Y-%m-%d').date()
+                hoje = datetime.now().date()
+                anos = hoje.year - nasc.year - ((hoje.month, hoje.day) < (nasc.month, nasc.day))
+                idade = f"{anos} anos"
+            except:
+                pass
+
+        # Buscar histórico de agendamentos deste pet
+        query_hist = '''
+            SELECT * FROM agendamentos 
+            WHERE pet = ? 
+            ORDER BY data_agendamento DESC, horario DESC
+        '''
+        historico_db = conn.execute(query_hist, (pet['nome'],)).fetchall()
+        
+        historico = []
+        ultima_consulta = None
+        
+        for h in historico_db:
+            if not ultima_consulta:
+                ultima_consulta = h['data_agendamento']
+                
+            historico.append({
+                'data': h['data_agendamento'],
+                'tipo': 'consulta', 
+                'titulo': f"Agendamento em {h['sala']}",
+                'descricao': h['observacoes'] or "Sem observações"
+            })
+
+        pets_data.append({
+            'id': pet['id'],
+            'petNome': pet['nome'],
+            'clienteNome': pet['tutor_nome'] or "Sem Tutor",
+            'especie': pet['especie'],
+            'raca': pet['raca'],
+            'idade': idade,
+            'ultimaConsulta': ultima_consulta or "Nenhuma",
+            'totalConsultas': len(historico),
+            'status': 'ativo', 
+            'telefone': pet['telefone'] or "",
+            'email': pet['email'] or "",
+            'endereco': pet['endereco'] or "",
+            'peso': f"{pet['peso']} kg" if pet['peso'] else "-",
+            'nascimento': pet['data_nascimento'],
+            'historico': historico
+        })
+    
+    conn.close()
+    return render_template('10. relatorios_pets.html', pets=pets_data)
 
 # Nova rota para Usuários
 @app.route('/usuarios')

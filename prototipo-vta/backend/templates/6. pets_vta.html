@@ -514,13 +514,13 @@
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
+            gap: 1.5rem;
             margin-bottom: 2rem;
         }
 
         .stat-card {
             background: var(--white);
-            padding: 1.5rem;
+            padding: 2rem;
             border-radius: 15px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
             text-align: center;
@@ -785,7 +785,7 @@
                     </div>
                 </section>
 
-                <section class="stats-grid">
+                <section class="stats-grid" style="grid-template-columns: repeat(4, 1fr); gap: 1.5rem;">
                     <div class="stat-card">
                         <div class="stat-icon">
                             <i class="fas fa-paw"></i>
@@ -1118,6 +1118,43 @@
             event.preventDefault();
             
             const formData = new FormData(event.target);
+
+            // Validações de bom senso (Idade e Peso)
+            const dataNascimento = formData.get('dataNascimento');
+            const peso = formData.get('peso');
+
+            if (dataNascimento) {
+                const dataNasc = new Date(dataNascimento);
+                const hoje = new Date();
+                
+                if (dataNasc > hoje) {
+                    alert('A data de nascimento não pode ser no futuro.');
+                    return;
+                }
+
+                // Cálculo aproximado da idade em anos
+                const diffAnos = hoje.getFullYear() - dataNasc.getFullYear();
+                
+                // Limite de 100 anos (cobre tartarugas e aves longevas, mas bloqueia erros grosseiros como 2000 anos)
+                if (diffAnos > 100) {
+                    alert(`A data informada resulta em uma idade de ${diffAnos} anos. Por favor verifique o ano de nascimento.`);
+                    return;
+                }
+            }
+
+            if (peso) {
+                const pesoVal = parseFloat(peso);
+                // Limite de 300kg (cobre qualquer pet doméstico razoável)
+                if (pesoVal > 300) {
+                    alert(`O peso informado (${pesoVal}kg) parece incorreto. Por favor verifique.`);
+                    return;
+                }
+                if (pesoVal < 0) {
+                    alert('O peso não pode ser negativo.');
+                    return;
+                }
+            }
+
             const petData = {
                 nome: formData.get('nomePet'),
                 especie: formData.get('especie'),

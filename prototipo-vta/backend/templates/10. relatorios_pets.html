@@ -732,6 +732,9 @@
             }
         }
     </style>
+    <!-- Bibliotecas para PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
     <div class="dashboard-container">
@@ -851,13 +854,8 @@
                     
                     <div class="filters-grid">
                         <div class="filter-group">
-                            <label class="filter-label">Nome do Cliente</label>
-                            <input type="text" class="filter-input" id="clienteNome" placeholder="Digite o nome do cliente">
-                        </div>
-                        
-                        <div class="filter-group">
-                            <label class="filter-label">Nome do Pet</label>
-                            <input type="text" class="filter-input" id="petNome" placeholder="Digite o nome do pet">
+                            <label class="filter-label">Buscar (Cliente ou Pet)</label>
+                            <input type="text" class="filter-input" id="buscaGeral" placeholder="Digite nome do cliente ou pet">
                         </div>
                         
                         <div class="filter-group">
@@ -866,10 +864,7 @@
                                 <option value="">Todas as espécies</option>
                                 <option value="cao">Cão</option>
                                 <option value="gato">Gato</option>
-                                <option value="ave">Ave</option>
-                                <option value="roedor">Roedor</option>
-                                <option value="reptil">Réptil</option>
-                                <option value="outro">Outro</option>
+                                <option value="outros">Outros</option>
                             </select>
                         </div>
                         
@@ -893,16 +888,7 @@
                         </div>
                     </div>
                     
-                    <div class="filter-actions">
-                        <button class="btn btn-secondary" onclick="limparFiltros()">
-                            <i class="fas fa-eraser"></i>
-                            Limpar
-                        </button>
-                        <button class="btn btn-primary" onclick="aplicarFiltros()">
-                            <i class="fas fa-search"></i>
-                            Buscar
-                        </button>
-                    </div>
+
                 </div>
 
                 <!-- Results Section -->
@@ -912,13 +898,13 @@
                             <span class="results-count" id="resultsCount">Exibindo 12 de 47 registros</span>
                         </div>
                         <div class="export-options">
-                            <button class="export-btn export-pdf" onclick="exportarPDF()">
+                            <button class="export-btn export-pdf" onclick="exportarListaPDF()">
                                 <i class="fas fa-file-pdf"></i>
                                 PDF
                             </button>
-                            <button class="export-btn export-excel" onclick="exportarExcel()">
-                                <i class="fas fa-file-excel"></i>
-                                Excel
+                            <button class="export-btn btn-secondary" onclick="limparFiltros()" style="background-color: var(--vta-blue); color: white;">
+                                <i class="fas fa-sync-alt"></i>
+                                Atualizar
                             </button>
                         </div>
                     </div>
@@ -968,7 +954,12 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2 class="modal-title">Detalhes do Pet</h2>
-                <button class="close-btn" onclick="fecharModal()">&times;</button>
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <button id="btnPdfIndividual" class="export-btn export-pdf" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
+                        <i class="fas fa-file-pdf"></i> Histórico
+                    </button>
+                    <button class="close-btn" onclick="fecharModal()">&times;</button>
+                </div>
             </div>
             
             <div class="detail-grid" id="detailGrid">
@@ -983,137 +974,10 @@
     </div>
 
     <script>
-        // Dados mockados
-        const mockData = [
-            {
-                id: 1,
-                petNome: "Rex",
-                clienteNome: "Maria Santos",
-                especie: "Cão",
-                raca: "Golden Retriever",
-                idade: "3 anos",
-                ultimaConsulta: "2024-08-10",
-                totalConsultas: 15,
-                status: "ativo",
-                telefone: "(11) 99999-1234",
-                email: "maria.santos@email.com",
-                endereco: "Rua das Flores, 123",
-                peso: "28 kg",
-                nascimento: "2021-03-15",
-                historico: [
-                    { data: "2024-08-10", tipo: "consulta", titulo: "Consulta de Rotina", descricao: "Exame geral e vacinação anual" },
-                    { data: "2024-07-15", tipo: "vacina", titulo: "Vacinação V10", descricao: "Aplicação da vacina V10 e vermífugo" },
-                    { data: "2024-06-20", tipo: "consulta", titulo: "Consulta Dermatológica", descricao: "Tratamento para alergia de pele" }
-                ]
-            },
-            {
-                id: 2,
-                petNome: "Mimi",
-                clienteNome: "João Pedro",
-                especie: "Gato",
-                raca: "Persa",
-                idade: "2 anos",
-                ultimaConsulta: "2024-08-12",
-                totalConsultas: 8,
-                status: "ativo",
-                telefone: "(11) 88888-5678",
-                email: "joao.pedro@email.com",
-                endereco: "Av. Principal, 456",
-                peso: "4.5 kg",
-                nascimento: "2022-01-10",
-                historico: [
-                    { data: "2024-08-12", tipo: "consulta", titulo: "Check-up Geral", descricao: "Exames de rotina e limpeza dental" },
-                    { data: "2024-07-08", tipo: "vacina", titulo: "Vacinação Felina", descricao: "Vacina tríplice felina" },
-                    { data: "2024-05-30", tipo: "cirurgia", titulo: "Castração", descricao: "Procedimento de castração sem complicações" }
-                ]
-            },
-            {
-                id: 3,
-                petNome: "Thor",
-                clienteNome: "Ana Clara",
-                especie: "Cão",
-                raca: "Pastor Alemão",
-                idade: "5 anos",
-                ultimaConsulta: "2024-08-05",
-                totalConsultas: 22,
-                status: "ativo",
-                telefone: "(11) 77777-9012",
-                email: "ana.clara@email.com",
-                endereco: "Rua do Sol, 789",
-                peso: "35 kg",
-                nascimento: "2019-04-22",
-                historico: [
-                    { data: "2024-08-05", tipo: "cirurgia", titulo: "Cirurgia Ortopédica", descricao: "Correção de displasia coxofemoral" },
-                    { data: "2024-07-20", tipo: "consulta", titulo: "Pré-operatório", descricao: "Exames preparatórios para cirurgia" },
-                    { data: "2024-06-15", tipo: "consulta", titulo: "Consulta Ortopédica", descricao: "Avaliação de claudicação" }
-                ]
-            },
-            {
-                id: 4,
-                petNome: "Luna",
-                clienteNome: "Carlos Lima",
-                especie: "Gato",
-                raca: "SRD",
-                idade: "1 ano",
-                ultimaConsulta: "2024-08-14",
-                totalConsultas: 5,
-                status: "ativo",
-                telefone: "(11) 66666-3456",
-                email: "carlos.lima@email.com",
-                endereco: "Praça Central, 321",
-                peso: "3.2 kg",
-                nascimento: "2023-02-28",
-                historico: [
-                    { data: "2024-08-14", tipo: "consulta", titulo: "Primeira Consulta", descricao: "Exame inicial e vacinação" },
-                    { data: "2024-07-25", tipo: "vacina", titulo: "Segunda Dose", descricao: "Segunda dose da vacina múltipla" },
-                    { data: "2024-07-05", tipo: "vacina", titulo: "Primeira Dose", descricao: "Primeira dose da vacina múltipla" }
-                ]
-            },
-            {
-                id: 5,
-                petNome: "Buddy",
-                clienteNome: "Patricia Oliveira",
-                especie: "Cão",
-                raca: "Labrador",
-                idade: "7 anos",
-                ultimaConsulta: "2024-07-28",
-                totalConsultas: 35,
-                status: "inativo",
-                telefone: "(11) 55555-7890",
-                email: "patricia.oliveira@email.com",
-                endereco: "Rua Verde, 654",
-                peso: "30 kg",
-                nascimento: "2017-08-12",
-                historico: [
-                    { data: "2024-07-28", tipo: "consulta", titulo: "Consulta Geriátrica", descricao: "Acompanhamento de saúde do idoso" },
-                    { data: "2024-06-30", tipo: "consulta", titulo: "Exames de Sangue", descricao: "Coleta para exames laboratoriais" },
-                    { data: "2024-05-15", tipo: "consulta", titulo: "Consulta Cardiológica", descricao: "Avaliação cardíaca de rotina" }
-                ]
-            },
-            {
-                id: 6,
-                petNome: "Bella",
-                clienteNome: "Roberto Silva",
-                especie: "Cão",
-                raca: "Poodle",
-                idade: "4 anos",
-                ultimaConsulta: "2024-08-11",
-                totalConsultas: 18,
-                status: "ativo",
-                telefone: "(11) 44444-2468",
-                email: "roberto.silva@email.com",
-                endereco: "Av. das Águias, 987",
-                peso: "12 kg",
-                nascimento: "2020-05-18",
-                historico: [
-                    { data: "2024-08-11", tipo: "consulta", titulo: "Tosa e Banho Medicinal", descricao: "Higienização e tratamento de pele" },
-                    { data: "2024-07-22", tipo: "consulta", titulo: "Consulta Dermatológica", descricao: "Acompanhamento de dermatite" },
-                    { data: "2024-06-28", tipo: "vacina", titulo: "Reforço Anual", descricao: "Vacina antirrábica" }
-                ]
-            }
-        ];
+        // Dados reais vindos do banco de dados
+        const petsData = {{ pets | tojson | safe }};
 
-        let currentData = [...mockData];
+        let currentData = [...petsData];
         let currentPage = 1;
         const itemsPerPage = 5;
 
@@ -1223,74 +1087,66 @@
 
         // Função para aplicar filtros
         function aplicarFiltros() {
-            const loading = document.getElementById('loading');
-            const dataTable = document.getElementById('dataTable');
-            
-            // Mostrar loading
-            loading.style.display = 'block';
-            dataTable.style.display = 'none';
-            
-            setTimeout(() => {
-                const clienteNome = document.getElementById('clienteNome').value.toLowerCase();
-                const petNome = document.getElementById('petNome').value.toLowerCase();
-                const especie = document.getElementById('especie').value;
-                const status = document.getElementById('status').value;
-                const dataInicial = document.getElementById('dataInicial').value;
-                const dataFinal = document.getElementById('dataFinal').value;
+            const buscaGeral = document.getElementById('buscaGeral').value.toLowerCase();
+            const especie = document.getElementById('especie').value.toLowerCase();
+            const status = document.getElementById('status').value;
+            const dataInicial = document.getElementById('dataInicial').value;
+            const dataFinal = document.getElementById('dataFinal').value;
 
-                let filteredData = mockData.filter(item => {
-                    let matches = true;
+            let filteredData = petsData.filter(item => {
+                let matches = true;
 
-                    if (clienteNome && !item.clienteNome.toLowerCase().includes(clienteNome)) {
+                if (buscaGeral) {
+                    const matchCliente = item.clienteNome.toLowerCase().includes(buscaGeral);
+                    const matchPet = item.petNome.toLowerCase().includes(buscaGeral);
+                    if (!matchCliente && !matchPet) {
                         matches = false;
                     }
-                    if (petNome && !item.petNome.toLowerCase().includes(petNome)) {
+                }
+                if (especie) {
+                    if (especie === 'outros') {
+                        // Se for "outros", exclui cão e gato
+                        if (['cao', 'gato', 'cão'].includes(item.especie.toLowerCase())) {
+                            matches = false;
+                        }
+                    } else if (item.especie.toLowerCase() !== especie) {
                         matches = false;
                     }
-                    if (especie && item.especie.toLowerCase() !== especie) {
-                        matches = false;
-                    }
-                    if (status && item.status !== status) {
-                        matches = false;
-                    }
-                    if (dataInicial && item.ultimaConsulta < dataInicial) {
-                        matches = false;
-                    }
-                    if (dataFinal && item.ultimaConsulta > dataFinal) {
-                        matches = false;
-                    }
+                }
+                if (status && item.status !== status) {
+                    matches = false;
+                }
+                if (dataInicial && item.ultimaConsulta < dataInicial) {
+                    matches = false;
+                }
+                if (dataFinal && item.ultimaConsulta > dataFinal) {
+                    matches = false;
+                }
 
-                    return matches;
-                });
+                return matches;
+            });
 
-                currentData = filteredData;
-                currentPage = 1;
-                
-                // Esconder loading e mostrar tabela
-                loading.style.display = 'none';
-                dataTable.style.display = 'table';
-                
-                renderTable(filteredData);
-            }, 1000);
+            currentData = filteredData;
+            currentPage = 1;
+            renderTable(filteredData);
         }
 
         // Função para limpar filtros
         function limparFiltros() {
-            document.getElementById('clienteNome').value = '';
-            document.getElementById('petNome').value = '';
+            document.getElementById('buscaGeral').value = '';
             document.getElementById('especie').value = '';
             document.getElementById('status').value = '';
             document.getElementById('dataInicial').value = '';
             document.getElementById('dataFinal').value = '';
             
-            currentData = [...mockData];
+            currentData = [...petsData];
             currentPage = 1;
             renderTable();
         }
 
         // Função para ver detalhes
         function verDetalhes(id) {
-            const pet = mockData.find(item => item.id === id);
+            const pet = petsData.find(item => item.id === id);
             if (!pet) return;
 
             const modal = document.getElementById('detailModal');
@@ -1377,23 +1233,155 @@
                 ${timelineHtml}
             `;
 
+            // Configurar botão de PDF
+            const btnPdf = document.getElementById('btnPdfIndividual');
+            btnPdf.onclick = () => exportarHistoricoIndividual(id);
+
             modal.style.display = 'block';
         }
 
         // Função para fechar modal
-        function fecharModal() {
-            document.getElementById('detailModal').style.display = 'none';
+        // Helper para carregar logo
+        async function loadLogo() {
+            const logoUrl = '/static/img/logo.png';
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.src = logoUrl;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+                    resolve(canvas.toDataURL('image/png'));
+                };
+                img.onerror = () => resolve(null);
+            });
         }
 
-        // Função para exportar PDF
-        function exportarPDF() {
-            alert('Gerando relatório em PDF...\n\nEsta funcionalidade será implementada na versão final com biblioteca de geração de PDF.');
+        // Função para exportar Lista de Pets (PDF)
+        async function exportarListaPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const logoData = await loadLogo();
+
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const margin = 14;
+
+            // Cabeçalho
+            if (logoData) {
+                doc.addImage(logoData, 'PNG', margin, 10, 20, 20);
+            }
+            doc.setFontSize(18);
+            doc.setFont("helvetica", "bold");
+            doc.text("Relatório de Pets - Lista Geral", logoData ? 40 : margin, 20);
+            
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "normal");
+            doc.text(`Gerado em: ${new Date().toLocaleDateString()} às ${new Date().toLocaleTimeString()}`, logoData ? 40 : margin, 26);
+            doc.text(`Total de registros: ${currentData.length}`, logoData ? 40 : margin, 31);
+
+            // Tabela com detalhes
+            const tableBody = currentData.map(pet => [
+                pet.petNome,
+                pet.clienteNome,
+                `${pet.especie} / ${pet.raca}\nIdade: ${pet.idade} | Peso: ${pet.peso || 'N/A'}\nNasc: ${formatDate(pet.nascimento)}`,
+                `Tel: ${pet.telefone}\nEmail: ${pet.email}`,
+                formatDate(pet.ultimaConsulta),
+                pet.status.charAt(0).toUpperCase() + pet.status.slice(1)
+            ]);
+
+            doc.autoTable({
+                startY: 40,
+                head: [['Pet', 'Tutor', 'Detalhes do Pet', 'Contato', 'Última Cons.', 'Status']],
+                body: tableBody,
+                theme: 'grid',
+                headStyles: { fillColor: [82, 183, 136] },
+                styles: { fontSize: 9, cellPadding: 3 },
+                columnStyles: {
+                    2: { cellWidth: 60 } // Aumentar largura da coluna de detalhes
+                },
+                margin: { left: margin, right: margin }
+            });
+
+            doc.save('lista_pets_vta.pdf');
         }
 
-        // Função para exportar Excel
-        function exportarExcel() {
-            alert('Gerando planilha Excel...\n\nEsta funcionalidade será implementada na versão final com biblioteca de exportação.');
+        // Função para exportar Histórico Individual (PDF)
+        async function exportarHistoricoIndividual(id) {
+            const pet = petsData.find(p => p.id === id);
+            if (!pet) return;
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const logoData = await loadLogo();
+
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const margin = 14;
+            let y = 20;
+
+            // Cabeçalho
+            if (logoData) {
+                doc.addImage(logoData, 'PNG', margin, 10, 20, 20);
+            }
+            doc.setFontSize(18);
+            doc.setFont("helvetica", "bold");
+            doc.text("Histórico do Pet", logoData ? 40 : margin, 20);
+            
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "normal");
+            doc.text(`Gerado em: ${new Date().toLocaleDateString()} às ${new Date().toLocaleTimeString()}`, logoData ? 40 : margin, 26);
+            
+            y = 45;
+
+            // Dados do Pet
+            doc.setFillColor(240, 240, 240);
+            doc.rect(margin, y - 5, pageWidth - (margin * 2), 25, 'F');
+            
+            doc.setFontSize(14);
+            doc.setFont("helvetica", "bold");
+            doc.text(pet.petNome, margin + 5, y + 2);
+            
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "normal");
+            doc.text(`Tutor: ${pet.clienteNome}`, margin + 5, y + 8);
+            doc.text(`Espécie: ${pet.especie} | Raça: ${pet.raca}`, margin + 5, y + 14);
+            doc.text(`Idade: ${pet.idade} | Peso: ${pet.peso}`, margin + 70, y + 8);
+            doc.text(`Status: ${pet.status.charAt(0).toUpperCase() + pet.status.slice(1)}`, margin + 70, y + 14);
+
+            y += 30;
+
+            // Tabela de Histórico
+            doc.setFontSize(12);
+            doc.setFont("helvetica", "bold");
+            doc.text("Histórico Clínico", margin, y);
+            y += 5;
+
+            if (pet.historico && pet.historico.length > 0) {
+                doc.autoTable({
+                    startY: y,
+                    head: [['Data', 'Tipo', 'Título', 'Descrição']],
+                    body: pet.historico.map(h => [
+                        formatDate(h.data),
+                        h.tipo.charAt(0).toUpperCase() + h.tipo.slice(1),
+                        h.titulo,
+                        h.descricao
+                    ]),
+                    theme: 'grid',
+                    headStyles: { fillColor: [46, 134, 171] }, // Azul para diferenciar
+                    styles: { fontSize: 10 },
+                    margin: { left: margin, right: margin }
+                });
+            } else {
+                doc.setFont("helvetica", "italic");
+                doc.setFontSize(10);
+                doc.text("Nenhum histórico registrado para este pet.", margin, y + 10);
+            }
+
+            doc.save(`historico_${pet.petNome.toLowerCase().replace(/\s+/g, '_')}.pdf`);
         }
+
+
 
         // Fechar modal clicando fora
         window.onclick = function(event) {
@@ -1420,15 +1408,12 @@
         });
 
         // Busca em tempo real
-        document.getElementById('clienteNome').addEventListener('input', function() {
-            if (this.value.length >= 3 || this.value.length === 0) {
-                aplicarFiltros();
-            }
-        });
-
-        document.getElementById('petNome').addEventListener('input', function() {
-            if (this.value.length >= 3 || this.value.length === 0) {
-                aplicarFiltros();
+        const filterIds = ['buscaGeral', 'especie', 'status', 'dataInicial', 'dataFinal'];
+        filterIds.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.addEventListener('input', aplicarFiltros);
+                element.addEventListener('change', aplicarFiltros);
             }
         });
     </script>
