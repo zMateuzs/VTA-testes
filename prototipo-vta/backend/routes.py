@@ -1517,3 +1517,135 @@ def list_all_clientes():
     finally:
         if conn:
             conn.close()
+
+# --- ROTAS DE SALAS ---
+
+@app.route('/api/salas', methods=['GET'])
+def list_salas():
+    if 'user_id' not in session:
+        return jsonify({"message": "Não autorizado"}), 401
+    
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        cur.execute("SELECT * FROM salas ORDER BY nome")
+        salas = cur.fetchall()
+        
+        salas_list = []
+        for sala in salas:
+            salas_list.append({
+                'id': sala['id'],
+                'nome': sala['nome'],
+                'tipo': sala['tipo'],
+                'capacidade': sala['capacidade'],
+                'status': sala['status'],
+                'observacoes': sala['observacoes'],
+                # Adicionando campos extras para compatibilidade com o frontend
+                'cor': '#52B788', # Default color or store in DB if needed
+                'veterinario': 'Dr(a).', # Placeholder
+                'descricao': sala['observacoes'],
+                'ocupacaoAtual': None # Placeholder logic for now
+            })
+            
+        cur.close()
+        return jsonify(salas_list), 200
+    except Exception as e:
+        print(f"Erro ao listar salas: {e}")
+        return jsonify({"message": "Erro ao listar salas"}), 500
+    finally:
+        if conn:
+            conn.close()
+
+@app.route('/api/salas', methods=['POST'])
+def create_sala():
+    if 'user_id' not in session:
+        return jsonify({"message": "Não autorizado"}), 401
+    
+    data = request.json
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        cur.execute("""
+            INSERT INTO salas (nome, tipo, capacidade, status, observacoes)
+            VALUES (?, ?, ?, ?, ?)
+        """, (
+            data.get('nome'),
+            data.get('tipo'),
+            data.get('capacidade'),
+            data.get('status', 'disponivel'),
+            data.get('descricao') # Mapping frontend 'descricao' to backend 'observacoes'
+        ))
+        
+        conn.commit()
+        new_id = cur.lastrowid
+        cur.close()
+        
+        return jsonify({"message": "Sala criada com sucesso", "id": new_id}), 201
+    except Exception as e:
+        print(f"Erro ao criar sala: {e}")
+        return jsonify({"message": f"Erro ao criar sala: {str(e)}"}), 500
+    finally:
+        if conn:
+            conn.close()
+
+@app.route('/api/salas/<int:id>', methods=['PUT'])
+def update_sala(id):
+    if 'user_id' not in session:
+        return jsonify({"message": "Não autorizado"}), 401
+    
+    data = request.json
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        cur.execute("""
+            UPDATE salas 
+            SET nome=?, tipo=?, capacidade=?, status=?, observacoes=?
+            WHERE id=?
+        """, (
+            data.get('nome'),
+            data.get('tipo'),
+            data.get('capacidade'),
+            data.get('status'),
+            data.get('descricao'),
+            id
+        ))
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({"message": "Sala atualizada com sucesso"}), 200
+    except Exception as e:
+        print(f"Erro ao atualizar sala: {e}")
+        return jsonify({"message": f"Erro ao atualizar sala: {str(e)}"}), 500
+    finally:
+        if conn:
+            conn.close()
+
+@app.route('/api/salas/<int:id>', methods=['DELETE'])
+def delete_sala(id):
+    if 'user_id' not in session:
+        return jsonify({"message": "Não autorizado"}), 401
+    
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        cur.execute("DELETE FROM salas WHERE id = ?", (id,))
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({"message": "Sala excluída com sucesso"}), 200
+    except Exception as e:
+        print(f"Erro ao excluir sala: {e}")
+        return jsonify({"message": "Erro ao excluir sala"}), 500
+    finally:
+        if conn:
+            conn.close()

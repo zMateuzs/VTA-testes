@@ -24,6 +24,8 @@
             --vta-orange: #F77F00;
             --vta-orange-light: #FCBF49;
             --vta-orange-dark: #D62828;
+            --vta-purple: #6F42C1;
+            --vta-purple-light: #8E5BDE;
             --white: #FFFFFF;
             --gray-light: #F8F9FA;
             --gray-medium: #6C757D;
@@ -37,16 +39,10 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: var(--gray-light);
             color: var(--gray-dark);
+            overflow-x: hidden;
         }
 
-        /* Layout Principal */
-        .dashboard-container {
-            display: grid;
-            grid-template-rows: auto 1fr;
-            min-height: 100vh;
-        }
-
-        /* Header */
+        /* Header Padronizado */
         .header {
             background: linear-gradient(135deg, var(--vta-green) 0%, var(--vta-green-dark) 100%);
             color: var(--white);
@@ -61,8 +57,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            max-width: 1400px;
-            margin: 0 auto;
+            width: 100%;
+            padding: 0 2rem;
         }
 
         .header-left {
@@ -158,7 +154,7 @@
             margin: 0 auto;
         }
 
-        /* Sidebar */
+        /* Sidebar Padronizada */
         .sidebar {
             background: var(--white);
             border-radius: 15px;
@@ -170,7 +166,7 @@
         }
 
         .sidebar-section {
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
         }
 
         .sidebar-title {
@@ -203,7 +199,8 @@
             font-weight: 500;
         }
 
-        .nav-link:hover, .nav-link.active {
+        .nav-link:hover,
+        .nav-link.active {
             background: linear-gradient(135deg, var(--vta-green) 0%, var(--vta-green-light) 100%);
             color: var(--white);
             transform: translateX(5px);
@@ -214,8 +211,8 @@
             width: 20px;
         }
 
-        /* Content Area */
-        .content-area {
+        /* Page Content */
+        .page-content {
             display: grid;
             gap: 2rem;
         }
@@ -223,12 +220,15 @@
         /* Page Header */
         .page-header {
             background: var(--white);
-            padding: 2rem;
+            padding: 1.5rem 2rem;
             border-radius: 15px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
         }
 
         .page-title {
@@ -237,12 +237,19 @@
             gap: 1rem;
         }
 
-        .page-title i {
-            font-size: 2rem;
-            color: var(--vta-green);
+        .page-title-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--vta-blue), var(--vta-blue-light));
+            color: var(--white);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
         }
 
-        .page-title h1 {
+        .page-title h2 {
             font-size: 1.8rem;
             font-weight: 600;
             margin-bottom: 0.25rem;
@@ -250,7 +257,7 @@
 
         .page-subtitle {
             color: var(--gray-medium);
-            font-size: 0.9rem;
+            font-size: 0.95rem;
         }
 
         .btn {
@@ -305,72 +312,75 @@
         /* Stats Cards */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
         }
 
         .stat-card {
             background: var(--white);
-            padding: 1.5rem;
-            border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-            position: relative;
-            overflow: hidden;
+            border-radius: 12px;
+            padding: 1.25rem;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 110px;
             transition: all 0.3s ease;
         }
 
         .stat-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-2px);
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--vta-green), var(--vta-blue));
         }
 
         .stat-header {
             display: flex;
+            align-items: center;
             justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 1rem;
+            gap: 0.75rem;
+        }
+
+        .stat-info .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--gray-dark);
+            line-height: 1;
+        }
+
+        .stat-info .stat-label {
+            font-size: 0.9rem;
+            color: var(--gray-medium);
+            margin-top: 0.25rem;
+            font-weight: 600;
         }
 
         .stat-icon {
-            width: 45px;
-            height: 45px;
+            width: 52px;
+            height: 52px;
             border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.3rem;
+            font-size: 1.25rem;
             color: var(--white);
         }
 
         .stat-icon.green { background: linear-gradient(135deg, var(--vta-green), var(--vta-green-light)); }
         .stat-icon.blue { background: linear-gradient(135deg, var(--vta-blue), var(--vta-blue-light)); }
-        .stat-icon.orange { background: linear-gradient(135deg, var(--vta-orange), var(--vta-orange-light)); }
+        .stat-icon.orange { background: linear-gradient(135deg, var(--vta-orange-dark), var(--vta-orange)); }
         .stat-icon.red { background: linear-gradient(135deg, var(--danger), #ff6b8a); }
 
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--gray-dark);
-            margin-bottom: 0.25rem;
+        @media (max-width: 1024px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
         }
 
-        .stat-label {
-            font-size: 0.9rem;
-            color: var(--gray-medium);
+        @media (max-width: 576px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .stat-header { gap: 0.5rem; }
         }
 
-        /* Salas Grid */
+        /* Salas Container */
         .salas-container {
             background: var(--white);
             border-radius: 15px;
@@ -384,6 +394,13 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .salas-header h2 {
+            font-size: 1.3rem;
+            font-weight: 600;
         }
 
         .search-container {
@@ -641,6 +658,123 @@
             margin-top: 2rem;
         }
 
+        /* Estilos para gerenciamento de salas (estilo agenda) */
+        .salas-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin: 1.5rem 0;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .sala-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--gray-light);
+            border-radius: 10px;
+            position: relative;
+        }
+
+        .sala-color-picker {
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+
+        .sala-color-preview {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 2px solid var(--white);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .sala-color-preview:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .sala-color-input {
+            position: absolute;
+            opacity: 0;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+        }
+
+        .sala-inputs {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .sala-inputs-row {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .sala-inputs input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 2px solid var(--white);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .sala-inputs input:focus {
+            outline: none;
+            border-color: var(--vta-green);
+            box-shadow: 0 0 0 3px rgba(82, 183, 136, 0.1);
+        }
+
+        .sala-vet-input {
+            font-size: 0.85rem !important;
+        }
+
+        .btn-remover-sala {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: var(--danger);
+            color: var(--white);
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-remover-sala:hover {
+            background: #c82333;
+            transform: scale(1.1);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--gray-medium);
+            cursor: pointer;
+            padding: 0.25rem;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            color: var(--danger);
+            transform: rotate(90deg);
+        }
+
         /* Animations */
         @keyframes fadeIn {
             from { opacity: 0; }
@@ -664,10 +798,8 @@
                 order: 2;
             }
 
-            .page-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 1rem;
+            .page-content {
+                margin-left: 0;
             }
 
             .salas-grid {
@@ -681,255 +813,237 @@
                 gap: 1rem;
             }
 
-            .main-content {
-                padding: 1rem;
+            .page-header {
+                flex-direction: column;
+                text-align: center;
             }
 
             .search-input {
-                width: 200px;
+                width: 100%;
             }
 
             .salas-header {
                 flex-direction: column;
-                align-items: flex-start;
-                gap: 1rem;
+                align-items: stretch;
             }
 
             .user-details {
                 display: none;
             }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
     </style>
 </head>
 <body>
-    <div class="dashboard-container">
-        <!-- Header -->
-        <header class="header">
-            <div class="header-content">
-                <div class="header-left">
-                    <div class="logo-mini">
-                        <i class="fas fa-stethoscope"></i>
-                    </div>
-                    <div class="header-title">
-                        <h1>Agenda VTA</h1>
-                        <p class="header-subtitle">Sistema de Agendamento Veterinário</p>
-                    </div>
+    <!-- Header Padronizado -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <div class="logo-mini">
+                    <i class="fas fa-stethoscope"></i>
                 </div>
-                
-                <div class="header-right">
-                    <div class="user-info">
-                        <div class="user-avatar">A</div>
-                        <div class="user-details">
-                            <h3>Administrador</h3>
-                            <p class="user-role">admin@vta.com</p>
-                        </div>
-                    </div>
-                    <button class="logout-btn" onclick="logout()" title="Sair do sistema">
-                        <i class="fas fa-sign-out-alt"></i>
-                    </button>
+                <div class="header-title">
+                    <h1>Agenda VTA</h1>
+                    <p class="header-subtitle">Sistema de Agendamento Veterinário</p>
                 </div>
             </div>
-        </header>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Sidebar -->
-            <aside class="sidebar">
-                <div class="sidebar-section">
-                    <h3 class="sidebar-title">Menu Principal</h3>
-                    <ul class="nav-menu">
-                        <li class="nav-item">
-                            <a href="{{ url_for('dashboard') }}" class="nav-link">
-                                <i class="fas fa-chart-pie"></i>
-                                Dashboard
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ url_for('agenda_page') }}" class="nav-link">
-                                <i class="fas fa-calendar"></i>
-                                Agenda
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ url_for('agendamento_page') }}" class="nav-link">
-                                <i class="fas fa-plus-circle"></i>
-                                Novo Agendamento
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ url_for('clientes_page') }}" class="nav-link">
-                                <i class="fas fa-users"></i>
-                                Clientes
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ url_for('pets_page') }}" class="nav-link">
-                                <i class="fas fa-paw"></i>
-                                Pets
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ url_for('salas_page') }}" class="nav-link active">
-                                <i class="fas fa-door-open"></i>
-                                Salas
-                            </a>
-                        </li>
-                    </ul>
+            <div class="header-right">
+                <div class="user-info">
+                    <div class="user-avatar">A</div>
+                    <div class="user-details">
+                        <h3>Administrador</h3>
+                        <p class="user-role">admin@vta.com</p>
+                    </div>
                 </div>
+                <button class="logout-btn" onclick="logout()" title="Sair do sistema">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+    </header>
 
-                <div class="sidebar-section">
-                    <h3 class="sidebar-title">Administração</h3>
-                    <ul class="nav-menu">
-                        <li class="nav-item">
-                            <a href="{{ url_for('relatorios_dashboard') }}" class="nav-link">
-                                <i class="fas fa-chart-bar"></i>
-                                Relatórios ADM
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ url_for('relatorios_pets') }}" class="nav-link">
-                                <i class="fas fa-file-medical"></i>
-                                Histórico Pets
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ url_for('usuarios_page') }}" class="nav-link">
-                                <i class="fas fa-user-cog"></i>
-                                Usuários
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </aside>
+    <!-- Container Principal -->
+    <div class="main-content">
+        <!-- Sidebar Padronizada -->
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">Menu Principal</h3>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="{{ url_for('dashboard') }}" class="nav-link" onclick="window.location.href='{{ url_for('dashboard') }}'; return false;">
+                            <i class="fas fa-chart-pie"></i>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('agenda_page') }}" class="nav-link" onclick="window.location.href='{{ url_for('agenda_page') }}'; return false;">
+                            <i class="fas fa-calendar"></i>
+                            Agenda
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('agendamento_page') }}" class="nav-link" onclick="window.location.href='{{ url_for('agendamento_page') }}'; return false;">
+                            <i class="fas fa-calendar-check"></i>
+                            Agendamentos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('clientes_page') }}" class="nav-link" onclick="window.location.href='{{ url_for('clientes_page') }}'; return false;">
+                            <i class="fas fa-users"></i>
+                            Clientes
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('pets_page') }}" class="nav-link" onclick="window.location.href='{{ url_for('pets_page') }}'; return false;">
+                            <i class="fas fa-paw"></i>
+                            Pets
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('salas_page') }}" class="nav-link active" onclick="window.location.href='{{ url_for('salas_page') }}'; return false;">
+                            <i class="fas fa-door-open"></i>
+                            Salas
+                        </a>
+                    </li>
+                </ul>
+            </div>
 
-            <!-- Content Area -->
-            <div class="content-area">
-                <!-- Page Header -->
-                <div class="page-header">
-                    <div class="page-title">
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">Administração</h3>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="{{ url_for('relatorios_dashboard') }}" class="nav-link" onclick="window.location.href='{{ url_for('relatorios_dashboard') }}'; return false;">
+                            <i class="fas fa-chart-bar"></i>
+                            Relatórios ADM
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('relatorios_pets') }}" class="nav-link" onclick="window.location.href='{{ url_for('relatorios_pets') }}'; return false;">
+                            <i class="fas fa-file-medical"></i>
+                            Histórico Pets
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('usuarios_page') }}" class="nav-link" onclick="window.location.href='{{ url_for('usuarios_page') }}'; return false;">
+                            <i class="fas fa-user-cog"></i>
+                            Usuários
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Área de Conteúdo -->
+        <div class="page-content">
+            <!-- Page Header -->
+            <section class="page-header">
+                <div class="page-title">
+                    <div class="page-title-icon">
                         <i class="fas fa-door-open"></i>
-                        <div>
-                            <h1>Gerenciamento de Salas</h1>
-                            <p class="page-subtitle">Controle de salas, disponibilidade e bloqueios</p>
-                        </div>
                     </div>
-                    <button class="btn btn-primary" onclick="openModal('addSalaModal')">
-                        <i class="fas fa-plus"></i>
-                        Nova Sala
-                    </button>
+                    <div>
+                        <h2>Gerenciamento de Salas</h2>
+                        <p class="page-subtitle">Controle de salas, disponibilidade e bloqueios</p>
+                    </div>
                 </div>
+                <button class="btn btn-primary" onclick="gerenciarSalas()">
+                    <i class="fas fa-plus"></i>
+                    Nova Sala
+                </button>
+            </section>
 
-                <!-- Stats Cards -->
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <div class="stat-info">
-                                <div class="stat-value">5</div>
-                                <div class="stat-label">Total de Salas</div>
-                            </div>
-                            <div class="stat-icon green">
-                                <i class="fas fa-door-open"></i>
-                            </div>
+            <!-- Stats Cards -->
+            <section class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-info">
+                            <div class="stat-value">5</div>
+                            <div class="stat-label">Total de Salas</div>
                         </div>
-                    </div>
-
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <div class="stat-info">
-                                <div class="stat-value">3</div>
-                                <div class="stat-label">Disponíveis</div>
-                            </div>
-                            <div class="stat-icon blue">
-                                <i class="fas fa-check-circle"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <div class="stat-info">
-                                <div class="stat-value">2</div>
-                                <div class="stat-label">Em Uso</div>
-                            </div>
-                            <div class="stat-icon orange">
-                                <i class="fas fa-clock"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <div class="stat-info">
-                                <div class="stat-value">0</div>
-                                <div class="stat-label">Bloqueadas</div>
-                            </div>
-                            <div class="stat-icon red">
-                                <i class="fas fa-ban"></i>
-                            </div>
+                        <div class="stat-icon green">
+                            <i class="fas fa-door-open"></i>
                         </div>
                     </div>
                 </div>
 
-                <!-- Salas Container -->
-                <div class="salas-container">
-                    <div class="salas-header">
-                        <h2>Lista de Salas</h2>
-                        <div class="search-container">
-                            <input type="text" id="searchSalas" class="search-input" placeholder="Buscar salas..." onkeyup="filtrarSalas()">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-info">
+                            <div class="stat-value">3</div>
+                            <div class="stat-label">Disponíveis</div>
+                        </div>
+                        <div class="stat-icon blue">
+                            <i class="fas fa-check-circle"></i>
                         </div>
                     </div>
+                </div>
 
-                    <div class="salas-grid" id="salasGrid">
-                        <!-- Salas serão carregadas aqui -->
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-info">
+                            <div class="stat-value">2</div>
+                            <div class="stat-label">Em Uso</div>
+                        </div>
+                        <div class="stat-icon orange">
+                            <i class="fas fa-clock"></i>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </main>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-info">
+                            <div class="stat-value">0</div>
+                            <div class="stat-label">Bloqueadas</div>
+                        </div>
+                        <div class="stat-icon red">
+                            <i class="fas fa-ban"></i>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Salas Container -->
+            <section class="salas-container">
+                <div class="salas-header">
+                    <h2>Lista de Salas</h2>
+                    <div class="search-container">
+                        <input type="text" id="searchSalas" class="search-input" placeholder="Buscar salas..." onkeyup="filtrarSalas()">
+                    </div>
+                </div>
+
+                <div class="salas-grid" id="salasGrid">
+                    <!-- Salas serão carregadas aqui -->
+                </div>
+            </section>
+        </div>
     </div>
 
-    <!-- Modal Nova Sala -->
+    <!-- Modal Gerenciar Salas -->
     <div class="modal" id="addSalaModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title">Nova Sala</h2>
-                <button class="close-modal" onclick="closeModal('addSalaModal')">
-                    <i class="fas fa-times"></i>
+                <h2 class="modal-title">Gerenciar Salas</h2>
+                <button class="close-btn" onclick="fecharModalSalas()">&times;</button>
+            </div>
+            <div class="salas-list" id="salasLista"></div>
+            <div style="margin: 1.5rem 0;">
+                <button class="btn btn-primary" onclick="adicionarNovaSala()" style="width: 100%;">
+                    <i class="fas fa-plus"></i>
+                    Adicionar Nova Sala
                 </button>
             </div>
-            <form onsubmit="adicionarSala(event)">
-                <div class="form-group">
-                    <label class="form-label">Nome da Sala</label>
-                    <input type="text" id="nomeSala" class="form-input" required placeholder="Ex: Sala de Cirurgia 1">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Tipo de Sala</label>
-                    <select id="tipoSala" class="form-select" required>
-                        <option value="">Selecione o tipo</option>
-                        <option value="consulta">Consulta</option>
-                        <option value="cirurgia">Cirurgia</option>
-                        <option value="emergencia">Emergência</option>
-                        <option value="internacao">Internação</option>
-                        <option value="exame">Exames</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Capacidade</label>
-                    <input type="number" id="capacidadeSala" class="form-input" required min="1" max="20" value="1" placeholder="Número de pacientes">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Descrição</label>
-                    <input type="text" id="descricaoSala" class="form-input" placeholder="Equipamentos e características especiais">
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('addSalaModal')">
-                        Cancelar
-                    </button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i>
-                        Salvar Sala
-                    </button>
-                </div>
-            </form>
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="salvarSalas()">
+                    <i class="fas fa-save"></i>
+                    Salvar
+                </button>
+                <button class="btn btn-secondary" onclick="fecharModalSalas()">Cancelar</button>
+            </div>
         </div>
     </div>
 
@@ -1030,114 +1144,68 @@
     </div>
 
     <script>
-        // Dados das salas (simulação)
-        let salas = [
-            {
-                id: 1,
-                nome: "Sala de Consulta 1",
-                tipo: "consulta",
-                capacidade: 1,
-                status: "ocupada",
-                descricao: "Mesa de exame, balança digital, armário com medicamentos",
-                ocupacaoAtual: {
-                    cliente: "Maria Santos",
-                    pet: "Rex",
-                    veterinario: "Dr. Silva",
-                    inicio: "09:00",
-                    fim: "09:30"
-                },
-                dataCriacao: "2024-01-15"
-            },
-            {
-                id: 2,
-                nome: "Sala de Cirurgia",
-                tipo: "cirurgia",
-                capacidade: 2,
-                status: "disponivel",
-                descricao: "Mesa cirúrgica, equipamentos de anestesia, monitores",
-                ocupacaoAtual: null,
-                dataCriacao: "2024-01-15"
-            },
-            {
-                id: 3,
-                nome: "Sala de Emergência",
-                tipo: "emergencia",
-                capacidade: 1,
-                status: "disponivel",
-                descricao: "Equipamentos de emergência, desfibrilador, oxigênio",
-                ocupacaoAtual: null,
-                dataCriacao: "2024-01-20"
-            },
-            {
-                id: 4,
-                nome: "Sala de Consulta 2",
-                tipo: "consulta",
-                capacidade: 1,
-                status: "ocupada",
-                descricao: "Mesa de exame, balança, equipamentos básicos",
-                ocupacaoAtual: {
-                    cliente: "João Pedro",
-                    pet: "Mimi",
-                    veterinario: "Dr. Costa",
-                    inicio: "10:30",
-                    fim: "11:00"
-                },
-                dataCriacao: "2024-02-01"
-            },
-            {
-                id: 5,
-                nome: "Sala de Exames",
-                tipo: "exame",
-                capacidade: 1,
-                status: "disponivel",
-                descricao: "Ultrassom, raio-X, equipamentos de diagnóstico",
-                ocupacaoAtual: null,
-                dataCriacao: "2024-02-10"
-            }
-        ];
-
+        // Variáveis globais
+        let salas = [];
         let salaParaBloqueio = null;
+        let salasTemporarias = [];
 
-        // Função para carregar as salas
-        function carregarSalas() {
-            const salasGrid = document.getElementById('salasGrid');
-            salasGrid.innerHTML = '';
+        // Função para carregar as salas do backend
+        async function carregarSalas() {
+            try {
+                const response = await fetch('/api/salas');
+                if (!response.ok) throw new Error('Erro ao carregar salas');
+                
+                salas = await response.json();
+                
+                const salasGrid = document.getElementById('salasGrid');
+                salasGrid.innerHTML = '';
 
-            salas.forEach(sala => {
-                const salaCard = criarSalaCard(sala);
-                salasGrid.appendChild(salaCard);
-            });
+                salas.forEach(sala => {
+                    const salaCard = criarSalaCard(sala);
+                    salasGrid.appendChild(salaCard);
+                });
 
-            atualizarEstatisticas();
+                atualizarEstatisticas();
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao carregar salas do sistema.');
+            }
         }
 
         // Função para criar card da sala
         function criarSalaCard(sala) {
             const card = document.createElement('div');
             card.className = `sala-card ${sala.status}`;
+
+            // Usar a cor personalizada da sala
+            const corSala = sala.cor || '#52B788';
+
             card.innerHTML = `
-                <div class="sala-header">
+                <div class="sala-header" style="border-left: 5px solid ${corSala}; padding-left: 1rem;">
                     <div class="sala-info">
-                        <h3>${sala.nome}</h3>
-                        <p class="sala-tipo">${formatarTipo(sala.tipo)}</p>
+                        <h3>
+                            <span style="display: inline-block; width: 12px; height: 12px; background: ${corSala}; border-radius: 50%; margin-right: 0.5rem;"></span>
+                            ${sala.nome}
+                        </h3>
+                        <p class="sala-tipo">${formatarTipo(sala.tipo)} ${sala.veterinario && sala.veterinario !== 'Dr(a).' ? '• ' + sala.veterinario : ''}</p>
                     </div>
                     <span class="sala-status status-${sala.status}">
                         ${formatarStatus(sala.status)}
                     </span>
                 </div>
-                
+
                 <div class="sala-details">
                     <div class="detail-item">
                         <i class="fas fa-users"></i>
-                        <span>Capacidade: ${sala.capacidade} paciente(s)</span>
+                        <span>Capacidade: ${sala.capacidade || 1} paciente(s)</span>
                     </div>
                     <div class="detail-item">
                         <i class="fas fa-clipboard-list"></i>
-                        <span>${sala.descricao}</span>
+                        <span>${sala.descricao || sala.observacoes || 'Sem descrição'}</span>
                     </div>
                     <div class="detail-item">
                         <i class="fas fa-calendar-plus"></i>
-                        <span>Criada em: ${formatarData(sala.dataCriacao)}</span>
+                        <span>Criada em: ${sala.created_at ? formatarData(sala.created_at) : 'N/A'}</span>
                     </div>
                 </div>
 
@@ -1193,19 +1261,21 @@
             const statusMap = {
                 'disponivel': 'Disponível',
                 'ocupada': 'Em Uso',
-                'bloqueada': 'Bloqueada'
+                'bloqueada': 'Bloqueada',
+                'ativo': 'Disponível' // Mapping DB default
             };
             return statusMap[status] || status;
         }
 
         function formatarData(data) {
+            if (!data) return '-';
             return new Date(data).toLocaleDateString('pt-BR');
         }
 
         // Função para atualizar estatísticas
         function atualizarEstatisticas() {
             const total = salas.length;
-            const disponiveis = salas.filter(s => s.status === 'disponivel').length;
+            const disponiveis = salas.filter(s => s.status === 'disponivel' || s.status === 'ativo').length;
             const ocupadas = salas.filter(s => s.status === 'ocupada').length;
             const bloqueadas = salas.filter(s => s.status === 'bloqueada').length;
 
@@ -1242,42 +1312,8 @@
             
             // Limpar formulários
             if (modalId === 'addSalaModal') {
-                document.querySelector('#addSalaModal form').reset();
+                // document.querySelector('#addSalaModal form').reset(); // Form is dynamic here
             }
-        }
-
-        // Função para adicionar nova sala
-        function adicionarSala(event) {
-            event.preventDefault();
-            
-            const nome = document.getElementById('nomeSala').value;
-            const tipo = document.getElementById('tipoSala').value;
-            const capacidade = parseInt(document.getElementById('capacidadeSala').value);
-            const descricao = document.getElementById('descricaoSala').value;
-
-            // Verificar se nome já existe
-            if (salas.some(s => s.nome.toLowerCase() === nome.toLowerCase())) {
-                alert('Já existe uma sala com este nome!');
-                return;
-            }
-
-            const novaSala = {
-                id: Math.max(...salas.map(s => s.id)) + 1,
-                nome: nome,
-                tipo: tipo,
-                capacidade: capacidade,
-                status: 'disponivel',
-                descricao: descricao,
-                ocupacaoAtual: null,
-                dataCriacao: new Date().toISOString().split('T')[0]
-            };
-
-            salas.push(novaSala);
-            carregarSalas();
-            closeModal('addSalaModal');
-            
-            // Feedback visual
-            alert('Sala criada com sucesso!');
         }
 
         // Função para abrir modal de edição
@@ -1288,15 +1324,15 @@
             document.getElementById('editSalaId').value = sala.id;
             document.getElementById('editNomeSala').value = sala.nome;
             document.getElementById('editTipoSala').value = sala.tipo;
-            document.getElementById('editCapacidadeSala').value = sala.capacidade;
-            document.getElementById('editDescricaoSala').value = sala.descricao;
-            document.getElementById('editStatusSala').value = sala.status;
+            document.getElementById('editCapacidadeSala').value = sala.capacidade || 1;
+            document.getElementById('editDescricaoSala').value = sala.descricao || sala.observacoes || '';
+            document.getElementById('editStatusSala').value = sala.status === 'ativo' ? 'disponivel' : sala.status;
 
             openModal('editSalaModal');
         }
 
         // Função para editar sala
-        function editarSala(event) {
+        async function editarSala(event) {
             event.preventDefault();
             
             const id = parseInt(document.getElementById('editSalaId').value);
@@ -1306,30 +1342,27 @@
             const descricao = document.getElementById('editDescricaoSala').value;
             const status = document.getElementById('editStatusSala').value;
 
-            const sala = salas.find(s => s.id === id);
-            if (!sala) return;
+            try {
+                const response = await fetch(`/api/salas/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        nome, tipo, capacidade, descricao, status
+                    })
+                });
 
-            // Verificar se nome já existe em outra sala
-            if (salas.some(s => s.id !== id && s.nome.toLowerCase() === nome.toLowerCase())) {
-                alert('Já existe uma sala com este nome!');
-                return;
+                if (response.ok) {
+                    alert('Sala atualizada com sucesso!');
+                    closeModal('editSalaModal');
+                    carregarSalas();
+                } else {
+                    const err = await response.json();
+                    alert('Erro ao atualizar sala: ' + err.message);
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Erro ao conectar com o servidor.');
             }
-
-            sala.nome = nome;
-            sala.tipo = tipo;
-            sala.capacidade = capacidade;
-            sala.descricao = descricao;
-            sala.status = status;
-
-            // Se status mudou para disponível, remover ocupação
-            if (status === 'disponivel') {
-                sala.ocupacaoAtual = null;
-            }
-
-            carregarSalas();
-            closeModal('editSalaModal');
-            
-            alert('Sala atualizada com sucesso!');
         }
 
         // Função para abrir modal de bloqueio
@@ -1351,7 +1384,7 @@
         }
 
         // Função para confirmar bloqueio
-        function confirmarBloqueio() {
+        async function confirmarBloqueio() {
             if (!salaParaBloqueio) return;
             
             const motivo = document.getElementById('motivoBloqueio').value;
@@ -1363,39 +1396,71 @@
             const sala = salas.find(s => s.id === salaParaBloqueio);
             if (!sala) return;
 
-            sala.status = 'bloqueada';
-            sala.ocupacaoAtual = null; // Remove ocupação se houver
-            sala.motivoBloqueio = motivo;
-            sala.observacoesBloqueio = document.getElementById('observacoesBloqueio').value;
-            sala.previsaoLiberacao = document.getElementById('previsaoLiberacao').value;
-            sala.dataBloqueio = new Date().toISOString();
+            const observacoes = document.getElementById('observacoesBloqueio').value;
+            // Concatenar motivo e observações para salvar no campo observacoes do banco
+            const novaDescricao = `[BLOQUEADA: ${motivo}] ${observacoes}`;
 
-            carregarSalas();
-            closeModal('bloqueioModal');
-            salaParaBloqueio = null;
-            
-            alert('Sala bloqueada com sucesso!');
+            try {
+                const response = await fetch(`/api/salas/${salaParaBloqueio}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        nome: sala.nome,
+                        tipo: sala.tipo,
+                        capacidade: sala.capacidade,
+                        status: 'bloqueada',
+                        descricao: novaDescricao
+                    })
+                });
+
+                if (response.ok) {
+                    alert('Sala bloqueada com sucesso!');
+                    closeModal('bloqueioModal');
+                    salaParaBloqueio = null;
+                    carregarSalas();
+                } else {
+                    alert('Erro ao bloquear sala.');
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Erro ao conectar com o servidor.');
+            }
         }
 
         // Função para desbloquear sala
-        function desbloquearSala(id) {
+        async function desbloquearSala(id) {
             if (confirm('Tem certeza que deseja desbloquear esta sala?')) {
                 const sala = salas.find(s => s.id === id);
-                if (sala) {
-                    sala.status = 'disponivel';
-                    delete sala.motivoBloqueio;
-                    delete sala.observacoesBloqueio;
-                    delete sala.previsaoLiberacao;
-                    delete sala.dataBloqueio;
-                    
-                    carregarSalas();
-                    alert('Sala desbloqueada com sucesso!');
+                if (!sala) return;
+
+                try {
+                    const response = await fetch(`/api/salas/${id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            nome: sala.nome,
+                            tipo: sala.tipo,
+                            capacidade: sala.capacidade,
+                            status: 'disponivel',
+                            descricao: sala.descricao ? sala.descricao.replace(/\[BLOQUEADA:.*?\]\s*/, '') : ''
+                        })
+                    });
+
+                    if (response.ok) {
+                        alert('Sala desbloqueada com sucesso!');
+                        carregarSalas();
+                    } else {
+                        alert('Erro ao desbloquear sala.');
+                    }
+                } catch (error) {
+                    console.error(error);
+                    alert('Erro ao conectar com o servidor.');
                 }
             }
         }
 
         // Função para excluir sala
-        function excluirSala(id) {
+        async function excluirSala(id) {
             const sala = salas.find(s => s.id === id);
             if (!sala) return;
 
@@ -1405,46 +1470,180 @@
             }
 
             if (confirm(`Tem certeza que deseja excluir a sala "${sala.nome}"?\n\nEsta ação não pode ser desfeita.`)) {
-                salas = salas.filter(s => s.id !== id);
-                carregarSalas();
-                alert('Sala excluída com sucesso!');
+                try {
+                    const response = await fetch(`/api/salas/${id}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        alert('Sala excluída com sucesso!');
+                        carregarSalas();
+                    } else {
+                        alert('Erro ao excluir sala.');
+                    }
+                } catch (error) {
+                    console.error(error);
+                    alert('Erro ao conectar com o servidor.');
+                }
             }
+        }
+
+        // Funções para gerenciar salas (estilo agenda)
+        function gerenciarSalas() {
+            // Carrega as salas atuais para edição em lote
+            salasTemporarias = JSON.parse(JSON.stringify(salas));
+            renderizarListaSalas();
+            document.getElementById('addSalaModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function renderizarListaSalas() {
+            const salasLista = document.getElementById('salasLista');
+            salasLista.innerHTML = '';
+
+            salasTemporarias.forEach((sala, index) => {
+                if (!sala.cor) sala.cor = '#52B788';
+                if (!sala.veterinario) sala.veterinario = 'Dr(a).';
+
+                const salaItem = document.createElement('div');
+                salaItem.className = 'sala-item';
+                salaItem.innerHTML = `
+                    <div class="sala-color-picker">
+                        <label for="colorPicker${index}" class="sala-color-preview" style="background-color: ${sala.cor}"></label>
+                        <input type="color" class="sala-color-input" id="colorPicker${index}" value="${sala.cor}">
+                    </div>
+                    <div class="sala-inputs">
+                        <div class="sala-inputs-row">
+                            <input type="text" placeholder="Nome da Sala" value="${sala.nome}" id="salaNome${index}">
+                            <input type="text" placeholder="Tipo (ex: Consulta)" value="${sala.tipo}" id="salaTipo${index}" required>
+                        </div>
+                        <div class="sala-inputs-row">
+                            <input type="text" placeholder="Dr(a)." value="${sala.veterinario === 'Dr(a).' ? '' : sala.veterinario}" id="salaVet${index}" class="sala-vet-input">
+                        </div>
+                    </div>
+                    ${salasTemporarias.length > 0 ? `
+                        <button class="btn-remover-sala" onclick="removerSala(${index})" title="Remover sala">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    ` : ''}
+                `;
+                salasLista.appendChild(salaItem);
+
+                // Event Listeners (simplificado para brevidade, idealmente delegar eventos)
+                const colorPicker = document.getElementById(`colorPicker${index}`);
+                const colorPreview = colorPicker.previousElementSibling;
+                colorPicker.addEventListener('input', (e) => {
+                    salasTemporarias[index].cor = e.target.value;
+                    colorPreview.style.backgroundColor = e.target.value;
+                });
+
+                document.getElementById(`salaNome${index}`).addEventListener('input', (e) => salasTemporarias[index].nome = e.target.value);
+                document.getElementById(`salaTipo${index}`).addEventListener('input', (e) => salasTemporarias[index].tipo = e.target.value);
+                document.getElementById(`salaVet${index}`).addEventListener('input', (e) => salasTemporarias[index].veterinario = e.target.value);
+            });
+        }
+
+        function adicionarNovaSala() {
+            const coresDisponiveis = ['#52B788', '#2E86AB', '#F77F00', '#9D4EDD', '#E63946', '#06FFA5', '#FFB703', '#8338EC', '#FF006E', '#8AC926', '#1982C4', '#6A4C93'];
+            const coresUsadas = salasTemporarias.map(s => s.cor ? s.cor.toUpperCase() : '');
+            let corSelecionada = coresDisponiveis.find(cor => !coresUsadas.includes(cor.toUpperCase()));
+            if (!corSelecionada) corSelecionada = coresDisponiveis[Math.floor(Math.random() * coresDisponiveis.length)];
+
+            // ID temporário negativo para identificar novas salas
+            const novaSala = {
+                id: -1 * (Date.now()), 
+                nome: `Sala ${salasTemporarias.length + 1}`,
+                tipo: '',
+                cor: corSelecionada,
+                veterinario: 'Dr(a).',
+                capacidade: 1,
+                status: 'disponivel',
+                descricao: '',
+                ocupacaoAtual: null
+            };
+
+            salasTemporarias.push(novaSala);
+            renderizarListaSalas();
+        }
+
+        function removerSala(index) {
+            const salaRemovida = salasTemporarias[index];
+            if (salaRemovida.id > 0) {
+                 // Sala existente, marcar para exclusão ou avisar que será excluída ao salvar
+                 if (!confirm(`Deseja realmente remover a sala "${salaRemovida.nome}"? Ela será excluída do sistema ao salvar.`)) return;
+            }
+            salasTemporarias.splice(index, 1);
+            renderizarListaSalas();
+        }
+
+        async function salvarSalas() {
+            // Esta função agora precisa sincronizar a lista temporária com o backend
+            // 1. Identificar salas novas (id < 0) -> POST
+            // 2. Identificar salas editadas (id > 0) -> PUT
+            // 3. Identificar salas removidas -> DELETE (comparando com a lista original 'salas')
+            
+            // Simplificação: Vamos apenas criar as novas e atualizar as existentes que estão na lista.
+            // A remoção já foi feita visualmente, mas precisamos processar as exclusões reais.
+            
+            const idsOriginais = salas.map(s => s.id);
+            const idsFinais = salasTemporarias.map(s => s.id).filter(id => id > 0);
+            const idsParaRemover = idsOriginais.filter(id => !idsFinais.includes(id));
+
+            try {
+                // Remover
+                for (const id of idsParaRemover) {
+                    await fetch(`/api/salas/${id}`, { method: 'DELETE' });
+                }
+
+                // Criar ou Atualizar
+                for (const sala of salasTemporarias) {
+                    const payload = {
+                        nome: sala.nome,
+                        tipo: sala.tipo,
+                        capacidade: sala.capacidade || 1,
+                        status: sala.status || 'disponivel',
+                        descricao: sala.descricao || ''
+                    };
+
+                    if (sala.id < 0) {
+                        // Criar
+                        await fetch('/api/salas', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                    } else {
+                        // Atualizar
+                        await fetch(`/api/salas/${sala.id}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                    }
+                }
+
+                alert('Configuração de salas atualizada!');
+                fecharModalSalas();
+                carregarSalas();
+
+            } catch (error) {
+                console.error(error);
+                alert('Erro ao salvar alterações.');
+            }
+        }
+
+        function fecharModalSalas() {
+            document.getElementById('addSalaModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+            salasTemporarias = [];
         }
 
         // Função de logout
         function logout() {
-            if (confirm('Tem certeza que deseja sair do sistema?')) {
+            if (confirm('Deseja realmente sair do sistema?')) {
                 window.location.href = '/logout';
             }
         }
-
-        // Navegação do menu (comportamento igual ao dashboard)
-        (function () {
-            'use strict';
-            const navLinks = document.querySelectorAll('.nav-link');
-            if (!navLinks || !navLinks.length) return;
-
-            navLinks.forEach(function (link) {
-                link.addEventListener('click', function (e) {
-                    const href = (link.getAttribute('href') || '').trim();
-
-                    // Se for rota do servidor (começa com /) ou URL externa, permite navegação nativa
-                    if (href.startsWith('/') || href.startsWith('http')) {
-                        navLinks.forEach(function (l) { l.classList.remove('active'); });
-                        link.classList.add('active');
-                        return;
-                    }
-
-                    // Se for link relativo para arquivo estático, navega explicitamente
-                    if (href && href !== '#') {
-                        e.preventDefault();
-                        navLinks.forEach(function (l) { l.classList.remove('active'); });
-                        link.classList.add('active');
-                        window.location.href = href;
-                    }
-                }, { passive: true });
-            });
-        })();
 
         // Fechar modal ao clicar fora
         window.addEventListener('click', (e) => {
@@ -1458,39 +1657,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             carregarSalas();
         });
-
-        // Simulação de atualizações em tempo real
-        setInterval(() => {
-            // Simular mudanças de status aleatórias
-            if (Math.random() > 0.95) {
-                const salasDisponiveis = salas.filter(s => s.status === 'disponivel');
-                const salasOcupadas = salas.filter(s => s.status === 'ocupada');
-                
-                if (salasDisponiveis.length > 0 && Math.random() > 0.5) {
-                    // Ocupar uma sala disponível
-                    const sala = salasDisponiveis[Math.floor(Math.random() * salasDisponiveis.length)];
-                    sala.status = 'ocupada';
-                    sala.ocupacaoAtual = {
-                        cliente: 'Cliente Exemplo',
-                        pet: 'Pet Exemplo',
-                        veterinario: 'Dr. Exemplo',
-                        inicio: new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'}),
-                        fim: new Date(Date.now() + 30*60000).toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'})
-                    };
-                    carregarSalas();
-                }
-                
-                if (salasOcupadas.length > 0 && Math.random() > 0.7) {
-                    // Liberar uma sala ocupada
-                    const sala = salasOcupadas[Math.floor(Math.random() * salasOcupadas.length)];
-                    sala.status = 'disponivel';
-                    sala.ocupacaoAtual = null;
-                    carregarSalas();
-                }
-            }
-        }, 10000); // Verificar a cada 10 segundos
     </script>
-    <!-- Navegação e controle de sessão -->
-    <script src="{{ url_for('static', filename='assets/js/vta-nav.js') }}" defer></script>
 </body>
 </html>
