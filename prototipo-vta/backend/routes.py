@@ -2,7 +2,7 @@ from flask import render_template, request, redirect, url_for, flash, jsonify
 from datetime import datetime
 from flask import request, jsonify, session, render_template, redirect, url_for, send_file
 import sqlite3
-from werkzeug.security import check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 import os
 from datetime import datetime, date
 import io
@@ -647,6 +647,165 @@ def usuarios_page():
     if 'user_id' not in session:
         return redirect(url_for('login_page'))
     return render_template('7. usuarios_vta.html')
+
+# --- API DE USUÁRIOS ---
+
+@app.route('/api/usuarios', methods=['GET'])
+def get_usuarios():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    conn = get_db_connection()
+    
+    # Filtros
+    query = request.args.get('q', '').lower()
+    role = request.args.get('role')
+    status = request.args.get('status')
+    
+    sql = "SELECT id, nome, email, cpf, telefone, perfil, status, ultimo_acesso FROM usuarios WHERE 1=1"
+    params = []
+    
+    if query:
+        sql += " AND (lower(nome) LIKE ? OR lower(email) LIKE ?)"
+        params.extend([f"%{query}%", f"%{query}%"])
+        
+    if role:
+        sql += " AND perfil = ?"
+        params.append(role)
+        
+    if status:
+        sql += " AND status = ?"
+        params.append(status)
+        
+    sql += " ORDER BY nome"
+    
+    users = conn.execute(sql, params).fetchall()
+    conn.close()
+    
+    result = []
+    for user in users:
+        result.append({
+            'id': user['id'],
+            'name': user['nome'] or 'Sem Nome',
+            'email': user['email'],
+            'cpf': user['cpf'],
+            'phone': user['telefone'],
+            'role': user['perfil'],
+            'status': user['status'],
+            'lastAccess': user['ultimo_acesso'] or 'Nunca'
+        })
+        
+    return jsonify(result)
+
+@app.route('/api/usuarios', methods=['POST'])
+def create_usuario():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    data = request.json
+    
+    # Validações básicas
+    if not data.get('email') or not data.get('password'):
+        return jsonify({'error': 'Email e senha são obrigatórios'}), 400
+        
+    conn = get_db_connection()
+    try:
+        # Verificar se email já existe
+        existing = conn.execute("SELECT id FROM usuarios WHERE email = ?", (data.get('email'),)).fetchone()
+        if existing:
+            return jsonify({'error': 'Email já cadastrado'}), 400
+            
+        senha_hash = generate_password_hash(data.get('password'))
+        
+        cur = conn.cursor()
+        cur.execute("""
+            INSERT INTO usuarios (nome, email, senha_hash, cpf, telefone, perfil, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (
+            data.get('name'),
+            data.get('email'),
+            senha_hash,
+            data.get('cpf'),
+            data.get('phone'),
+            data.get('role', 'usuario'),
+            data.get('status', 'ativo')
+        ))
+        conn.commit()
+        new_id = cur.lastrowid
+        return jsonify({'success': True, 'id': new_id})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
+
+@app.route('/api/usuarios/<int:user_id>', methods=['PUT'])
+def update_usuario(user_id):
+    if 'user_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    data = request.json
+    conn = get_db_connection()
+    try:
+        cur = conn.cursor()
+        
+        # Se senha foi fornecida, atualiza também a senha
+        if data.get('password'):
+            senha_hash = generate_password_hash(data.get('password'))
+            cur.execute("""
+                UPDATE usuarios 
+                SET nome=?, email=?, senha_hash=?, cpf=?, telefone=?, perfil=?, status=?
+                WHERE id=?
+            """, (
+                data.get('name'),
+                data.get('email'),
+                senha_hash,
+                data.get('cpf'),
+                data.get('phone'),
+                data.get('role'),
+                data.get('status'),
+                user_id
+            ))
+        else:
+            cur.execute("""
+                UPDATE usuarios 
+                SET nome=?, email=?, cpf=?, telefone=?, perfil=?, status=?
+                WHERE id=?
+            """, (
+                data.get('name'),
+                data.get('email'),
+                data.get('cpf'),
+                data.get('phone'),
+                data.get('role'),
+                data.get('status'),
+                user_id
+            ))
+            
+        conn.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
+
+@app.route('/api/usuarios/<int:user_id>', methods=['DELETE'])
+def delete_usuario(user_id):
+    if 'user_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+        
+    # Não permitir excluir o próprio usuário logado
+    if user_id == session.get('user_id'):
+        return jsonify({'error': 'Não é possível excluir o próprio usuário'}), 400
+    
+    conn = get_db_connection()
+    try:
+        conn.execute('DELETE FROM usuarios WHERE id = ?', (user_id,))
+        conn.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
+
 
 # Rota para Gerar Relatório PDF de Agendamentos
 @app.route('/relatorios/agendamentos-pdf')
