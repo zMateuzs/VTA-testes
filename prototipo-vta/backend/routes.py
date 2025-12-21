@@ -179,7 +179,8 @@ def dashboard():
                 'servico': ag['observacoes'] if ag['observacoes'] else 'Consulta',
                 'sala': sala_display,
                 'cliente': ag['cliente'],
-                'veterinario': 'Dr. VTA' # Placeholder
+                'veterinario': 'Dr. VTA', # Placeholder
+                'status': ag['status']
             }
             agenda_items.append(item)
             

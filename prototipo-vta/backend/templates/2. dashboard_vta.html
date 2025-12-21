@@ -203,15 +203,27 @@
                     <div class="schedule-card">
                         <h2 class="section-title">Agenda de Hoje</h2>
                         {% if agenda_hoje %}
+                            {% set ns = namespace(found=false) %}
                             {% for item in agenda_hoje %}
-                            <div class="schedule-item">
-                                <div class="schedule-time">{{ item.horario }}</div>
-                                <div class="schedule-details">
-                                    <h4>{{ item.pet }} - {{ item.servico }}</h4>
-                                    <p>{{ item.veterinario }} • {{ item.sala }} • {{ item.cliente }}</p>
-                                </div>
-                            </div>
+                                {% if item.status and item.status.lower() == 'confirmado' %}
+                                    {% set ns.found = true %}
+                                    <div class="schedule-item">
+                                        <div class="schedule-time">{{ item.horario }}</div>
+                                        <div class="schedule-details">
+                                            <h4>{{ item.pet }} - {{ item.servico }}</h4>
+                                            <p>{{ item.veterinario }} • {{ item.sala }} • {{ item.cliente }}</p>
+                                        </div>
+                                    </div>
+                                {% endif %}
                             {% endfor %}
+                            
+                            {% if not ns.found %}
+                                <div class="schedule-item">
+                                    <div class="schedule-details">
+                                        <p>Nenhuma consulta confirmada para hoje.</p>
+                                    </div>
+                                </div>
+                            {% endif %}
                         {% else %}
                             <div class="schedule-item">
                                 <div class="schedule-details">
