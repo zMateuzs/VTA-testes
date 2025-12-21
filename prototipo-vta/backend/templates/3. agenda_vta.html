@@ -1699,7 +1699,8 @@
                     const agendamento = agendamentos.find(a =>
                         a.sala === `sala${i}` &&
                         a.horario === horario &&
-                        mesmaData(a.data, estadoAtual.dataAtual)
+                        mesmaData(a.data, estadoAtual.dataAtual) &&
+                        a.status !== 'cancelado'
                     );
 
                     if (agendamento) {
@@ -1788,7 +1789,8 @@
 
                     const agendamentosDaSala = agendamentos.filter(a =>
                         a.sala === sala.id &&
-                        mesmaData(a.data, dia)
+                        mesmaData(a.data, dia) &&
+                        a.status !== 'cancelado'
                     );
 
                     agendamentosDaSala.sort((a, b) => a.horario.localeCompare(b.horario));
@@ -1954,7 +1956,7 @@
                         dayCell.classList.add('today');
                     }
 
-                    const agendamentosNoDia = agendamentos.filter(a => mesmaData(a.data, dataAtual));
+                    const agendamentosNoDia = agendamentos.filter(a => mesmaData(a.data, dataAtual) && a.status !== 'cancelado');
 
                     // Contar agendamentos por sala
                     const contadoresPorSala = {
@@ -2103,7 +2105,8 @@
                 // Verifica se é a mesma sala, mesmo horário e mesma data
                 return a.sala === sala && 
                        a.horario === horario && 
-                       mesmaData(a.data, dataObj);
+                       mesmaData(a.data, dataObj) &&
+                       a.status !== 'cancelado';
             });
         }
 

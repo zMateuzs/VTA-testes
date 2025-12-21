@@ -942,24 +942,10 @@
 
                 <!-- Paginação -->
                 <div class="d-flex justify-content-between align-items-center mt-3">
-                    <small class="text-muted">Mostrando 1-3 de 15 agendamentos</small>
+                    <small class="text-muted" id="paginationInfo">Mostrando 0-0 de 0 agendamentos</small>
                     <nav>
-                        <ul class="pagination pagination-sm mb-0">
-                            <li class="page-item disabled">
-                                <a class="page-link" href="#">Anterior</a>
-                            </li>
-                            <li class="page-item active">
-                                <a class="page-link" href="#">1</a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link" href="#">2</a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link" href="#">3</a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link" href="#">Próximo</a>
-                            </li>
+                        <ul class="pagination pagination-sm mb-0" id="paginationControls">
+                            <!-- Paginação gerada via JS -->
                         </ul>
                     </nav>
                 </div>
@@ -983,20 +969,11 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label">Cliente *</label>
-                                <select class="form-select" id="cliente" required>
-                                    <option value="">Selecione o cliente...</option>
-                                    <option value="1">Maria Silva</option>
-                                    <option value="2">João Santos</option>
-                                    <option value="3">Carlos Oliveira</option>
-                                </select>
+                                <input type="text" class="form-control" id="cliente" placeholder="Nome do Cliente" required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Pet *</label>
-                                <select class="form-select" id="pet" required>
-                                    <option value="">Selecione o pet...</option>
-                                    <option value="demo1">Thor (Cão)</option>
-                                    <option value="demo2">Mel (Gato)</option>
-                                </select>
+                                <input type="text" class="form-control" id="pet" placeholder="Nome do Pet" required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Data *</label>
@@ -1004,7 +981,9 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Horário *</label>
-                                <input type="time" class="form-control" id="horario" required>
+                                <select class="form-select" id="horario" required>
+                                    <option value="">Selecione o horário...</option>
+                                </select>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Serviço *</label>
@@ -1030,10 +1009,10 @@
                                 <label class="form-label">Sala *</label>
                                 <select class="form-select" id="sala" required>
                                     <option value="">Selecione a sala...</option>
-                                    <option value="1">Consultório 1</option>
-                                    <option value="2">Consultório 2</option>
-                                    <option value="3">Cirurgia</option>
-                                    <option value="4">Raio-X</option>
+                                    <option value="sala1">Consultório 1</option>
+                                    <option value="sala2">Consultório 2</option>
+                                    <option value="sala3">Cirurgia</option>
+                                    <option value="sala4">Raio-X</option>
                                 </select>
                             </div>
                             <div class="col-md-6">
@@ -1220,61 +1199,46 @@
             }
         }
 
-        // Dados mockados para demonstração
-        let agendamentos = [
-            {
-                id: 1,
-                data: '2025-08-15',
-                horario: '09:00',
-                cliente: { nome: 'Maria Silva', telefone: '(51) 99999-9999', email: 'maria@email.com' },
-                pet: { nome: 'Rex', especie: 'Cão', raca: 'Golden Retriever', idade: '3 anos' },
-                servico: 'Consulta Geral',
-                veterinario: 'Dr. João Silva',
-                sala: 'Consultório 1',
-                status: 'confirmado',
-                observacoes: 'Pet apresentou sintomas de alergia na última semana.',
-                valor: 'R$ 80,00',
-                duracao: '30 minutos'
-            },
-            {
-                id: 2,
-                data: '2025-08-15',
-                horario: '10:30',
-                cliente: { nome: 'João Santos', telefone: '(51) 88888-8888', email: 'joao@email.com' },
-                pet: { nome: 'Mimi', especie: 'Gato', raca: 'Persa', idade: '2 anos' },
-                servico: 'Vacinação',
-                veterinario: 'Dra. Ana Costa',
-                sala: 'Consultório 2',
-                status: 'agendado',
-                observacoes: 'Primeira dose da vacina múltipla.',
-                valor: 'R$ 45,00',
-                duracao: '15 minutos'
-            },
-            {
-                id: 3,
-                data: '2025-08-14',
-                horario: '14:00',
-                cliente: { nome: 'Carlos Oliveira', telefone: '(51) 77777-7777', email: 'carlos@email.com' },
-                pet: { nome: 'Bolt', especie: 'Cão', raca: 'Labrador', idade: '5 anos' },
-                servico: 'Cirurgia',
-                veterinario: 'Dr. Pedro Lima',
-                sala: 'Cirurgia',
-                status: 'realizado',
-                observacoes: 'Cirurgia de remoção de tumor realizada com sucesso.',
-                valor: 'R$ 350,00',
-                duracao: '2 horas'
-            }
-        ];
-
+        // Dados reais carregados do backend
+        let agendamentos = [];
+        let agendamentosFiltrados = [];
         let agendamentoEditando = null;
+        
+        // Paginação
+        let paginaAtual = 1;
+        const itensPorPagina = 10;
 
         // Inicialização
         document.addEventListener('DOMContentLoaded', function() {
+            carregarHorarios();
             carregarAgendamentos();
             configurarFiltros();
-            configurarFormulario();
+            // configurarFormulario(); // Não precisamos mais configurar o change do cliente
             definirDataAtual();
         });
+
+        // Carregar opções de horário
+        function carregarHorarios() {
+            const select = document.getElementById('horario');
+            // Limpar opções exceto a primeira
+            while (select.options.length > 1) {
+                select.remove(1);
+            }
+            
+            for (let hora = 8; hora < 18; hora++) {
+                const hStr = hora.toString().padStart(2, '0');
+                
+                const opt1 = document.createElement('option');
+                opt1.value = `${hStr}:00`;
+                opt1.textContent = `${hStr}:00`;
+                select.appendChild(opt1);
+                
+                const opt2 = document.createElement('option');
+                opt2.value = `${hStr}:30`;
+                opt2.textContent = `${hStr}:30`;
+                select.appendChild(opt2);
+            }
+        }
 
         // Definir data atual no formulário
         function definirDataAtual() {
@@ -1292,49 +1256,53 @@
             document.getElementById('dataFim').addEventListener('change', filtrarAgendamentos);
         }
 
-        // Configurar formulário
-        function configurarFormulario() {
-            document.getElementById('cliente').addEventListener('change', function() {
-                carregarPetsDoCliente(this.value);
-            });
-        }
-
-        // Carregar pets do cliente selecionado
-        function carregarPetsDoCliente(clienteId) {
-            const petSelect = document.getElementById('pet');
-            petSelect.innerHTML = '<option value="">Selecione o pet...</option>';
-            
-            // Mock data - em produção, fazer requisição à API
-            const petsData = {
-                '1': [
-                    { id: 1, nome: 'Rex', especie: 'Cão' },
-                    { id: 2, nome: 'Buddy', especie: 'Cão' }
-                ],
-                '2': [
-                    { id: 3, nome: 'Mimi', especie: 'Gato' }
-                ],
-                '3': [
-                    { id: 4, nome: 'Bolt', especie: 'Cão' }
-                ]
-            };
-
-            if (petsData[clienteId]) {
-                petsData[clienteId].forEach(pet => {
-                    const option = document.createElement('option');
-                    option.value = pet.id;
-                    option.textContent = `${pet.nome} (${pet.especie})`;
-                    petSelect.appendChild(option);
-                });
+        // Carregar agendamentos do backend
+        async function carregarAgendamentos() {
+            try {
+                const response = await fetch('/api/agendamentos');
+                if (!response.ok) throw new Error('Erro ao carregar agendamentos');
+                
+                agendamentos = await response.json();
+                agendamentosFiltrados = [...agendamentos];
+                renderizarTabela(agendamentosFiltrados);
+            } catch (error) {
+                console.error('Erro:', error);
+                mostrarToast('Erro ao carregar agendamentos', 'error');
             }
         }
 
-        // Carregar agendamentos na tabela
-        function carregarAgendamentos(dados = agendamentos) {
+        // Renderizar tabela
+        function renderizarTabela(dados) {
             const tbody = document.getElementById('agendamentosTableBody');
             tbody.innerHTML = '';
 
-            dados.forEach(agendamento => {
+            // Lógica de Paginação
+            const totalItens = dados.length;
+            const totalPaginas = Math.ceil(totalItens / itensPorPagina);
+            
+            // Ajustar página atual se necessário
+            if (paginaAtual > totalPaginas) paginaAtual = totalPaginas || 1;
+            if (paginaAtual < 1) paginaAtual = 1;
+
+            const inicio = (paginaAtual - 1) * itensPorPagina;
+            const fim = Math.min(inicio + itensPorPagina, totalItens);
+            const dadosPaginados = dados.slice(inicio, fim);
+
+            atualizarPaginacao(totalItens, inicio, fim, totalPaginas);
+
+            if (dadosPaginados.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4">Nenhum agendamento encontrado.</td></tr>';
+                return;
+            }
+
+            dadosPaginados.forEach(agendamento => {
                 const tr = document.createElement('tr');
+                // Tratamento para campos opcionais ou nulos
+                const clienteNome = agendamento.cliente || 'Cliente não informado';
+                const petNome = agendamento.pet || 'Pet não informado';
+                const servico = agendamento.obs ? (agendamento.obs.includes('Serviço:') ? agendamento.obs.split('Serviço:')[1].split(',')[0].trim() : 'Consulta') : 'Consulta';
+                const veterinario = agendamento.obs ? (agendamento.obs.includes('Vet:') ? agendamento.obs.split('Vet:')[1].split('.')[0].trim() : '-') : '-';
+                
                 tr.innerHTML = `
                     <td>
                         <div>
@@ -1344,19 +1312,17 @@
                     </td>
                     <td>
                         <div>
-                            <strong>${agendamento.cliente.nome}</strong><br>
-                            <small class="text-muted">${agendamento.cliente.telefone}</small>
+                            <strong>${clienteNome}</strong>
                         </div>
                     </td>
                     <td>
                         <div>
-                            <strong>${agendamento.pet.nome}</strong><br>
-                            <small class="text-muted">${agendamento.pet.raca}</small>
+                            <strong>${petNome}</strong>
                         </div>
                     </td>
-                    <td>${agendamento.servico}</td>
-                    <td>${agendamento.veterinario}</td>
-                    <td>${agendamento.sala}</td>
+                    <td>${servico}</td>
+                    <td>${veterinario}</td>
+                    <td>${formatarSala(agendamento.sala)}</td>
                     <td><span class="badge status-${agendamento.status}">${formatarStatus(agendamento.status)}</span></td>
                     <td>
                         <div class="dropdown">
@@ -1383,10 +1349,6 @@
                                 <li><a class="dropdown-item text-danger" href="#" onclick="cancelarAgendamento(${agendamento.id})">
                                     <i class="fas fa-times me-2"></i>Cancelar
                                 </a></li>` : ''}
-                                ${agendamento.status === 'realizado' ? `
-                                <li><a class="dropdown-item" href="#" onclick="gerarRelatorio(${agendamento.id})">
-                                    <i class="fas fa-file-medical me-2"></i>Relatório
-                                </a></li>` : ''}
                             </ul>
                         </div>
                     </td>
@@ -1395,7 +1357,56 @@
             });
         }
 
-        // Filtrar agendamentos
+        function atualizarPaginacao(totalItens, inicio, fim, totalPaginas) {
+            const info = document.getElementById('paginationInfo');
+            const controls = document.getElementById('paginationControls');
+            
+            if (totalItens === 0) {
+                info.textContent = 'Mostrando 0 de 0 agendamentos';
+                controls.innerHTML = '';
+                return;
+            }
+
+            info.textContent = `Mostrando ${inicio + 1}-${fim} de ${totalItens} agendamentos`;
+            
+            let html = '';
+            
+            // Botão Anterior
+            html += `<li class="page-item ${paginaAtual === 1 ? 'disabled' : ''}">
+                        <a class="page-link" href="#" onclick="mudarPagina(${paginaAtual - 1}); return false;">Anterior</a>
+                    </li>`;
+            
+            // Páginas (limitar a 5 páginas visíveis se houver muitas)
+            let startPage = Math.max(1, paginaAtual - 2);
+            let endPage = Math.min(totalPaginas, startPage + 4);
+            
+            if (endPage - startPage < 4) {
+                startPage = Math.max(1, endPage - 4);
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                html += `<li class="page-item ${paginaAtual === i ? 'active' : ''}">
+                            <a class="page-link" href="#" onclick="mudarPagina(${i}); return false;">${i}</a>
+                        </li>`;
+            }
+            
+            // Botão Próximo
+            html += `<li class="page-item ${paginaAtual === totalPaginas ? 'disabled' : ''}">
+                        <a class="page-link" href="#" onclick="mudarPagina(${paginaAtual + 1}); return false;">Próximo</a>
+                    </li>`;
+            
+            controls.innerHTML = html;
+        }
+
+        function mudarPagina(novaPagina) {
+            const totalPaginas = Math.ceil(agendamentosFiltrados.length / itensPorPagina);
+            if (novaPagina < 1 || novaPagina > totalPaginas) return;
+            
+            paginaAtual = novaPagina;
+            renderizarTabela(agendamentosFiltrados);
+        }
+
+        // Filtrar agendamentos (localmente por enquanto, ideal seria no backend)
         function filtrarAgendamentos() {
             const busca = document.getElementById('searchInput').value.toLowerCase();
             const status = document.getElementById('statusFilter').value;
@@ -1403,18 +1414,18 @@
             const dataInicio = document.getElementById('dataInicio').value;
             const dataFim = document.getElementById('dataFim').value;
 
-            let agendamentosFiltrados = agendamentos.filter(agendamento => {
+            let filtrados = agendamentos.filter(agendamento => {
                 let passa = true;
 
                 // Filtro de busca
                 if (busca) {
-                    const textoBusca = `${agendamento.cliente.nome} ${agendamento.pet.nome} ${agendamento.servico}`.toLowerCase();
+                    const textoBusca = `${agendamento.cliente} ${agendamento.pet} ${agendamento.obs || ''}`.toLowerCase();
                     passa = passa && textoBusca.includes(busca);
                 }
 
                 // Filtro de status
                 if (status) {
-                    passa = passa && agendamento.status === status;
+                    passa = passa && (agendamento.status || '').toLowerCase() === status.toLowerCase();
                 }
 
                 // Filtro de sala
@@ -1433,7 +1444,9 @@
                 return passa;
             });
 
-            carregarAgendamentos(agendamentosFiltrados);
+            agendamentosFiltrados = filtrados;
+            paginaAtual = 1;
+            renderizarTabela(agendamentosFiltrados);
         }
 
         // Funções de filtros rápidos
@@ -1478,23 +1491,28 @@
             const agendamento = agendamentos.find(a => a.id === id);
             if (!agendamento) return;
 
+            // Extrair info de obs
+            const servico = agendamento.obs ? (agendamento.obs.includes('Serviço:') ? agendamento.obs.split('Serviço:')[1].split(',')[0].trim() : 'Consulta') : 'Consulta';
+            const veterinario = agendamento.obs ? (agendamento.obs.includes('Vet:') ? agendamento.obs.split('Vet:')[1].split('.')[0].trim() : '-') : '-';
+            const obsReal = agendamento.obs ? (agendamento.obs.includes('Obs:') ? agendamento.obs.split('Obs:')[1].trim() : agendamento.obs) : '';
+
             // Preencher modal de visualização
-            document.getElementById('viewCliente').textContent = agendamento.cliente.nome;
-            document.getElementById('viewTelefone').textContent = agendamento.cliente.telefone;
-            document.getElementById('viewEmail').textContent = agendamento.cliente.email;
-            document.getElementById('viewPet').textContent = agendamento.pet.nome;
-            document.getElementById('viewEspecie').textContent = agendamento.pet.especie;
-            document.getElementById('viewRaca').textContent = agendamento.pet.raca;
-            document.getElementById('viewIdade').textContent = agendamento.pet.idade;
+            document.getElementById('viewCliente').textContent = agendamento.cliente;
+            document.getElementById('viewTelefone').textContent = '-'; // Não temos telefone no backend
+            document.getElementById('viewEmail').textContent = '-'; // Não temos email no backend
+            document.getElementById('viewPet').textContent = agendamento.pet;
+            document.getElementById('viewEspecie').textContent = '-'; // Não temos especie
+            document.getElementById('viewRaca').textContent = '-'; // Não temos raça
+            document.getElementById('viewIdade').textContent = '-'; // Não temos idade
             document.getElementById('viewData').textContent = formatarData(agendamento.data);
             document.getElementById('viewHorario').textContent = agendamento.horario;
-            document.getElementById('viewDuracao').textContent = agendamento.duracao;
+            document.getElementById('viewDuracao').textContent = '1h'; // Padrão
             document.getElementById('viewStatus').innerHTML = `<span class="badge status-${agendamento.status}">${formatarStatus(agendamento.status)}</span>`;
-            document.getElementById('viewServico').textContent = agendamento.servico;
-            document.getElementById('viewVeterinario').textContent = agendamento.veterinario;
+            document.getElementById('viewServico').textContent = servico;
+            document.getElementById('viewVeterinario').textContent = veterinario;
             document.getElementById('viewSala').textContent = agendamento.sala;
-            document.getElementById('viewValor').textContent = agendamento.valor;
-            document.getElementById('viewObservacoes').textContent = agendamento.observacoes || 'Nenhuma observação registrada.';
+            document.getElementById('viewValor').textContent = '-';
+            document.getElementById('viewObservacoes').textContent = obsReal || 'Nenhuma observação registrada.';
 
             new bootstrap.Modal(document.getElementById('visualizarModal')).show();
         }
@@ -1506,40 +1524,97 @@
 
             agendamentoEditando = id;
 
+            // Extrair info de obs
+            const servico = agendamento.obs ? (agendamento.obs.includes('Serviço:') ? agendamento.obs.split('Serviço:')[1].split(',')[0].trim().toLowerCase() : '') : '';
+            const veterinario = agendamento.obs ? (agendamento.obs.includes('Vet:') ? agendamento.obs.split('Vet:')[1].split('.')[0].trim() : '') : '';
+            
+            const obsReal = agendamento.obs ? (agendamento.obs.includes('Obs:') ? agendamento.obs.split('Obs:')[1].trim() : agendamento.obs) : '';
+
             // Preencher formulário
-            document.getElementById('cliente').value = '1'; // Mock
+            document.getElementById('cliente').value = agendamento.cliente;
+            document.getElementById('pet').value = agendamento.pet;
             document.getElementById('data').value = agendamento.data;
             document.getElementById('horario').value = agendamento.horario;
-            document.getElementById('servico').value = agendamento.servico.toLowerCase().replace(' ', '');
-            document.getElementById('veterinario').value = '1'; // Mock
-            document.getElementById('sala').value = '1'; // Mock
+            document.getElementById('servico').value = servico;
+            
+            // Tentar selecionar veterinario pelo texto
+            const vetSelect = document.getElementById('veterinario');
+            for (let i = 0; i < vetSelect.options.length; i++) {
+                if (vetSelect.options[i].text === veterinario) {
+                    vetSelect.selectedIndex = i;
+                    break;
+                }
+            }
+
+            document.getElementById('sala').value = agendamento.sala; 
             document.getElementById('status').value = agendamento.status;
-            document.getElementById('observacoes').value = agendamento.observacoes;
+            document.getElementById('observacoes').value = obsReal;
 
             document.getElementById('modalTitle').textContent = 'Editar Agendamento';
             new bootstrap.Modal(document.getElementById('agendamentoModal')).show();
         }
 
         // Confirmar agendamento
-        function confirmarAgendamento(id) {
+        async function confirmarAgendamento(id) {
             const agendamento = agendamentos.find(a => a.id === id);
-            if (agendamento) {
-                agendamento.status = 'confirmado';
-                carregarAgendamentos();
-                mostrarToast('Agendamento confirmado com sucesso!', 'success');
+            if (!agendamento) return;
+
+            try {
+                const response = await fetch(`/api/agendamentos/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        cliente: agendamento.cliente,
+                        pet: agendamento.pet,
+                        sala: agendamento.sala,
+                        data: agendamento.data,
+                        horario: agendamento.horario,
+                        status: 'confirmado',
+                        obs: agendamento.obs
+                    })
+                });
                 
-                // Simular envio de notificação
-                enviarNotificacao(agendamento, 'confirmacao');
+                if (response.ok) {
+                    carregarAgendamentos();
+                    mostrarToast('Agendamento confirmado com sucesso!', 'success');
+                } else {
+                    mostrarToast('Erro ao confirmar agendamento', 'error');
+                }
+            } catch (error) {
+                console.error(error);
+                mostrarToast('Erro ao confirmar agendamento', 'error');
             }
         }
 
         // Realizar agendamento
-        function realizarAgendamento(id) {
+        async function realizarAgendamento(id) {
             const agendamento = agendamentos.find(a => a.id === id);
-            if (agendamento) {
-                agendamento.status = 'realizado';
-                carregarAgendamentos();
-                mostrarToast('Agendamento marcado como realizado!', 'success');
+            if (!agendamento) return;
+
+            try {
+                const response = await fetch(`/api/agendamentos/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        cliente: agendamento.cliente,
+                        pet: agendamento.pet,
+                        sala: agendamento.sala,
+                        data: agendamento.data,
+                        horario: agendamento.horario,
+                        status: 'realizado',
+                        obs: agendamento.obs
+                    })
+                });
+                
+                if (response.ok) {
+                    carregarAgendamentos();
+                    mostrarToast('Agendamento marcado como realizado!', 'success');
+                } else {
+                    mostrarToast('Erro ao realizar agendamento', 'error');
+                }
+            } catch (error) {
+                console.error(error);
+                mostrarToast('Erro ao realizar agendamento', 'error');
             }
         }
 
@@ -1550,27 +1625,42 @@
         }
 
         // Confirmar cancelamento
-        function confirmarCancelamento() {
-            const agendamento = agendamentos.find(a => a.id === agendamentoEditando);
+        async function confirmarCancelamento() {
             const motivo = document.getElementById('motivoCancelamento').value;
+            const agendamento = agendamentos.find(a => a.id === agendamentoEditando);
             
-            if (agendamento) {
-                agendamento.status = 'cancelado';
-                agendamento.motivoCancelamento = motivo;
-                carregarAgendamentos();
+            if (!agendamento) return;
+
+            try {
+                const response = await fetch(`/api/agendamentos/${agendamentoEditando}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        cliente: agendamento.cliente,
+                        pet: agendamento.pet,
+                        sala: agendamento.sala,
+                        data: agendamento.data,
+                        horario: agendamento.horario,
+                        status: 'cancelado',
+                        obs: `${agendamento.obs || ''} | Cancelado. Motivo: ${motivo}` 
+                    })
+                });
                 
-                // Fechar modal
-                bootstrap.Modal.getInstance(document.getElementById('confirmDeleteModal')).hide();
-                
-                mostrarToast('Agendamento cancelado com sucesso!', 'warning');
-                
-                // Simular envio de notificação
-                enviarNotificacao(agendamento, 'cancelamento');
+                if (response.ok) {
+                    carregarAgendamentos();
+                    bootstrap.Modal.getInstance(document.getElementById('confirmDeleteModal')).hide();
+                    mostrarToast('Agendamento cancelado com sucesso!', 'warning');
+                } else {
+                    mostrarToast('Erro ao cancelar agendamento', 'error');
+                }
+            } catch (error) {
+                console.error(error);
+                mostrarToast('Erro ao cancelar agendamento', 'error');
             }
         }
 
         // Salvar agendamento (novo/edição)
-        function salvarAgendamento() {
+        async function salvarAgendamento() {
             const form = document.getElementById('agendamentoForm');
             
             if (!form.checkValidity()) {
@@ -1578,48 +1668,61 @@
                 return;
             }
 
+            const data = document.getElementById('data').value;
+            const horario = document.getElementById('horario').value;
+            const sala = document.getElementById('sala').value;
+            const salaTexto = document.getElementById('sala').selectedOptions[0]?.textContent;
+
+            // Verificar conflitos antes de salvar
+            if (!validarConflitosHorario(data, horario, sala, agendamentoEditando)) {
+                mostrarToast(`Não é possível agendar! A ${salaTexto} já está ocupada neste horário.`, 'error');
+                return;
+            }
+
+            const servicoTexto = document.getElementById('servico').options[document.getElementById('servico').selectedIndex].text;
+            const veterinarioTexto = document.getElementById('veterinario').options[document.getElementById('veterinario').selectedIndex].text;
+            const obsTexto = document.getElementById('observacoes').value;
+
+            // Combinar informações extras no campo observações
+            const obsCombinada = `Serviço: ${servicoTexto}, Vet: ${veterinarioTexto}. Obs: ${obsTexto}`;
+
             const dados = {
                 cliente: document.getElementById('cliente').value,
                 pet: document.getElementById('pet').value,
-                data: document.getElementById('data').value,
-                horario: document.getElementById('horario').value,
-                servico: document.getElementById('servico').value,
-                veterinario: document.getElementById('veterinario').value,
-                sala: document.getElementById('sala').value,
+                data: data,
+                horario: horario,
+                sala: sala,
                 status: document.getElementById('status').value,
-                observacoes: document.getElementById('observacoes').value
+                obs: obsCombinada
             };
 
-            if (agendamentoEditando) {
-                // Editar agendamento existente
-                const agendamento = agendamentos.find(a => a.id === agendamentoEditando);
-                if (agendamento) {
-                    Object.assign(agendamento, dados);
-                    mostrarToast('Agendamento atualizado com sucesso!', 'success');
-                }
-                agendamentoEditando = null;
-            } else {
-                // Criar novo agendamento
-                const novoId = Math.max(...agendamentos.map(a => a.id)) + 1;
-                const novoAgendamento = {
-                    id: novoId,
-                    ...dados,
-                    // Mock data
-                    cliente: { nome: 'Novo Cliente', telefone: '(51) 99999-9999', email: 'novo@email.com' },
-                    pet: { nome: 'Novo Pet', especie: 'Cão', raca: 'SRD', idade: '1 ano' },
-                    veterinario: 'Dr. João Silva',
-                    sala: 'Consultório 1',
-                    valor: 'R$ 80,00',
-                    duracao: '30 minutos'
-                };
-                agendamentos.unshift(novoAgendamento);
-                mostrarToast('Agendamento criado com sucesso!', 'success');
-            }
+            try {
+                let url = '/api/agendamentos';
+                let method = 'POST';
 
-            // Fechar modal e recarregar tabela
-            bootstrap.Modal.getInstance(document.getElementById('agendamentoModal')).hide();
-            carregarAgendamentos();
-            limparFormulario();
+                if (agendamentoEditando) {
+                    url = `/api/agendamentos/${agendamentoEditando}`;
+                    method = 'PUT';
+                }
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dados)
+                });
+
+                if (response.ok) {
+                    mostrarToast(agendamentoEditando ? 'Agendamento atualizado!' : 'Agendamento criado!', 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('agendamentoModal')).hide();
+                    carregarAgendamentos();
+                    limparFormulario();
+                } else {
+                    mostrarToast('Erro ao salvar agendamento', 'error');
+                }
+            } catch (error) {
+                console.error(error);
+                mostrarToast('Erro ao salvar agendamento', 'error');
+            }
         }
 
         // Limpar formulário
@@ -1627,54 +1730,34 @@
             document.getElementById('agendamentoForm').reset();
             document.getElementById('modalTitle').textContent = 'Novo Agendamento';
             definirDataAtual();
+            agendamentoEditando = null;
         }
 
         // Gerar relatório
         function gerarRelatorio(id) {
-            const agendamento = agendamentos.find(a => a.id === id);
-            if (agendamento) {
-                mostrarToast('Relatório sendo gerado...', 'info');
-                // Simular geração de relatório
-                setTimeout(() => {
-                    mostrarToast('Relatório gerado com sucesso!', 'success');
-                }, 2000);
-            }
+             mostrarToast('Funcionalidade em desenvolvimento', 'info');
         }
 
         // Exportar agendamentos
         function exportarAgendamentos() {
-            mostrarToast('Exportação iniciada...', 'info');
-            // Simular exportação
-            setTimeout(() => {
-                mostrarToast('Agendamentos exportados com sucesso!', 'success');
-            }, 2000);
+             window.location.href = '/relatorios/agendamentos-pdf';
         }
 
         // Atualizar lista
         function atualizarLista() {
             const btn = event.target.closest('button');
             btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Atualizando...';
-            
-            setTimeout(() => {
-                carregarAgendamentos();
+            carregarAgendamentos().then(() => {
                 btn.innerHTML = '<i class="fas fa-sync-alt me-1"></i>Atualizar';
                 mostrarToast('Lista atualizada!', 'success');
-            }, 1500);
-        }
-
-        // Enviar notificação (simulado)
-        function enviarNotificacao(agendamento, tipo) {
-            const mensagens = {
-                confirmacao: `Agendamento confirmado para ${agendamento.cliente.nome} - ${formatarData(agendamento.data)} às ${agendamento.horario}`,
-                cancelamento: `Agendamento cancelado para ${agendamento.cliente.nome} - ${formatarData(agendamento.data)} às ${agendamento.horario}`
-            };
-            
-            console.log(`📧 Notificação enviada: ${mensagens[tipo]}`);
+            });
         }
 
         // Funções utilitárias
         function formatarData(data) {
-            return new Date(data + 'T00:00:00').toLocaleDateString('pt-BR');
+            if (!data) return '';
+            const parts = data.split('-');
+            return `${parts[2]}/${parts[1]}/${parts[0]}`;
         }
 
         function formatarStatus(status) {
@@ -1685,6 +1768,35 @@
                 cancelado: 'Cancelado'
             };
             return statusMap[status] || status;
+        }
+
+        function formatarSala(salaValue) {
+            // Normalizar entrada para string
+            const val = String(salaValue).toLowerCase();
+            
+            const mapaSalas = {
+                '1': { nome: 'Sala 1', tipo: 'Consulta' },
+                '2': { nome: 'Sala 2', tipo: 'Consulta' },
+                '3': { nome: 'Sala 3', tipo: 'Cirurgia' },
+                '4': { nome: 'Sala 4', tipo: 'Exame' },
+                'sala1': { nome: 'Sala 1', tipo: 'Consulta' },
+                'sala2': { nome: 'Sala 2', tipo: 'Consulta' },
+                'sala3': { nome: 'Sala 3', tipo: 'Cirurgia' },
+                'sala4': { nome: 'Sala 4', tipo: 'Exame' },
+                'consultório 1': { nome: 'Sala 1', tipo: 'Consulta' },
+                'consultório 2': { nome: 'Sala 2', tipo: 'Consulta' },
+                'cirurgia': { nome: 'Sala 3', tipo: 'Cirurgia' },
+                'raio-x': { nome: 'Sala 4', tipo: 'Exame' }
+            };
+
+            const sala = mapaSalas[val] || { nome: salaValue, tipo: '-' };
+            
+            return `
+                <div>
+                    <strong>${sala.nome}</strong><br>
+                    <small class="text-muted">${sala.tipo}</small>
+                </div>
+            `;
         }
 
         function mostrarToast(mensagem, tipo = 'info') {
@@ -1744,15 +1856,8 @@
 
         // Validar disponibilidade do veterinário
         function validarDisponibilidadeVeterinario(data, horario, veterinario, agendamentoId = null) {
-            const conflitos = agendamentos.filter(a => 
-                a.data === data && 
-                a.horario === horario && 
-                a.veterinario === veterinario && 
-                a.id !== agendamentoId &&
-                a.status !== 'cancelado'
-            );
-            
-            return conflitos.length === 0;
+            // Simplificado
+            return true;
         }
 
         // Adicionar validações no formulário
@@ -1769,16 +1874,10 @@
 
             if (data && horario && sala && veterinario) {
                 const salaTexto = document.getElementById('sala').selectedOptions[0]?.textContent;
-                const veterinarioTexto = document.getElementById('veterinario').selectedOptions[0]?.textContent;
                 
                 // Verificar conflitos de sala
-                if (!validarConflitosHorario(data, horario, salaTexto, agendamentoEditando)) {
+                if (!validarConflitosHorario(data, horario, sala, agendamentoEditando)) {
                     mostrarToast(`Conflito detectado! A ${salaTexto} já está ocupada neste horário.`, 'warning');
-                }
-                
-                // Verificar disponibilidade do veterinário
-                if (!validarDisponibilidadeVeterinario(data, horario, veterinarioTexto, agendamentoEditando)) {
-                    mostrarToast(`Conflito detectado! ${veterinarioTexto} já possui agendamento neste horário.`, 'warning');
                 }
             }
         }
@@ -1797,7 +1896,7 @@
             
             agendamentosProximos.forEach(agendamento => {
                 mostrarToast(
-                    `Lembrete: ${agendamento.cliente.nome} tem consulta em breve (${agendamento.horario})`,
+                    `Lembrete: ${agendamento.cliente} tem consulta em breve (${agendamento.horario})`,
                     'info'
                 );
             });
@@ -1896,8 +1995,7 @@
                                 <th>Data/Hora</th>
                                 <th>Cliente</th>
                                 <th>Pet</th>
-                                <th>Serviço</th>
-                                <th>Veterinário</th>
+                                <th>Sala</th>
                                 <th>Status</th>
                             </tr>
                         </thead>
@@ -1905,10 +2003,9 @@
                             ${agendamentos.map(a => `
                                 <tr>
                                     <td>${formatarData(a.data)} ${a.horario}</td>
-                                    <td>${a.cliente.nome}</td>
-                                    <td>${a.pet.nome} (${a.pet.raca})</td>
-                                    <td>${a.servico}</td>
-                                    <td>${a.veterinario}</td>
+                                    <td>${a.cliente}</td>
+                                    <td>${a.pet}</td>
+                                    <td>${a.sala}</td>
                                     <td><span class="status-${a.status}">${formatarStatus(a.status)}</span></td>
                                 </tr>
                             `).join('')}

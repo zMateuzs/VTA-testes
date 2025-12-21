@@ -82,28 +82,37 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * @description Simula a atualização em tempo real das estatísticas para dar dinamismo à página.
+     * @description Atualiza em tempo real as estatísticas do dashboard consultando a API.
      */
     function updateStats() {
-        const consultasTodayElement = document.querySelector('.stat-value');
-        if (consultasTodayElement) {
-            let currentValue = parseInt(consultasTodayElement.textContent);
-
-            // Simula uma mudança aleatória
-            if (Math.random() > 0.7) {
-                const change = Math.floor(Math.random() * 3) - 1; // -1, 0, ou +1
-                const newValue = Math.max(0, currentValue + change);
-                consultasTodayElement.textContent = newValue;
-
-                // Animação sutil para a mudança
-                consultasTodayElement.style.transform = 'scale(1.1)';
-                setTimeout(() => {
-                    consultasTodayElement.style.transform = 'scale(1)';
-                }, 200);
-            }
-        }
+        fetch('/api/dashboard/stats')
+            .then(response => response.json())
+            .then(data => {
+                if (data.consultas_hoje !== undefined) {
+                    const el = document.getElementById('stat-consultas-hoje');
+                    if (el && el.textContent != data.consultas_hoje) {
+                        el.textContent = data.consultas_hoje;
+                        // Animação sutil
+                        el.style.transform = 'scale(1.1)';
+                        setTimeout(() => { el.style.transform = 'scale(1)'; }, 200);
+                    }
+                }
+                if (data.salas_disponiveis !== undefined) {
+                    const el = document.getElementById('stat-salas-disponiveis');
+                    if (el) el.textContent = data.salas_disponiveis;
+                }
+                if (data.salas_ocupadas !== undefined) {
+                    const el = document.getElementById('stat-salas-ocupadas');
+                    if (el) el.textContent = data.salas_ocupadas;
+                }
+                if (data.clientes_ativos !== undefined) {
+                    const el = document.getElementById('stat-clientes-ativos');
+                    if (el) el.textContent = data.clientes_ativos;
+                }
+            })
+            .catch(error => console.error('Erro ao atualizar dashboard:', error));
     }
 
-    // Inicia a atualização simulada a cada 30 segundos
-    setInterval(updateStats, 30000);
+    // Inicia a atualização a cada 5 segundos
+    setInterval(updateStats, 5000);
 });

@@ -924,136 +924,7 @@
                                 </tr>
                             </thead>
                             <tbody id="clientsTableBody">
-                                <tr>
-                                    <td>
-                                        <div class="client-info">
-                                            <div class="client-avatar">MS</div>
-                                            <div class="client-details">
-                                                <h4>Maria Santos</h4>
-                                                <p class="client-email">maria.santos@email.com</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>(11) 99999-9999</td>
-                                    <td>123.456.789-00</td>
-                                    <td>2</td>
-                                    <td><span class="status-badge status-active">Ativo</span></td>
-                                    <td>15/01/2024</td>
-                                    <td>
-                                        <div class="action-buttons">
-                                            <button class="btn btn-small btn-edit" onclick="openClientModal('edit', 1)">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button class="btn btn-small btn-delete" onclick="deleteClient(1)">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="client-info">
-                                            <div class="client-avatar">JP</div>
-                                            <div class="client-details">
-                                                <h4>João Pedro</h4>
-                                                <p class="client-email">joao.pedro@email.com</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>(11) 88888-8888</td>
-                                    <td>987.654.321-00</td>
-                                    <td>1</td>
-                                    <td><span class="status-badge status-active">Ativo</span></td>
-                                    <td>22/01/2024</td>
-                                    <td>
-                                        <div class="action-buttons">
-                                            <button class="btn btn-small btn-edit" onclick="openClientModal('edit', 2)">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button class="btn btn-small btn-delete" onclick="deleteClient(2)">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="client-info">
-                                            <div class="client-avatar">AC</div>
-                                            <div class="client-details">
-                                                <h4>Ana Clara</h4>
-                                                <p class="client-email">ana.clara@email.com</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>(11) 77777-7777</td>
-                                    <td>456.789.123-00</td>
-                                    <td>3</td>
-                                    <td><span class="status-badge status-active">Ativo</span></td>
-                                    <td>05/02/2024</td>
-                                    <td>
-                                        <div class="action-buttons">
-                                            <button class="btn btn-small btn-edit" onclick="openClientModal('edit', 3)">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button class="btn btn-small btn-delete" onclick="deleteClient(3)">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="client-info">
-                                            <div class="client-avatar">CL</div>
-                                            <div class="client-details">
-                                                <h4>Carlos Lima</h4>
-                                                <p class="client-email">carlos.lima@email.com</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>(11) 66666-6666</td>
-                                    <td>789.123.456-00</td>
-                                    <td>1</td>
-                                    <td><span class="status-badge status-inactive">Inativo</span></td>
-                                    <td>12/02/2024</td>
-                                    <td>
-                                        <div class="action-buttons">
-                                            <button class="btn btn-small btn-edit" onclick="openClientModal('edit', 4)">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button class="btn btn-small btn-delete" onclick="deleteClient(4)">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="client-info">
-                                            <div class="client-avatar">LM</div>
-                                            <div class="client-details">
-                                                <h4>Luiza Martins</h4>
-                                                <p class="client-email">luiza.martins@email.com</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>(11) 55555-5555</td>
-                                    <td>321.654.987-00</td>
-                                    <td>2</td>
-                                    <td><span class="status-badge status-active">Ativo</span></td>
-                                    <td>18/02/2024</td>
-                                    <td>
-                                        <div class="action-buttons">
-                                            <button class="btn btn-small btn-edit" onclick="openClientModal('edit', 5)">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button class="btn btn-small btn-delete" onclick="deleteClient(5)">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
+                                <!-- O conteúdo será preenchido via JavaScript -->
                             </tbody>
                         </table>
                     </div>
@@ -1146,83 +1017,25 @@
     </div>
 
     <script>
-        // Dados mockados dos clientes
+        // Dados reais dos clientes vindos do backend
         const clientsData = [
+            {% for client in clients %}
             {
-                id: 1,
-                name: 'Maria Santos',
-                email: 'maria.santos@email.com',
-                phone: '(11) 99999-9999',
-                cpf: '123.456.789-00',
-                pets: 2,
-                petNames: ['Fluffy', 'Mittens'],
-                status: 'active',
-                createdAt: '15/01/2024',
-                lastVisit: '10/11/2024',
-                address: 'Rua das Flores, 123, Centro, São Paulo - 01234-567',
-                birthDate: '1985-05-15',
-                notes: 'Cliente preferencial, possui 2 gatos'
+                id: {{ client['id'] }},
+                name: "{{ client['nome'] }}",
+                email: "{{ client['email'] }}",
+                phone: "{{ client['telefone'] }}",
+                cpf: "{{ client['cpf'] }}",
+                pets: 0, // Placeholder
+                petNames: [], // Placeholder
+                status: "{{ client['status'] }}",
+                createdAt: "{{ client['created_at'] }}",
+                lastVisit: "-", // Placeholder
+                address: "{{ client['endereco'] or '' }}",
+                birthDate: "{{ client['data_nascimento'] or '' }}",
+                notes: "{{ client['observacoes'] or '' }}"
             },
-            {
-                id: 2,
-                name: 'João Pedro',
-                email: 'joao.pedro@email.com',
-                phone: '(11) 88888-8888',
-                cpf: '987.654.321-00',
-                pets: 1,
-                petNames: ['Mimi'],
-                status: 'active',
-                createdAt: '22/01/2024',
-                lastVisit: '08/11/2024',
-                address: 'Av. Paulista, 456, Bela Vista, São Paulo - 01310-100',
-                birthDate: '1990-08-22',
-                notes: 'Dono do cachorro Mimi'
-            },
-            {
-                id: 3,
-                name: 'Ana Clara',
-                email: 'ana.clara@email.com',
-                phone: '(11) 77777-7777',
-                cpf: '456.789.123-00',
-                pets: 3,
-                petNames: ['Thor', 'Luna', 'Bolt'],
-                status: 'active',
-                createdAt: '05/02/2024',
-                lastVisit: '25/11/2024',
-                address: 'Rua Augusta, 789, Consolação, São Paulo - 01305-000',
-                birthDate: '1992-12-03',
-                notes: 'Possui 3 pets: Thor, Luna e Bolt'
-            },
-            {
-                id: 4,
-                name: 'Carlos Lima',
-                email: 'carlos.lima@email.com',
-                phone: '(11) 66666-6666',
-                cpf: '789.123.456-00',
-                pets: 1,
-                petNames: ['Rex'],
-                status: 'inactive',
-                createdAt: '12/02/2024',
-                lastVisit: '-',
-                address: 'Rua Oscar Freire, 321, Jardins, São Paulo - 01426-001',
-                birthDate: '1988-03-10',
-                notes: 'Cliente inativo desde março'
-            },
-            {
-                id: 5,
-                name: 'Luiza Martins',
-                email: 'luiza.martins@email.com',
-                phone: '(11) 55555-5555',
-                cpf: '321.654.987-00',
-                pets: 2,
-                petNames: ['Bella', 'Max'],
-                status: 'active',
-                createdAt: '18/02/2024',
-                lastVisit: '20/11/2024',
-                address: 'Alameda Santos, 654, Cerqueira César, São Paulo - 01418-002',
-                birthDate: '1995-07-28',
-                notes: 'Novos pets recentemente adotados'
-            }
+            {% endfor %}
         ];
 
         let currentEditingId = null;
@@ -1313,10 +1126,27 @@
         function deleteClient(clientId) {
             const client = clientsData.find(c => c.id === clientId);
             if (confirm(`Tem certeza que deseja excluir o cliente ${client.name}?`)) {
-                const index = clientsData.findIndex(c => c.id === clientId);
-                clientsData.splice(index, 1);
-                renderTable();
-                alert('Cliente excluído com sucesso!');
+                fetch(`/api/clientes/${clientId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const index = clientsData.findIndex(c => c.id === clientId);
+                        clientsData.splice(index, 1);
+                        renderTable();
+                        alert('Cliente excluído com sucesso!');
+                    } else {
+                        alert('Erro ao excluir cliente: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Erro ao excluir cliente.');
+                });
             }
         }
 
@@ -1406,23 +1236,60 @@
 
                 if (currentEditingId) {
                     // Editar cliente existente
-                    const clientIndex = clientsData.findIndex(c => c.id === currentEditingId);
-                    clientsData[clientIndex] = { ...clientsData[clientIndex], ...formData };
-                    alert('Cliente atualizado com sucesso!');
+                    fetch(`/api/clientes/${currentEditingId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            const clientIndex = clientsData.findIndex(c => c.id === currentEditingId);
+                            clientsData[clientIndex] = { ...clientsData[clientIndex], ...formData };
+                            alert('Cliente atualizado com sucesso!');
+                            closeModal();
+                            renderTable();
+                        } else {
+                            alert('Erro ao atualizar cliente: ' + data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Erro ao atualizar cliente.');
+                    });
                 } else {
                     // Novo cliente
-                    const newClient = {
-                        ...formData,
-                        id: clientsData.length + 1,
-                        pets: 0,
-                        createdAt: new Date().toLocaleDateString('pt-BR')
-                    };
-                    clientsData.push(newClient);
-                    alert('Cliente cadastrado com sucesso!');
+                    fetch('/api/clientes', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            const newClient = {
+                                ...formData,
+                                id: data.id,
+                                pets: 0,
+                                createdAt: new Date().toISOString().split('T')[0]
+                            };
+                            clientsData.push(newClient);
+                            alert('Cliente cadastrado com sucesso!');
+                            closeModal();
+                            renderTable();
+                        } else {
+                            alert('Erro ao cadastrar cliente: ' + data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Erro ao cadastrar cliente.');
+                    });
                 }
-
-                closeModal();
-                renderTable();
             });
 
             // Fechar modal ao clicar fora

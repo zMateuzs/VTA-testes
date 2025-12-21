@@ -118,7 +118,7 @@
                     <div class="stat-card">
                         <div class="stat-header">
                             <div class="stat-info">
-                                <div class="stat-value">{{ consultas_hoje }}</div>
+                                <div class="stat-value" id="stat-consultas-hoje">{{ consultas_hoje }}</div>
                                 <div class="stat-label">Consultas Hoje</div>
                             </div>
                             <div class="stat-icon green">
@@ -134,7 +134,7 @@
                     <div class="stat-card">
                         <div class="stat-header">
                             <div class="stat-info">
-                                <div class="stat-value">{{ salas_disponiveis }}</div>
+                                <div class="stat-value" id="stat-salas-disponiveis">{{ salas_disponiveis }}</div>
                                 <div class="stat-label">Salas Disponíveis</div>
                             </div>
                             <div class="stat-icon blue">
@@ -143,14 +143,14 @@
                         </div>
                         <div class="stat-trend trend-positive">
                             <i class="fas fa-check-circle"></i>
-                            <span>{{ salas_ocupadas }} ocupadas</span>
+                            <span><span id="stat-salas-ocupadas">{{ salas_ocupadas }}</span> ocupadas</span>
                         </div>
                     </div>
 
                     <div class="stat-card">
                         <div class="stat-header">
                             <div class="stat-info">
-                                <div class="stat-value">{{ clientes_ativos }}</div>
+                                <div class="stat-value" id="stat-clientes-ativos">{{ clientes_ativos }}</div>
                                 <div class="stat-label">Clientes Ativos</div>
                             </div>
                             <div class="stat-icon orange">

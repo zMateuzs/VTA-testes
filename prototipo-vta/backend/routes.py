@@ -20,6 +20,34 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
+def update_appointment_statuses(conn):
+    """Atualiza automaticamente o status dos agendamentos baseados na data e hora atuais."""
+    try:
+        cur = conn.cursor()
+        today = date.today()
+        today_str = today.isoformat()
+        now = datetime.now()
+        current_time_str = now.strftime('%H:%M')
+
+        # 1. Passou do dia -> Realizado (se não cancelado/realizado)
+        cur.execute("""
+            UPDATE agendamentos 
+            SET status = 'realizado' 
+            WHERE data_agendamento < ? AND status NOT IN ('cancelado', 'realizado')
+        """, (today_str,))
+
+        # 2. Mesmo dia, passou do horário -> Confirmado (se agendado)
+        cur.execute("""
+            UPDATE agendamentos 
+            SET status = 'confirmado' 
+            WHERE data_agendamento = ? AND horario < ? AND status = 'agendado'
+        """, (today_str, current_time_str))
+        
+        conn.commit()
+        cur.close()
+    except Exception as e:
+        print(f"Erro na atualização automática de status: {e}")
+
 # --- ROTAS DE PÁGINAS E AUTENTICAÇÃO ---
 
 # Rota para a página de Landing (GET)
@@ -88,6 +116,7 @@ def dashboard():
     conn = None
     try:
         conn = get_db_connection()
+        update_appointment_statuses(conn)
         cur = conn.cursor()
         
         # Data de hoje
@@ -95,7 +124,7 @@ def dashboard():
         today_str = today.isoformat()
         
         # 1. Consultas Hoje (Total)
-        cur.execute("SELECT COUNT(*) FROM agendamentos WHERE data_agendamento = ?", (today_str,))
+        cur.execute("SELECT COUNT(*) FROM agendamentos WHERE data_agendamento = ? AND status != 'cancelado'", (today_str,))
         consultas_hoje_count = cur.fetchone()[0]
         
         # 2. Clientes Ativos (Total de clientes únicos)
@@ -186,6 +215,67 @@ def dashboard():
         if conn:
             conn.close()
 
+@app.route('/api/dashboard/stats')
+def dashboard_stats():
+    if 'user_id' not in session:
+        return jsonify({"message": "Não autorizado"}), 401
+    
+    conn = None
+    try:
+        conn = get_db_connection()
+        update_appointment_statuses(conn)
+        cur = conn.cursor()
+        
+        today = date.today()
+        today_str = today.isoformat()
+        
+        # 1. Consultas Hoje (Total) - Excluindo cancelados
+        cur.execute("SELECT COUNT(*) FROM agendamentos WHERE data_agendamento = ? AND status != 'cancelado'", (today_str,))
+        consultas_hoje_count = cur.fetchone()[0]
+        
+        # 2. Clientes Ativos
+        cur.execute("SELECT COUNT(DISTINCT cliente) FROM agendamentos")
+        clientes_ativos_count = cur.fetchone()[0]
+        
+        # 3. Salas
+        cur.execute("SELECT * FROM agendamentos WHERE data_agendamento = ? AND status != 'cancelado' ORDER BY horario", (today_str,))
+        agendamentos_hoje = cur.fetchall()
+        
+        TOTAL_SALAS = 5
+        occupied_rooms = set()
+        now = datetime.now()
+        current_minutes = now.hour * 60 + now.minute
+        
+        for ag in agendamentos_hoje:
+            try:
+                h_str = str(ag['horario'])
+                parts = h_str.split(':')
+                h = int(parts[0])
+                m = int(parts[1])
+                start_minutes = h * 60 + m
+                if start_minutes <= current_minutes < start_minutes + 60:
+                    occupied_rooms.add(ag['sala'])
+            except:
+                pass
+                
+        salas_ocupadas_count = len(occupied_rooms)
+        salas_disponiveis_count = max(0, TOTAL_SALAS - salas_ocupadas_count)
+        
+        cur.close()
+        
+        return jsonify({
+            "consultas_hoje": consultas_hoje_count,
+            "clientes_ativos": clientes_ativos_count,
+            "salas_disponiveis": salas_disponiveis_count,
+            "salas_ocupadas": salas_ocupadas_count
+        })
+    except Exception as e:
+        print(f"Erro API stats: {e}")
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if conn:
+            conn.close()
+
 # Rota da Agenda
 @app.route('/agenda')
 def agenda_page():
@@ -213,7 +303,88 @@ def pets_page():
 def clientes_page():
     if 'user_id' not in session:
         return redirect(url_for('login_page'))
-    return render_template('5. clientes_vta.html')
+    
+    conn = get_db_connection()
+    clients = conn.execute('SELECT * FROM clientes ORDER BY created_at DESC').fetchall()
+    conn.close()
+    
+    return render_template('5. clientes_vta.html', clients=clients)
+
+@app.route('/api/clientes', methods=['POST'])
+def create_cliente():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    data = request.json
+    conn = get_db_connection()
+    try:
+        cur = conn.cursor()
+        cur.execute("""
+            INSERT INTO clientes (nome, email, telefone, cpf, data_nascimento, endereco, observacoes, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            data.get('name'),
+            data.get('email'),
+            data.get('phone'),
+            data.get('cpf'),
+            data.get('birthDate'),
+            data.get('address'),
+            data.get('notes'),
+            data.get('status', 'active')
+        ))
+        conn.commit()
+        new_id = cur.lastrowid
+        return jsonify({'success': True, 'id': new_id})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
+
+@app.route('/api/clientes/<int:client_id>', methods=['PUT'])
+def update_cliente(client_id):
+    if 'user_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    data = request.json
+    conn = get_db_connection()
+    try:
+        cur = conn.cursor()
+        cur.execute("""
+            UPDATE clientes 
+            SET nome=?, email=?, telefone=?, cpf=?, data_nascimento=?, endereco=?, observacoes=?, status=?
+            WHERE id=?
+        """, (
+            data.get('name'),
+            data.get('email'),
+            data.get('phone'),
+            data.get('cpf'),
+            data.get('birthDate'),
+            data.get('address'),
+            data.get('notes'),
+            data.get('status'),
+            client_id
+        ))
+        conn.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
+
+@app.route('/api/clientes/<int:client_id>', methods=['DELETE'])
+def delete_cliente(client_id):
+    if 'user_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    conn = get_db_connection()
+    try:
+        conn.execute('DELETE FROM clientes WHERE id = ?', (client_id,))
+        conn.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
 
 # Nova rota para Salas
 @app.route('/salas')
@@ -242,6 +413,162 @@ def usuarios_page():
     if 'user_id' not in session:
         return redirect(url_for('login_page'))
     return render_template('7. usuarios_vta.html')
+
+# Rota para Gerar Relatório PDF de Agendamentos
+@app.route('/relatorios/agendamentos-pdf')
+def gerar_relatorio_agendamentos_pdf():
+    if 'user_id' not in session:
+        return redirect(url_for('login_page'))
+    
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Buscar todos os agendamentos ordenados por data e horário
+        cur.execute("SELECT * FROM agendamentos ORDER BY data_agendamento DESC, horario ASC")
+        agendamentos = cur.fetchall()
+        
+        cur.close()
+        
+        # --- Geração do PDF ---
+        buffer = io.BytesIO()
+        c = canvas.Canvas(buffer, pagesize=letter)
+        width, height = letter
+        
+        # Logo (Simulado com texto/círculo se não tiver imagem, ou tentar carregar imagem)
+        # Tenta carregar a imagem da logo se existir
+        logo_path = os.path.join(app.static_folder, 'img', 'logo.png') # Ajuste o caminho conforme necessário
+        if os.path.exists(logo_path):
+            try:
+                c.drawImage(logo_path, 50, height - 80, width=50, height=50, mask='auto')
+            except:
+                pass
+        else:
+            # Desenha um placeholder se não tiver imagem
+            c.setStrokeColor(colors.green)
+            c.setFillColor(colors.white)
+            c.circle(75, height - 55, 25, fill=1)
+            c.setFillColor(colors.green)
+            c.setFont("Helvetica-Bold", 14)
+            c.drawCentredString(75, height - 60, "VTA")
+
+        # Cabeçalho
+        c.setFillColor(colors.black)
+        c.setFont("Helvetica-Bold", 20)
+        c.drawString(120, height - 50, "Relatório de Agendamentos")
+        c.setFont("Helvetica", 12)
+        c.drawString(120, height - 70, "VTA - Vet Assistance")
+        
+        c.setFont("Helvetica", 10)
+        today_fmt = date.today().strftime('%d/%m/%Y')
+        c.drawRightString(width - 50, height - 50, f"Data de Emissão: {today_fmt}")
+        
+        # Linha separadora
+        c.setStrokeColor(colors.gray)
+        c.line(50, height - 90, width - 50, height - 90)
+        
+        y = height - 120
+        
+        # Cabeçalho da Tabela
+        c.setFillColor(colors.black)
+        c.setFont("Helvetica-Bold", 8)
+        # Colunas: Data, Horário, Sala, Cliente, Pet, Serviço, Veterinário, Status
+        c.drawString(30, y, "Data")
+        c.drawString(85, y, "Horário")
+        c.drawString(125, y, "Sala")
+        c.drawString(165, y, "Cliente")
+        c.drawString(265, y, "Pet")
+        c.drawString(335, y, "Serviço")
+        c.drawString(415, y, "Veterinário")
+        c.drawString(500, y, "Status")
+        
+        y -= 10
+        c.line(30, y, width - 30, y)
+        y -= 20
+        
+        c.setFont("Helvetica", 8)
+        
+        sala_nomes = {
+            '1': 'Sala 1', '2': 'Sala 2', '3': 'Cirurgia', '4': 'Raio-X',
+            'sala1': 'Sala 1', 'sala2': 'Sala 2', 'sala3': 'Cirurgia', 'sala4': 'Raio-X'
+        }
+
+        for ag in agendamentos:
+            if y < 50: # Nova página
+                c.showPage()
+                y = height - 50
+                # Repetir cabeçalho na nova página
+                c.setFont("Helvetica-Bold", 8)
+                c.drawString(30, y, "Data")
+                c.drawString(85, y, "Horário")
+                c.drawString(125, y, "Sala")
+                c.drawString(165, y, "Cliente")
+                c.drawString(265, y, "Pet")
+                c.drawString(335, y, "Serviço")
+                c.drawString(415, y, "Veterinário")
+                c.drawString(500, y, "Status")
+                y -= 10
+                c.line(30, y, width - 30, y)
+                y -= 20
+                c.setFont("Helvetica", 8)
+            
+            # Formatar Data
+            try:
+                data_obj = datetime.strptime(str(ag['data_agendamento']), '%Y-%m-%d')
+                data_fmt = data_obj.strftime('%d/%m/%Y')
+            except:
+                data_fmt = str(ag['data_agendamento'])
+
+            # Extrair serviço e veterinário de observações
+            obs = ag['observacoes'] or ''
+            servico = '-'
+            veterinario = '-'
+            
+            if 'Serviço:' in obs:
+                try:
+                    servico = obs.split('Serviço:')[1].split(',')[0].strip()
+                except:
+                    pass
+            
+            if 'Vet:' in obs:
+                try:
+                    # Tenta pegar o texto após 'Vet:' até o próximo ponto ou fim da string
+                    vet_part = obs.split('Vet:')[1]
+                    if '.' in vet_part:
+                        veterinario = vet_part.split('.')[0].strip()
+                    else:
+                        veterinario = vet_part.strip()
+                except:
+                    pass
+            
+            # Formatar Sala
+            sala_raw = str(ag['sala']).lower()
+            sala_fmt = sala_nomes.get(sala_raw, ag['sala'])
+
+            c.drawString(30, y, data_fmt)
+            c.drawString(85, y, str(ag['horario'])[:5])
+            c.drawString(125, y, str(sala_fmt)[:10])
+            c.drawString(165, y, str(ag['cliente'])[:20])
+            c.drawString(265, y, str(ag['pet'])[:15])
+            c.drawString(335, y, servico[:15])
+            c.drawString(415, y, veterinario[:15])
+            c.drawString(500, y, str(ag['status']).capitalize())
+            
+            y -= 15
+            
+        c.save()
+        buffer.seek(0)
+        
+        today_str = date.today().strftime('%Y-%m-%d')
+        return send_file(buffer, as_attachment=True, download_name=f'relatorio_agendamentos_{today_str}.pdf', mimetype='application/pdf')
+
+    except Exception as e:
+        print(f"Erro ao gerar PDF de agendamentos: {e}")
+        return jsonify({"message": "Erro ao gerar relatório PDF"}), 500
+    finally:
+        if conn:
+            conn.close()
 
 # Rota para Gerar Relatório PDF do Dashboard
 @app.route('/relatorios/dashboard-pdf')
@@ -397,6 +724,7 @@ def get_agendamentos():
     conn = None
     try:
         conn = get_db_connection()
+        update_appointment_statuses(conn)
         cur = conn.cursor()
         cur.execute("SELECT * FROM agendamentos ORDER BY data_agendamento, horario")
         agendamentos = cur.fetchall()
