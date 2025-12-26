@@ -61,8 +61,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            max-width: 1600px;
-            margin: 0 auto;
+            width: 100%;
         }
 
         .header-left {
@@ -94,67 +93,80 @@
             opacity: 0.8;
         }
 
-        .header-actions {
+        .header-right {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 1.5rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--vta-green);
+            font-weight: bold;
+        }
+
+        .user-details h3 {
+            font-size: 0.9rem;
+            margin-bottom: 2px;
+        }
+
+        .user-role {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        .logout-btn {
+            background: transparent;
+            border: none;
+            color: var(--white);
+            font-size: 1.2rem;
+            cursor: pointer;
+            border-radius: 50%;
+            padding: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: rotate(12deg);
         }
 
         .period-selector {
-            background: var(--vta-green);
-            border: 1px solid var(--vta-green);
-            color: var(--white);
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            cursor: pointer;
-        }
-
-        .export-btn {
             background: var(--white);
-            color: var(--vta-green);
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
+            border: 1px solid var(--gray-light);
+            color: var(--gray-dark);
+            padding: 0.6rem 1rem;
+            border-radius: 10px;
+            font-size: 0.95rem;
             cursor: pointer;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: all 0.3s ease;
-        }
-
-        .export-btn:hover {
-            background: var(--gray-light);
-            transform: translateY(-2px);
-        }
-
-        .back-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: var(--white);
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: all 0.3s ease;
-        }
-
-        .back-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
+            min-width: 170px;
         }
 
         /* Sidebar */
         .sidebar {
             background: var(--white);
             border-radius: 15px;
-            padding: 1.5rem;
+            padding: 1rem 1.25rem;
             height: fit-content;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-            position: sticky;
-            top: 100px;
+            position: relative;
+            width: 220px;
         }
 
         .sidebar-section {
@@ -205,16 +217,88 @@
         /* Main Content Container */
         .main-content-wrapper {
             display: grid;
-            grid-template-columns: 250px 1fr;
+            grid-template-columns: 220px 1fr;
             gap: 2rem;
-            padding: 2rem;
-            max-width: 1600px;
-            margin: 0 auto;
+            padding: 1.5rem 2rem;
+            max-width: 100%;
         }
 
         /* Main Content */
         .main-content {
             padding: 0;
+        }
+
+        .page-header {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--gray-dark);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .page-title i {
+            color: var(--vta-blue);
+            font-size: 1.6rem;
+        }
+
+        .section-subtitle {
+            color: var(--gray-medium);
+            margin-top: 0.25rem;
+        }
+
+        .page-actions {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 12px;
+            padding: 0.65rem 1.5rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--vta-green), var(--vta-green-light));
+            color: var(--white);
+            box-shadow: 0 6px 18px rgba(82, 183, 136, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--gray-light);
+            border: 1px solid var(--gray-medium);
+            color: var(--gray-dark);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-medium);
+            color: var(--white);
         }
 
         /* KPI Cards */
@@ -401,6 +485,16 @@
             border-left-color: var(--vta-orange);
         }
 
+        @media (max-width: 1024px) {
+            .main-content-wrapper {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                width: 100%;
+            }
+        }
+
         .metric-label {
             font-weight: 500;
         }
@@ -538,9 +632,13 @@
                 gap: 1rem;
             }
 
-            .header-actions {
+            .header-right {
                 width: 100%;
                 justify-content: space-between;
+            }
+
+            .user-details {
+                display: none;
             }
 
             .main-content {
@@ -549,6 +647,16 @@
 
             .kpi-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .page-actions {
+                width: 100%;
+                justify-content: flex-start;
             }
 
             .chart-header {
@@ -572,30 +680,25 @@
             <div class="header-content">
                 <div class="header-left">
                     <div class="logo-mini">
-                        <i class="fas fa-chart-line"></i>
+                        <i class="fas fa-stethoscope"></i>
                     </div>
                     <div class="header-title">
-                        <h1>Dashboard Gerencial</h1>
-                        <p class="header-subtitle">Relatórios e Analytics - Agenda VTA</p>
+                        <h1>Agenda VTA</h1>
+                        <p class="header-subtitle">Relatórios e Analytics</p>
                     </div>
                 </div>
-                
-                <div class="header-actions">
-                    <select class="period-selector" id="periodSelector">
-                        <option value="7d">Últimos 7 dias</option>
-                        <option value="30d" selected>Últimos 30 dias</option>
-                        <option value="3m">Últimos 3 meses</option>
-                        <option value="6m">Últimos 6 meses</option>
-                        <option value="1y">Último ano</option>
-                    </select>
-                    <button class="export-btn" onclick="exportReport()">
-                        <i class="fas fa-download"></i>
-                        Exportar PDF
+
+                <div class="header-right">
+                    <div class="user-info">
+                        <div class="user-avatar">A</div>
+                        <div class="user-details">
+                            <h3>Administrador</h3>
+                            <p class="user-role">admin@vta.com</p>
+                        </div>
+                    </div>
+                    <button class="logout-btn" onclick="logout()" title="Sair do sistema">
+                        <i class="fas fa-sign-out-alt"></i>
                     </button>
-                    <a href="#" class="back-btn" onclick="goBack()">
-                        <i class="fas fa-arrow-left"></i>
-                        Voltar
-                    </a>
                 </div>
             </div>
         </header>
@@ -673,6 +776,32 @@
 
         <!-- Main Content -->
         <main class="main-content">
+            <section class="page-header">
+                <div>
+                    <h1 class="page-title">
+                        <i class="fas fa-chart-line"></i>
+                        Dashboard Gerencial
+                    </h1>
+                    <p class="section-subtitle">Relatórios detalhados e insights para decisões estratégicas.</p>
+                </div>
+                <div class="page-actions">
+                    <select class="period-selector" id="periodSelector">
+                        <option value="7d">Últimos 7 dias</option>
+                        <option value="30d" selected>Últimos 30 dias</option>
+                        <option value="3m">Últimos 3 meses</option>
+                        <option value="6m">Últimos 6 meses</option>
+                        <option value="1y">Último ano</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="exportReport()">
+                        <i class="fas fa-download"></i>
+                        Exportar PDF
+                    </button>
+                    <button class="btn btn-secondary" onclick="goBack()">
+                        <i class="fas fa-arrow-left"></i>
+                        Voltar
+                    </button>
+                </div>
+            </section>
             <!-- KPI Cards -->
             <section class="kpi-grid">
                 <div class="kpi-card revenue">
@@ -900,6 +1029,12 @@
     </div>
 
     <script>
+    function logout() {
+        if (confirm('Tem certeza que deseja sair do sistema?')) {
+            window.location.href = '/logout';
+        }
+    }
+
     // Dados para os gráficos
     const chartData = {
         consultas: {

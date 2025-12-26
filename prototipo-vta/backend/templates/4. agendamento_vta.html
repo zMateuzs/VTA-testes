@@ -11,14 +11,12 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
     <style>
-        /* Reset e configurações básicas */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        /* Paleta de cores VTA */
         :root {
             --vta-green: #52B788;
             --vta-green-light: #74C69D;
@@ -41,16 +39,14 @@
             color: var(--gray-dark);
         }
 
-        /* Layout Principal */
         .dashboard-container {
             display: grid;
             grid-template-rows: auto 1fr;
             min-height: 100vh;
         }
 
-        /* Header */
         .header {
-            background: linear-gradient(135deg, var(--vta-green) 0%, var(--vta-green-dark) 100%);
+            background: linear-gradient(135deg, var(--vta-green), var(--vta-green-dark));
             color: var(--white);
             padding: 1rem 2rem;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
@@ -63,8 +59,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            max-width: 1400px;
-            margin: 0 auto;
+            width: 100%;
         }
 
         .header-left {
@@ -76,8 +71,8 @@
         .logo-mini {
             width: 45px;
             height: 45px;
-            background: var(--white);
             border-radius: 50%;
+            background: var(--white);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -108,15 +103,15 @@
             gap: 0.75rem;
             padding: 0.5rem 1rem;
             border-radius: 25px;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(10px);
         }
 
         .user-avatar {
             width: 35px;
             height: 35px;
-            background: var(--white);
             border-radius: 50%;
+            background: var(--white);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -135,58 +130,57 @@
         }
 
         .logout-btn {
-            background: none;
+            background: transparent;
             border: none;
             color: var(--white);
             font-size: 1.2rem;
             cursor: pointer;
-            padding: 0.5rem;
             border-radius: 50%;
+            padding: 0.5rem;
             transition: all 0.3s ease;
         }
 
         .logout-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: rotate(15deg);
+            background: rgba(255, 255, 255, 0.15);
+            transform: rotate(12deg);
         }
 
-        /* Main Content */
         .main-content {
             display: grid;
-            grid-template-columns: 250px 1fr;
+            grid-template-columns: 220px 1fr;
             gap: 2rem;
-            padding: 2rem;
-            max-width: 1400px;
-            margin: 0 auto;
+            padding: 1.5rem 2rem;
+            max-width: 100%;
         }
 
-        /* Sidebar */
         .sidebar {
             background: var(--white);
             border-radius: 15px;
-            padding: 1.5rem;
-            height: fit-content;
+            padding: 1rem 1.25rem;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-            position: sticky;
-            top: 100px;
+            width: 220px;
+            height: fit-content;
+            position: relative;
         }
 
         .sidebar-section {
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
         }
 
         .sidebar-title {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--gray-medium);
+            font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 1rem;
-            padding-left: 0.5rem;
+            font-weight: 600;
+            color: var(--gray-medium);
+            margin-bottom: 0.75rem;
+            padding-left: 0.25rem;
         }
 
         .nav-menu {
             list-style: none;
+            padding: 0;
+            margin: 0;
         }
 
         .nav-item {
@@ -196,359 +190,375 @@
         .nav-link {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem 1rem;
+            gap: 0.65rem;
             text-decoration: none;
             color: var(--gray-dark);
+            padding: 0.65rem 0.85rem;
             border-radius: 10px;
             transition: all 0.3s ease;
             font-weight: 500;
+            font-size: 0.95rem;
         }
 
-        .nav-link:hover, .nav-link.active {
-            background: linear-gradient(135deg, var(--vta-green) 0%, var(--vta-green-light) 100%);
+        .nav-link:hover,
+        .nav-link.active {
+            background: linear-gradient(135deg, var(--vta-green), var(--vta-green-light));
             color: var(--white);
             transform: translateX(5px);
         }
 
         .nav-link i {
-            font-size: 1.1rem;
-            width: 20px;
+            font-size: 1rem;
+            width: 18px;
         }
 
-        /* Page Content */
-        .page-content {
+        .schedule-content {
             display: grid;
-            gap: 2rem;
+            gap: 1.5rem;
         }
 
         .page-header {
             background: var(--white);
-            padding: 2rem;
             border-radius: 15px;
+            padding: 2rem;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
         }
 
         .page-title {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--gray-dark);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .page-title i {
+            color: var(--vta-orange);
             font-size: 1.8rem;
-            font-weight: 600;
-            color: var(--gray-dark);
-            margin: 0;
         }
 
-        .page-subtitle {
-            color: var(--gray-medium);
-            margin: 0;
-            margin-top: 0.5rem;
-        }
-
-        /* Buttons */
-        .btn-primary {
-            background: linear-gradient(135deg, var(--vta-green), var(--vta-green-light));
-            border: none;
-            border-radius: 12px;
-            padding: 0.75rem 1.5rem;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            color: var(--white);
-        }
-
-        .btn-primary:hover {
-            background: linear-gradient(135deg, var(--vta-green-dark), var(--vta-green));
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(82, 183, 136, 0.3);
-            color: var(--white);
-        }
-
-        .btn-success {
-            background: linear-gradient(135deg, var(--vta-green), var(--vta-green-light));
-            border: none;
-            border-radius: 12px;
-        }
-
-        .btn-warning {
-            background: linear-gradient(135deg, var(--vta-orange), var(--vta-orange-light));
-            border: none;
-            border-radius: 12px;
-        }
-
-        .btn-danger {
-            background: linear-gradient(135deg, var(--vta-orange-dark), var(--vta-orange));
-            border: none;
-            border-radius: 12px;
-        }
-
-        .btn-outline-primary {
-            border: 2px solid var(--vta-green);
-            color: var(--vta-green);
-            border-radius: 12px;
-            font-weight: 600;
-            background: transparent;
-            transition: all 0.3s ease;
-        }
-
-        .btn-outline-primary:hover {
-            background: var(--vta-green);
-            color: var(--white);
-            transform: translateY(-1px);
-        }
-
-        /* Cards */
-        .card {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s ease;
-            background: var(--white);
-        }
-
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .card-header {
-            background: linear-gradient(135deg, var(--vta-green), var(--vta-green-light));
-            color: var(--white);
-            border-radius: 15px 15px 0 0 !important;
-            padding: 1.5rem;
-            border: none;
-        }
-
-        /* Search and Filters */
-        .search-filters {
-            background: var(--white);
-            padding: 2rem;
-            border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-        }
-
-        /* Forms */
-        .form-label {
-            font-weight: 600;
-            color: var(--gray-dark);
-            margin-bottom: 0.5rem;
-        }
-
-        .form-control, .form-select {
-            border-radius: 10px;
-            border: 2px solid var(--gray-light);
-            padding: 0.75rem 1rem;
-            transition: all 0.3s ease;
-            background: var(--white);
-        }
-
-        .form-control:focus, .form-select:focus {
-            border-color: var(--vta-green);
-            box-shadow: 0 0 0 0.2rem rgba(82, 183, 136, 0.15);
-            background: var(--white);
-        }
-
-        /* Table */
-        .table {
-            background: var(--white);
-            border-radius: 15px;
-            overflow: hidden;
-        }
-
-        .table th {
-            background: var(--gray-light);
-            border: none;
-            font-weight: 600;
-            color: var(--gray-dark);
-            padding: 1rem 1.5rem;
-        }
-
-        .table td {
-            padding: 1rem 1.5rem;
-            border: none;
-            border-bottom: 1px solid var(--gray-light);
-            vertical-align: middle;
-        }
-
-        .table tbody tr:hover {
-            background: rgba(82, 183, 136, 0.05);
-        }
-
-        /* Status badges */
-        .badge {
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 0.8rem;
-        }
-
-        .status-agendado {
-            background: linear-gradient(135deg, var(--vta-blue), var(--vta-blue-light));
-            color: var(--white);
-        }
-
-        .status-confirmado {
-            background: linear-gradient(135deg, var(--vta-green), var(--vta-green-light));
-            color: var(--white);
-        }
-
-        .status-realizado {
-            background: linear-gradient(135deg, #6f42c1, #8B5CF6);
-            color: var(--white);
-        }
-
-        .status-cancelado {
-            background: linear-gradient(135deg, var(--vta-orange-dark), var(--vta-orange));
-            color: var(--white);
-        }
-
-        /* Quick actions */
-        .quick-actions {
+        .page-actions {
             display: flex;
             gap: 0.75rem;
             flex-wrap: wrap;
         }
 
-        .btn-sm {
-            padding: 0.5rem 1rem;
-            font-size: 0.875rem;
-            border-radius: 10px;
-        }
-
-        /* Modal customization */
-        .modal-content {
-            border-radius: 15px;
+        .btn {
             border: none;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            border-radius: 12px;
+            padding: 0.65rem 1.5rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
         }
 
-        .modal-header {
+        .btn i {
+            font-size: 1rem;
+        }
+
+        .btn-primary {
             background: linear-gradient(135deg, var(--vta-green), var(--vta-green-light));
             color: var(--white);
-            border-radius: 15px 15px 0 0;
-            border: none;
+            box-shadow: 0 6px 18px rgba(82, 183, 136, 0.3);
         }
 
-        .modal-footer {
-            border: none;
+        .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--gray-light);
+            border: 1px solid var(--gray-medium);
+            color: var(--gray-dark);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-medium);
+            color: var(--white);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--gray-medium);
+            color: var(--gray-medium);
+        }
+
+        .btn-outline:hover {
+            background: var(--vta-green);
+            border-color: var(--vta-green);
+            color: var(--white);
+        }
+
+        .btn-sm {
+            padding: 0.45rem 1rem;
+            font-size: 0.85rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--white);
+            border-radius: 15px;
             padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
         }
 
-        .btn-close-white {
-            filter: invert(1) grayscale(100%) brightness(200%);
+        .stat-icon {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 1.4rem;
         }
 
-        /* Input groups */
-        .input-group .form-control {
-            border-right: none;
+        .stat-icon.orange { background: linear-gradient(135deg, var(--vta-orange), var(--vta-orange-light)); }
+        .stat-icon.green { background: linear-gradient(135deg, var(--vta-green), var(--vta-green-light)); }
+        .stat-icon.blue { background: linear-gradient(135deg, var(--vta-blue), var(--vta-blue-light)); }
+        .stat-icon.red { background: linear-gradient(135deg, var(--vta-orange-dark), var(--vta-orange)); }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
         }
 
-        .input-group .btn {
-            border-left: none;
-            border-color: var(--gray-light);
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--gray-medium);
         }
 
-        /* Pagination */
+        .filters-section {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .filters-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .section-subtitle {
+            color: var(--gray-medium);
+            margin-top: 0.25rem;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-label {
+            font-weight: 600;
+            color: var(--gray-dark);
+        }
+
+        .filter-input {
+            position: relative;
+        }
+
+        .filter-input input,
+        .filter-input select {
+            width: 100%;
+            border: 2px solid var(--gray-light);
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            background: var(--white);
+        }
+
+        .filter-input.with-icon input {
+            padding-left: 2.75rem;
+        }
+
+        .filter-input i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-medium);
+        }
+
+        .filter-input input:focus,
+        .filter-input select:focus {
+            border-color: var(--vta-green);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(82, 183, 136, 0.12);
+        }
+
+        .filter-actions {
+            margin-top: 1.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .table-section {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .table-header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .table-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .table-subtitle {
+            color: var(--gray-medium);
+            margin-top: 0.25rem;
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        .agendamentos-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 900px;
+        }
+
+        .agendamentos-table th {
+            text-align: left;
+            padding: 0.85rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--gray-light);
+            color: var(--gray-medium);
+            background: var(--gray-light);
+        }
+
+        .agendamentos-table td {
+            padding: 1rem 0.85rem;
+            border-bottom: 1px solid var(--gray-light);
+            vertical-align: top;
+        }
+
+        .agendamentos-table tbody tr:hover {
+            background: rgba(82, 183, 136, 0.08);
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.35rem 0.9rem;
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: var(--white);
+        }
+
+        .status-agendado { background: linear-gradient(135deg, var(--vta-blue), var(--vta-blue-light)); }
+        .status-confirmado { background: linear-gradient(135deg, var(--vta-green), var(--vta-green-light)); }
+        .status-realizado { background: linear-gradient(135deg, #6f42c1, #8B5CF6); }
+        .status-cancelado { background: linear-gradient(135deg, var(--vta-orange-dark), var(--vta-orange)); }
+
+        .pagination-wrapper {
+            margin-top: 1.5rem;
+            display: flex;
+            justify-content: flex-end;
+        }
+
         .pagination {
-            --bs-pagination-color: var(--vta-green);
-            --bs-pagination-hover-color: var(--white);
-            --bs-pagination-hover-bg: var(--vta-green);
-            --bs-pagination-active-bg: var(--vta-green);
-            --bs-pagination-active-border-color: var(--vta-green);
+            display: flex;
+            list-style: none;
+            gap: 0.35rem;
+        }
+
+        .page-item {
+            border-radius: 10px;
+            overflow: hidden;
         }
 
         .page-link {
-            border-radius: 8px;
-            margin: 0 2px;
             border: none;
+            padding: 0.5rem 0.9rem;
+            background: var(--gray-light);
+            color: var(--gray-dark);
+            font-weight: 600;
         }
 
-        /* Dropdown menus */
-        .dropdown-menu {
-            border: none;
-            border-radius: 12px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-            padding: 0.5rem;
-        }
-
-        .dropdown-item {
-            border-radius: 8px;
-            padding: 0.75rem 1rem;
-            transition: all 0.3s ease;
-        }
-
-        .dropdown-item:hover {
+        .page-item.active .page-link,
+        .page-link:hover {
             background: var(--vta-green);
             color: var(--white);
         }
 
-        /* Responsive */
-        @media (max-width: 1024px) {
-            .main-content {
-                grid-template-columns: 1fr;
-                gap: 1.5rem;
-            }
-
-            .sidebar {
-                position: static;
-                order: 2;
-            }
+        .toast-container {
+            z-index: 9999 !important;
         }
 
-        @media (max-width: 768px) {
-            .header-content {
-                flex-direction: column;
-                gap: 1rem;
-            }
-
-            .header-right {
-                width: 100%;
-                justify-content: space-between;
-            }
-
-            .main-content {
-                padding: 1rem;
-            }
-
-            .page-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 1rem;
-            }
-
-            .user-details {
-                display: none;
-            }
-
-            .quick-actions {
-                flex-direction: column;
-            }
+        .modal-content {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
         }
 
-        /* Animation for loading states */
-        .loading {
-            position: relative;
-            overflow: hidden;
+        .modal-header {
+            border: none;
+            border-radius: 16px 16px 0 0;
+            background: linear-gradient(135deg, var(--vta-green), var(--vta-green-light));
+            color: var(--white);
         }
 
-        .loading::after {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-            animation: loading 1.5s infinite;
+        .modal-footer {
+            border: none;
         }
 
-        @keyframes loading {
-            0% { left: -100%; }
-            100% { left: 100%; }
-        }
-
-        /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
+            height: 8px;
         }
 
         ::-webkit-scrollbar-track {
@@ -565,28 +575,52 @@
             background: var(--vta-green-dark);
         }
 
-        /* Toast notifications */
-        .toast-container {
-            z-index: 9999 !important;
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                order: 2;
+            }
         }
 
-        /* Alerts */
-        .alert {
-            border: none;
-            border-radius: 12px;
-            padding: 1rem 1.5rem;
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .header-right {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .user-details {
+                display: none;
+            }
         }
 
-        .alert-warning {
-            background: linear-gradient(135deg, rgba(247, 127, 0, 0.1), rgba(252, 191, 73, 0.1));
-            color: var(--vta-orange-dark);
-            border-left: 4px solid var(--vta-orange);
+        @media (max-width: 576px) {
+            .page-actions {
+                width: 100%;
+                flex-direction: column;
+            }
+
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
     <div class="dashboard-container">
-        <!-- Header -->
         <header class="header">
             <div class="header-content">
                 <div class="header-left">
@@ -594,17 +628,17 @@
                         <i class="fas fa-stethoscope"></i>
                     </div>
                     <div class="header-title">
-                        <h1>VTA - Vet Assistance</h1>
+                        <h1>Agenda VTA</h1>
                         <p class="header-subtitle">Sistema de Agendamento Veterinário</p>
                     </div>
                 </div>
-                
+
                 <div class="header-right">
                     <div class="user-info">
-                        <div class="user-avatar">J</div>
+                        <div class="user-avatar">A</div>
                         <div class="user-details">
-                            <h3>Dr. João Silva</h3>
-                            <p class="user-role">Veterinário</p>
+                            <h3>Administrador</h3>
+                            <p class="user-role">admin@vta.com</p>
                         </div>
                     </div>
                     <button class="logout-btn" onclick="logout()" title="Sair do sistema">
@@ -614,9 +648,7 @@
             </div>
         </header>
 
-        <!-- Main Content -->
         <main class="main-content">
-            <!-- Sidebar -->
             <aside class="sidebar">
                 <div class="sidebar-section">
                     <h3 class="sidebar-title">Menu Principal</h3>
@@ -628,36 +660,31 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ url_for('agenda_page') }}" class="nav-link"
-                               onclick="window.location.href='{{ url_for('agenda_page') }}'; return false;">
-                                <i class="fas fa-calendar-alt"></i>
+                            <a href="{{ url_for('agenda_page') }}" class="nav-link">
+                                <i class="fas fa-calendar"></i>
                                 Agenda
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ url_for('agendamento_page') }}" class="nav-link active"
-                               onclick="window.location.href='{{ url_for('agendamento_page') }}'; return false;">
-                                <i class="fas fa-calendar-plus"></i>
-                                Agendamentos
+                            <a href="{{ url_for('agendamento_page') }}" class="nav-link active">
+                                <i class="fas fa-plus-circle"></i>
+                                Novo Agendamento
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ url_for('clientes_page') }}" class="nav-link"
-                               onclick="window.location.href='{{ url_for('clientes_page') }}'; return false;">
+                            <a href="{{ url_for('clientes_page') }}" class="nav-link">
                                 <i class="fas fa-users"></i>
                                 Clientes
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ url_for('pets_page') }}" class="nav-link"
-                               onclick="window.location.href='{{ url_for('pets_page') }}'; return false;">
+                            <a href="{{ url_for('pets_page') }}" class="nav-link">
                                 <i class="fas fa-paw"></i>
                                 Pets
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ url_for('salas_page') }}" class="nav-link"
-                               onclick="window.location.href='{{ url_for('salas_page') }}'; return false;">
+                            <a href="{{ url_for('salas_page') }}" class="nav-link">
                                 <i class="fas fa-door-open"></i>
                                 Salas
                             </a>
@@ -690,270 +717,269 @@
                 </div>
             </aside>
 
-            <!-- Page Content -->
-            <div class="page-content">
-                <!-- Page Header -->
-                <div class="page-header">
+            <div class="schedule-content">
+                <section class="page-header">
                     <div>
-                        <h2 class="page-title">Gerenciamento de Agendamentos</h2>
-                        <p class="page-subtitle">Gerencie consultas, exames e procedimentos</p>
+                        <h1 class="page-title">
+                            <i class="fas fa-calendar-check"></i>
+                            Gerenciamento de Agendamentos
+                        </h1>
+                        <p class="section-subtitle">
+                            Gerencie consultas, exames e procedimentos com o mesmo visual da tela de pets.
+                        </p>
                     </div>
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#agendamentoModal">
-                        <i class="fas fa-plus me-2"></i>Novo Agendamento
-                    </button>
-                </div>
+                    <div class="page-actions">
+                        <button class="btn btn-secondary" onclick="window.location.href='{{ url_for('agenda_page') }}'">
+                            <i class="fas fa-calendar-alt"></i>
+                            Agenda Completa
+                        </button>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#agendamentoModal">
+                            <i class="fas fa-plus"></i>
+                            Novo Agendamento
+                        </button>
+                    </div>
+                </section>
 
-                <!-- Search and Filters -->
-                <div class="search-filters">
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <label class="form-label">Buscar</label>
-                            <div class="input-group">
-                                <input type="text" class="form-control" placeholder="Cliente, pet ou serviço..." id="searchInput">
-                                <button class="btn btn-outline-primary" type="button">
-                                    <i class="fas fa-search"></i>
-                                </button>
+                <section class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon orange">
+                            <i class="fas fa-calendar-day"></i>
+                        </div>
+                        <div>
+                            <div class="stat-value" id="stat-hoje">0</div>
+                            <div class="stat-label">Agendados Hoje</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon green">
+                            <i class="fas fa-clipboard-check"></i>
+                        </div>
+                        <div>
+                            <div class="stat-value" id="stat-confirmados">0</div>
+                            <div class="stat-label">Confirmados</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon blue">
+                            <i class="fas fa-hourglass-half"></i>
+                        </div>
+                        <div>
+                            <div class="stat-value" id="stat-pendentes">0</div>
+                            <div class="stat-label">Pendentes</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon red">
+                            <i class="fas fa-ban"></i>
+                        </div>
+                        <div>
+                            <div class="stat-value" id="stat-cancelados">0</div>
+                            <div class="stat-label">Cancelados</div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="filters-section">
+                    <div class="filters-header">
+                        <h2 class="section-title">Filtros e Busca</h2>
+                        <p class="section-subtitle">Combine filtros para encontrar consultas específicas rapidamente.</p>
+                    </div>
+                    <div class="filter-grid">
+                        <div class="filter-item">
+                            <label class="filter-label" for="searchInput">Buscar</label>
+                            <div class="filter-input with-icon">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="searchInput" placeholder="Cliente, pet ou serviço...">
                             </div>
                         </div>
-                        <div class="col-md-2">
-                            <label class="form-label">Status</label>
-                            <select class="form-select" id="statusFilter">
-                                <option value="">Todos</option>
-                                <option value="agendado">Agendado</option>
-                                <option value="confirmado">Confirmado</option>
-                                <option value="realizado">Realizado</option>
-                                <option value="cancelado">Cancelado</option>
-                            </select>
+                        <div class="filter-item">
+                            <label class="filter-label" for="statusFilter">Status</label>
+                            <div class="filter-input">
+                                <select id="statusFilter">
+                                    <option value="">Todos</option>
+                                    <option value="agendado">Agendado</option>
+                                    <option value="confirmado">Confirmado</option>
+                                    <option value="realizado">Realizado</option>
+                                    <option value="cancelado">Cancelado</option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="col-md-2">
-                            <label class="form-label">Sala</label>
-                            <select class="form-select" id="salaFilter">
-                                <option value="">Todas</option>
-                                <option value="1">Consultório 1</option>
-                                <option value="2">Consultório 2</option>
-                                <option value="3">Cirurgia</option>
-                                <option value="4">Raio-X</option>
-                            </select>
+                        <div class="filter-item">
+                            <label class="filter-label" for="salaFilter">Sala</label>
+                            <div class="filter-input">
+                                <select id="salaFilter">
+                                    <option value="">Todas</option>
+                                    <option value="1">Consultório 1</option>
+                                    <option value="2">Consultório 2</option>
+                                    <option value="3">Cirurgia</option>
+                                    <option value="4">Raio-X</option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="col-md-2">
-                            <label class="form-label">Data Inicial</label>
-                            <input type="date" class="form-control" id="dataInicio">
+                        <div class="filter-item">
+                            <label class="filter-label" for="dataInicio">Data Inicial</label>
+                            <div class="filter-input">
+                                <input type="date" id="dataInicio">
+                            </div>
                         </div>
-                        <div class="col-md-2">
-                            <label class="form-label">Data Final</label>
-                            <input type="date" class="form-control" id="dataFim">
-                        </div>
-                    </div>
-                    <div class="row mt-3">
-                        <div class="col-12">
-                            <div class="quick-actions">
-                                <button class="btn btn-outline-primary btn-sm" onclick="filtrarHoje()">
-                                    <i class="fas fa-calendar-day me-1"></i>Hoje
-                                </button>
-                                <button class="btn btn-outline-primary btn-sm" onclick="filtrarSemana()">
-                                    <i class="fas fa-calendar-week me-1"></i>Esta Semana
-                                </button>
-                                <button class="btn btn-outline-primary btn-sm" onclick="filtrarMes()">
-                                    <i class="fas fa-calendar me-1"></i>Este Mês
-                                </button>
-                                <button class="btn btn-outline-secondary btn-sm" onclick="limparFiltros()">
-                                    <i class="fas fa-times me-1"></i>Limpar Filtros
-                                </button>
+                        <div class="filter-item">
+                            <label class="filter-label" for="dataFim">Data Final</label>
+                            <div class="filter-input">
+                                <input type="date" id="dataFim">
                             </div>
                         </div>
                     </div>
-                </div>
+                    <div class="filter-actions">
+                        <button class="btn btn-outline btn-sm" onclick="filtrarHoje()">
+                            <i class="fas fa-calendar-day"></i>
+                            Hoje
+                        </button>
+                        <button class="btn btn-outline btn-sm" onclick="filtrarSemana()">
+                            <i class="fas fa-calendar-week"></i>
+                            Esta Semana
+                        </button>
+                        <button class="btn btn-outline btn-sm" onclick="filtrarMes()">
+                            <i class="fas fa-calendar"></i>
+                            Este Mês
+                        </button>
+                        <button class="btn btn-secondary btn-sm" onclick="limparFiltros()">
+                            <i class="fas fa-times"></i>
+                            Limpar Filtros
+                        </button>
+                    </div>
+                </section>
 
-                <!-- Agendamentos Table -->
-                <div class="card">
-                    <div class="card-header">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">
-                                <i class="fas fa-list me-2"></i>Lista de Agendamentos
-                            </h5>
-                            <div class="d-flex gap-2">
-                                <button class="btn btn-outline-light btn-sm" onclick="exportarAgendamentos()">
-                                    <i class="fas fa-download me-1"></i>Exportar
-                                </button>
-                                <button class="btn btn-outline-light btn-sm" onclick="atualizarLista()">
-                                    <i class="fas fa-sync-alt me-1"></i>Atualizar
-                                </button>
-                            </div>
+                <section class="table-section">
+                    <div class="table-header">
+                        <div>
+                            <h2 class="table-title">Agenda Completa</h2>
+                            <p class="table-subtitle" id="paginationInfo">Mostrando 0 de 0 agendamentos</p>
+                        </div>
+                        <div class="table-actions">
+                            <button class="btn btn-secondary btn-sm" onclick="imprimirAgendamentos()">
+                                <i class="fas fa-print"></i>
+                                Imprimir
+                            </button>
+                            <button class="btn btn-secondary btn-sm" onclick="exportarAgendamentos()">
+                                <i class="fas fa-file-export"></i>
+                                Exportar
+                            </button>
+                            <button class="btn btn-primary btn-sm" onclick="atualizarLista(event)">
+                                <i class="fas fa-sync-alt"></i>
+                                Atualizar
+                            </button>
                         </div>
                     </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0" id="agendamentosTable">
-                                <thead>
-                                    <tr>
-                                        <th>Data/Hora</th>
-                                        <th>Cliente</th>
-                                        <th>Pet</th>
-                                        <th>Serviço</th>
-                                        <th>Veterinário</th>
-                                        <th>Sala</th>
-                                        <th>Status</th>
-                                        <th>Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="agendamentosTableBody">
-                                    <tr>
-                                        <td>
-                                            <div>
-                                                <strong>15/08/2025</strong><br>
-                                                <small class="text-muted">09:00</small>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div>
-                                                <strong>Maria Silva</strong><br>
-                                                <small class="text-muted">(51) 99999-9999</small>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div>
-                                                <strong>Rex</strong><br>
-                                                <small class="text-muted">Golden Retriever</small>
-                                            </div>
-                                        </td>
-                                        <td>Consulta Geral</td>
-                                        <td>Dr. João Silva</td>
-                                        <td>Consultório 1</td>
-                                        <td><span class="badge status-confirmado">Confirmado</span></td>
-                                        <td>
-                                            <div class="dropdown">
-                                                <button class="btn btn-outline-primary btn-sm dropdown-toggle" data-bs-toggle="dropdown">
-                                                    Ações
-                                                </button>
-                                                <ul class="dropdown-menu">
-                                                    <li><a class="dropdown-item" href="#" onclick="visualizarAgendamento(1)">
-                                                        <i class="fas fa-eye me-2"></i>Visualizar
-                                                    </a></li>
-                                                    <li><a class="dropdown-item" href="#" onclick="editarAgendamento(1)">
-                                                        <i class="fas fa-edit me-2"></i>Editar
-                                                    </a></li>
-                                                    <li><a class="dropdown-item" href="#" onclick="confirmarAgendamento(1)">
-                                                        <i class="fas fa-check me-2"></i>Confirmar
-                                                    </a></li>
-                                                    <li><a class="dropdown-item" href="#" onclick="realizarAgendamento(1)">
-                                                        <i class="fas fa-user-md me-2"></i>Realizar
-                                                    </a></li>
-                                                    <li><hr class="dropdown-divider"></li>
-                                                    <li><a class="dropdown-item text-danger" href="#" onclick="cancelarAgendamento(1)">
-                                                        <i class="fas fa-times me-2"></i>Cancelar
-                                                    </a></li>
-                                                </ul>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div>
-                                                <strong>15/08/2025</strong><br>
-                                                <small class="text-muted">10:30</small>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div>
-                                                <strong>João Santos</strong><br>
-                                                <small class="text-muted">(51) 88888-8888</small>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div>
-                                                <strong>Mimi</strong><br>
-                                                <small class="text-muted">Persa</small>
-                                            </div>
-                                        </td>
-                                        <td>Vacinação</td>
-                                        <td>Dra. Ana Costa</td>
-                                        <td>Consultório 2</td>
-                                        <td><span class="badge status-agendado">Agendado</span></td>
-                                        <td>
-                                            <div class="dropdown">
-                                                <button class="btn btn-outline-primary btn-sm dropdown-toggle" data-bs-toggle="dropdown">
-                                                    Ações
-                                                </button>
-                                                <ul class="dropdown-menu">
-                                                    <li><a class="dropdown-item" href="#" onclick="visualizarAgendamento(2)">
-                                                        <i class="fas fa-eye me-2"></i>Visualizar
-                                                    </a></li>
-                                                    <li><a class="dropdown-item" href="#" onclick="editarAgendamento(2)">
-                                                        <i class="fas fa-edit me-2"></i>Editar
-                                                    </a></li>
-                                                    <li><a class="dropdown-item" href="#" onclick="confirmarAgendamento(2)">
-                                                        <i class="fas fa-check me-2"></i>Confirmar
-                                                    </a></li>
-                                                    <li><a class="dropdown-item" href="#" onclick="realizarAgendamento(2)">
-                                                        <i class="fas fa-user-md me-2"></i>Realizar
-                                                    </a></li>
-                                                    <li><hr class="dropdown-divider"></li>
-                                                    <li><a class="dropdown-item text-danger" href="#" onclick="cancelarAgendamento(2)">
-                                                        <i class="fas fa-times me-2"></i>Cancelar
-                                                    </a></li>
-                                                </ul>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div>
-                                                <strong>14/08/2025</strong><br>
-                                                <small class="text-muted">14:00</small>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div>
-                                                <strong>Carlos Oliveira</strong><br>
-                                                <small class="text-muted">(51) 77777-7777</small>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div>
-                                                <strong>Bolt</strong><br>
-                                                <small class="text-muted">Labrador</small>
-                                            </div>
-                                        </td>
-                                        <td>Cirurgia</td>
-                                        <td>Dr. Pedro Lima</td>
-                                        <td>Cirurgia</td>
-                                        <td><span class="badge status-realizado">Realizado</span></td>
-                                        <td>
-                                            <div class="dropdown">
-                                                <button class="btn btn-outline-primary btn-sm dropdown-toggle" data-bs-toggle="dropdown">
-                                                    Ações
-                                                </button>
-                                                <ul class="dropdown-menu">
-                                                    <li><a class="dropdown-item" href="#" onclick="visualizarAgendamento(3)">
-                                                        <i class="fas fa-eye me-2"></i>Visualizar
-                                                    </a></li>
-                                                    <li><a class="dropdown-item" href="#" onclick="gerarRelatorio(3)">
-                                                        <i class="fas fa-file-medical me-2"></i>Relatório
-                                                    </a></li>
-                                                </ul>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                    <div class="table-wrapper">
+                        <table class="agendamentos-table" id="agendamentosTable">
+                            <thead>
+                                <tr>
+                                    <th>Data/Hora</th>
+                                    <th>Cliente</th>
+                                    <th>Pet</th>
+                                    <th>Serviço</th>
+                                    <th>Veterinário</th>
+                                    <th>Sala</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="agendamentosTableBody">
+                                <tr>
+                                    <td>
+                                        <strong>15/08/2025</strong><br>
+                                        <small class="text-muted">09:00</small>
+                                    </td>
+                                    <td>
+                                        <strong>Maria Silva</strong><br>
+                                        <small class="text-muted">(51) 99999-9999</small>
+                                    </td>
+                                    <td>
+                                        <strong>Rex</strong><br>
+                                        <small class="text-muted">Golden Retriever</small>
+                                    </td>
+                                    <td>Consulta Geral</td>
+                                    <td>Dr. João Silva</td>
+                                    <td>Consultório 1</td>
+                                    <td><span class="status-pill status-confirmado">Confirmado</span></td>
+                                    <td>
+                                        <div class="dropdown">
+                                            <button class="btn btn-outline btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+                                                Ações
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li><a class="dropdown-item" href="#" onclick="visualizarAgendamento(1)">
+                                                    <i class="fas fa-eye me-2"></i>Visualizar
+                                                </a></li>
+                                                <li><a class="dropdown-item" href="#" onclick="editarAgendamento(1)">
+                                                    <i class="fas fa-edit me-2"></i>Editar
+                                                </a></li>
+                                                <li><a class="dropdown-item" href="#" onclick="confirmarAgendamento(1)">
+                                                    <i class="fas fa-check me-2"></i>Confirmar
+                                                </a></li>
+                                                <li><a class="dropdown-item" href="#" onclick="realizarAgendamento(1)">
+                                                    <i class="fas fa-user-md me-2"></i>Realizar
+                                                </a></li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li><a class="dropdown-item text-danger" href="#" onclick="cancelarAgendamento(1)">
+                                                    <i class="fas fa-times me-2"></i>Cancelar
+                                                </a></li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <strong>15/08/2025</strong><br>
+                                        <small class="text-muted">10:30</small>
+                                    </td>
+                                    <td>
+                                        <strong>João Santos</strong><br>
+                                        <small class="text-muted">(51) 88888-8888</small>
+                                    </td>
+                                    <td>
+                                        <strong>Mimi</strong><br>
+                                        <small class="text-muted">Persa</small>
+                                    </td>
+                                    <td>Vacinação</td>
+                                    <td>Dra. Ana Costa</td>
+                                    <td>Consultório 2</td>
+                                    <td><span class="status-pill status-agendado">Agendado</span></td>
+                                    <td>
+                                        <div class="dropdown">
+                                            <button class="btn btn-outline btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+                                                Ações
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li><a class="dropdown-item" href="#" onclick="visualizarAgendamento(2)">
+                                                    <i class="fas fa-eye me-2"></i>Visualizar
+                                                </a></li>
+                                                <li><a class="dropdown-item" href="#" onclick="editarAgendamento(2)">
+                                                    <i class="fas fa-edit me-2"></i>Editar
+                                                </a></li>
+                                                <li><a class="dropdown-item" href="#" onclick="confirmarAgendamento(2)">
+                                                    <i class="fas fa-check me-2"></i>Confirmar
+                                                </a></li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li><a class="dropdown-item text-danger" href="#" onclick="cancelarAgendamento(2)">
+                                                    <i class="fas fa-times me-2"></i>Cancelar
+                                                </a></li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
-                </div>
-
-                <!-- Paginação -->
-                <div class="d-flex justify-content-between align-items-center mt-3">
-                    <small class="text-muted" id="paginationInfo">Mostrando 0-0 de 0 agendamentos</small>
-                    <nav>
-                        <ul class="pagination pagination-sm mb-0" id="paginationControls">
-                            <!-- Paginação gerada via JS -->
-                        </ul>
-                    </nav>
-                </div>
+                    <div class="pagination-wrapper">
+                        <ul class="pagination" id="paginationControls"></ul>
+                    </div>
+                </section>
             </div>
         </main>
     </div>
 
-    <!-- Modal Novo/Editar Agendamento -->
+    <!-- Modal Novo/Editar Agendamento --><!-- Modal Novo/Editar Agendamento -->
     <div class="modal fade" id="agendamentoModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -1266,6 +1292,7 @@
                 
                 agendamentos = await response.json();
                 agendamentosFiltrados = [...agendamentos];
+                atualizarResumoCards();
                 renderizarTabela(agendamentosFiltrados);
             } catch (error) {
                 console.error('Erro:', error);
@@ -1747,11 +1774,18 @@
         }
 
         // Atualizar lista
-        function atualizarLista() {
-            const btn = event.target.closest('button');
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Atualizando...';
+        function atualizarLista(ev) {
+            const btn = ev ? ev.target.closest('button') : null;
+            const original = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Atualizando...';
+                btn.disabled = true;
+            }
             carregarAgendamentos().then(() => {
-                btn.innerHTML = '<i class="fas fa-sync-alt me-1"></i>Atualizar';
+                if (btn) {
+                    btn.innerHTML = original || '<i class="fas fa-sync-alt"></i> Atualizar';
+                    btn.disabled = false;
+                }
                 mostrarToast('Lista atualizada!', 'success');
             });
         }
@@ -1946,8 +1980,23 @@
             return estatisticas;
         }
 
+        function atualizarResumoCards() {
+            const stats = calcularEstatisticas();
+            const mapping = [
+                ['stat-hoje', stats.hoje],
+                ['stat-confirmados', stats.confirmados],
+                ['stat-pendentes', stats.pendentes],
+                ['stat-cancelados', stats.cancelados]
+            ];
+            mapping.forEach(([id, value]) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = value;
+            });
+        }
+
         // Mostrar estatísticas no console para desenvolvimento
         console.log('📊 Estatísticas dos Agendamentos:', calcularEstatisticas());
+        atualizarResumoCards();
 
         // Função para backup dos dados (localStorage simulation)
         function salvarBackup() {
@@ -1973,18 +2022,601 @@
                 <head>
                     <title>Relatório de Agendamentos - VTA</title>
                     <style>
-                        body { font-family: Arial, sans-serif; margin: 20px; color: #343A40; }
-                        .header { text-align: center; margin-bottom: 30px; }
-                        .logo { font-size: 24px; font-weight: bold; color: #52B788; }
-                        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-                        th { background-color: #f8f9fa; font-weight: bold; color: #343A40; }
-                        .status-agendado { background: #2E86AB; color: white; padding: 2px 6px; border-radius: 3px; }
-                        .status-confirmado { background: #52B788; color: white; padding: 2px 6px; border-radius: 3px; }
-                        .status-realizado { background: #6f42c1; color: white; padding: 2px 6px; border-radius: 3px; }
-                        .status-cancelado { background: #D62828; color: white; padding: 2px 6px; border-radius: 3px; }
-                        .footer { margin-top: 30px; text-align: center; color: #6C757D; }
-                    </style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --vta-green: #52B788;
+            --vta-green-light: #74C69D;
+            --vta-green-dark: #40916C;
+            --vta-blue: #2E86AB;
+            --vta-blue-light: #48A3C7;
+            --vta-blue-dark: #1B5E7A;
+            --vta-orange: #F77F00;
+            --vta-orange-light: #FCBF49;
+            --vta-orange-dark: #D62828;
+            --white: #FFFFFF;
+            --gray-light: #F8F9FA;
+            --gray-medium: #6C757D;
+            --gray-dark: #343A40;
+        }
+
+        body {
+            background: var(--gray-light);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--gray-dark);
+        }
+
+        .dashboard-container {
+            display: grid;
+            grid-template-rows: auto 1fr;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--vta-green), var(--vta-green-dark));
+            color: var(--white);
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-mini {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--vta-green);
+            font-size: 1.4rem;
+        }
+
+        .header-title h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .header-subtitle {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--vta-green);
+            font-weight: 600;
+        }
+
+        .user-role {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        .logout-btn {
+            background: transparent;
+            border: none;
+            color: var(--white);
+            font-size: 1.2rem;
+            cursor: pointer;
+            border-radius: 50%;
+            padding: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: rotate(12deg);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            gap: 2rem;
+            padding: 1.5rem 2rem;
+            max-width: 100%;
+        }
+
+        .sidebar {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 1rem 1.25rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            height: fit-content;
+        }
+
+        .sidebar-section + .sidebar-section {
+            margin-top: 2rem;
+        }
+
+        .sidebar-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            color: var(--gray-medium);
+            margin-bottom: 0.75rem;
+        }
+
+        .nav-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: var(--gray-dark);
+            padding: 0.65rem 0.85rem;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: linear-gradient(135deg, var(--vta-green), var(--vta-green-light));
+            color: var(--white);
+            transform: translateX(5px);
+        }
+
+        .schedule-content {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .page-header {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--gray-dark);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .page-title i {
+            color: var(--vta-orange);
+            font-size: 1.8rem;
+        }
+
+        .page-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 12px;
+            padding: 0.65rem 1.5rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .btn i {
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--vta-green), var(--vta-green-light));
+            color: var(--white);
+            box-shadow: 0 6px 18px rgba(82, 183, 136, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--gray-light);
+            border: 1px solid var(--gray-medium);
+            color: var(--gray-dark);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-medium);
+            color: var(--white);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--gray-medium);
+            color: var(--gray-medium);
+        }
+
+        .btn-outline:hover {
+            background: var(--vta-green);
+            border-color: var(--vta-green);
+            color: var(--white);
+        }
+
+        .btn-sm {
+            padding: 0.45rem 1rem;
+            font-size: 0.85rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .stat-icon {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 1.4rem;
+        }
+
+        .stat-icon.orange { background: linear-gradient(135deg, var(--vta-orange), var(--vta-orange-light)); }
+        .stat-icon.green { background: linear-gradient(135deg, var(--vta-green), var(--vta-green-light)); }
+        .stat-icon.blue { background: linear-gradient(135deg, var(--vta-blue), var(--vta-blue-light)); }
+        .stat-icon.red { background: linear-gradient(135deg, var(--vta-orange-dark), var(--vta-orange)); }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--gray-medium);
+        }
+
+        .filters-section {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .filters-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .section-subtitle {
+            color: var(--gray-medium);
+            margin-top: 0.25rem;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-label {
+            font-weight: 600;
+            color: var(--gray-dark);
+        }
+
+        .filter-input {
+            position: relative;
+        }
+
+        .filter-input input,
+        .filter-input select {
+            width: 100%;
+            border: 2px solid var(--gray-light);
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            background: var(--white);
+        }
+
+        .filter-input.with-icon input {
+            padding-left: 2.75rem;
+        }
+
+        .filter-input i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-medium);
+        }
+
+        .filter-input input:focus,
+        .filter-input select:focus {
+            border-color: var(--vta-green);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(82, 183, 136, 0.12);
+        }
+
+        .filter-actions {
+            margin-top: 1.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .table-section {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .table-header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .table-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .table-subtitle {
+            color: var(--gray-medium);
+            margin-top: 0.25rem;
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        .agendamentos-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 900px;
+        }
+
+        .agendamentos-table th {
+            text-align: left;
+            padding: 0.85rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--gray-light);
+            color: var(--gray-medium);
+            background: var(--gray-light);
+        }
+
+        .agendamentos-table td {
+            padding: 1rem 0.85rem;
+            border-bottom: 1px solid var(--gray-light);
+            vertical-align: top;
+        }
+
+        .agendamentos-table tbody tr:hover {
+            background: rgba(82, 183, 136, 0.08);
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.35rem 0.9rem;
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: var(--white);
+        }
+
+        .status-agendado { background: linear-gradient(135deg, var(--vta-blue), var(--vta-blue-light)); }
+        .status-confirmado { background: linear-gradient(135deg, var(--vta-green), var(--vta-green-light)); }
+        .status-realizado { background: linear-gradient(135deg, #6f42c1, #8B5CF6); }
+        .status-cancelado { background: linear-gradient(135deg, var(--vta-orange-dark), var(--vta-orange)); }
+
+        .pagination-wrapper {
+            margin-top: 1.5rem;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .pagination {
+            display: flex;
+            list-style: none;
+            gap: 0.35rem;
+        }
+
+        .page-item {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .page-link {
+            border: none;
+            padding: 0.5rem 0.9rem;
+            background: var(--gray-light);
+            color: var(--gray-dark);
+            font-weight: 600;
+        }
+
+        .page-item.active .page-link,
+        .page-link:hover {
+            background: var(--vta-green);
+            color: var(--white);
+        }
+
+        .toast-container {
+            z-index: 9999 !important;
+        }
+
+        .modal-content {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .modal-header {
+            border: none;
+            border-radius: 16px 16px 0 0;
+            background: linear-gradient(135deg, var(--vta-green), var(--vta-green-light));
+            color: var(--white);
+        }
+
+        .modal-footer {
+            border: none;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--gray-light);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--vta-green);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--vta-green-dark);
+        }
+
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                order: 2;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .header-right {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .user-details {
+                display: none;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .page-actions {
+                width: 100%;
+                flex-direction: column;
+            }
+
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
                 </head>
                 <body>
                     <div class="header">

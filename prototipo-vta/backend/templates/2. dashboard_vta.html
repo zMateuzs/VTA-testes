@@ -5,7 +5,518 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Agenda VTA</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/dashboard.min.css') }}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --vta-green: #52B788;
+            --vta-green-light: #74C69D;
+            --vta-green-dark: #40916C;
+            --vta-blue: #2E86AB;
+            --vta-blue-light: #48A3C7;
+            --vta-blue-dark: #1B5E7A;
+            --vta-orange: #F77F00;
+            --vta-orange-light: #FCBF49;
+            --vta-orange-dark: #D62828;
+            --white: #FFFFFF;
+            --gray-light: #F8F9FA;
+            --gray-medium: #6C757D;
+            --gray-dark: #343A40;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--gray-light);
+            color: var(--gray-dark);
+        }
+
+        .dashboard-container {
+            display: grid;
+            grid-template-rows: auto 1fr;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--vta-green), var(--vta-green-dark));
+            color: var(--white);
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-mini {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--vta-green);
+            font-size: 1.5rem;
+        }
+
+        .header-title h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .header-subtitle {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+        }
+
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--vta-green);
+            font-weight: bold;
+        }
+
+        .user-details h3 {
+            font-size: 0.9rem;
+            margin-bottom: 2px;
+        }
+
+        .user-role {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        .logout-btn {
+            background: transparent;
+            border: none;
+            color: var(--white);
+            font-size: 1.2rem;
+            cursor: pointer;
+            border-radius: 50%;
+            padding: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: rotate(12deg);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            gap: 2rem;
+            padding: 1.5rem 2rem;
+            max-width: 100%;
+        }
+
+        .sidebar {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 1rem 1.25rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            width: 220px;
+            height: fit-content;
+            position: relative;
+        }
+
+        .sidebar-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .sidebar-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            color: var(--gray-medium);
+            margin-bottom: 0.75rem;
+            padding-left: 0.25rem;
+        }
+
+        .nav-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            text-decoration: none;
+            color: var(--gray-dark);
+            padding: 0.65rem 0.85rem;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: linear-gradient(135deg, var(--vta-green), var(--vta-green-light));
+            color: var(--white);
+            transform: translateX(5px);
+        }
+
+        .nav-link i {
+            font-size: 1rem;
+            width: 18px;
+        }
+
+        .dashboard-content {
+            display: grid;
+            gap: 1.5rem;
+            width: 100%;
+        }
+
+        .page-header {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--gray-dark);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .page-title i {
+            color: var(--vta-orange);
+            font-size: 1.8rem;
+        }
+
+        .section-subtitle {
+            color: var(--gray-medium);
+            margin-top: 0.25rem;
+        }
+
+        .page-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 12px;
+            padding: 0.65rem 1.5rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .btn i {
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--vta-green), var(--vta-green-light));
+            color: var(--white);
+            box-shadow: 0 6px 18px rgba(82, 183, 136, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--gray-light);
+            border: 1px solid var(--gray-medium);
+            color: var(--gray-dark);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-medium);
+            color: var(--white);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .stat-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--gray-medium);
+        }
+
+        .stat-icon {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 1.4rem;
+        }
+
+        .stat-icon.green { background: linear-gradient(135deg, var(--vta-green), var(--vta-green-light)); }
+        .stat-icon.blue { background: linear-gradient(135deg, var(--vta-blue), var(--vta-blue-light)); }
+        .stat-icon.orange { background: linear-gradient(135deg, var(--vta-orange), var(--vta-orange-light)); }
+
+        .card-section {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .card-section + .card-section {
+            margin-top: 0;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+        }
+
+        .action-btn {
+            border: none;
+            border-radius: 15px;
+            padding: 1.5rem;
+            background: var(--gray-light);
+            color: var(--gray-dark);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .action-btn i {
+            font-size: 1.5rem;
+            color: var(--vta-green);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-3px);
+            background: var(--white);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        .schedule-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .schedule-card {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 1.75rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .schedule-card .section-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .schedule-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        .schedule-item:last-child {
+            border-bottom: none;
+        }
+
+        .schedule-time {
+            font-weight: 600;
+            color: var(--vta-blue);
+            min-width: 60px;
+        }
+
+        .schedule-details h4 {
+            font-size: 1rem;
+            margin-bottom: 0.35rem;
+        }
+
+        .schedule-details p {
+            font-size: 0.9rem;
+            color: var(--gray-medium);
+        }
+
+        .notification-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+
+        .notification-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+        }
+
+        .notification-icon.info { background: var(--vta-blue); }
+        .notification-icon.warning { background: var(--vta-orange); }
+        .notification-icon.success { background: var(--vta-green); }
+        .notification-icon.default { background: var(--gray-medium); }
+
+        .notification-content h5 {
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .notification-content p {
+            font-size: 0.9rem;
+            color: var(--gray-medium);
+        }
+
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                order: 2;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .header-right {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .page-actions {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .schedule-section {
+                grid-template-columns: 1fr;
+            }
+
+            .user-details {
+                display: none;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .page-actions {
+                flex-direction: column;
+            }
+
+            .action-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="dashboard-container">
@@ -20,7 +531,7 @@
                         <p class="header-subtitle">Sistema de Agendamento Veterinário</p>
                     </div>
                 </div>
-                
+
                 <div class="header-right">
                     <div class="user-info">
                         <div class="user-avatar">A</div>
@@ -42,46 +553,41 @@
                     <h3 class="sidebar-title">Menu Principal</h3>
                     <ul class="nav-menu">
                         <li class="nav-item">
-                            <a href="2.%20dashboard_vta.html" class="nav-link active">
+                            <a href="{{ url_for('dashboard') }}" class="nav-link active">
                                 <i class="fas fa-chart-pie"></i>
                                 Dashboard
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ url_for('agenda_page') }}" class="nav-link"
-                               onclick="window.location.href='{{ url_for('agenda_page') }}'; return false;">
+                            <a href="{{ url_for('agenda_page') }}" class="nav-link">
                                 <i class="fas fa-calendar"></i>
                                 Agenda
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ url_for('agendamento_page') }}" class="nav-link"
-                               onclick="window.location.href='{{ url_for('agendamento_page') }}'; return false;">
+                            <a href="{{ url_for('agendamento_page') }}" class="nav-link">
                                 <i class="fas fa-plus-circle"></i>
                                 Novo Agendamento
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ url_for('clientes_page') }}" class="nav-link"
-                               onclick="window.location.href='{{ url_for('clientes_page') }}'; return false;">
-                                 <i class="fas fa-users"></i>
-                                 Clientes
-                             </a>
-                         </li>
+                            <a href="{{ url_for('clientes_page') }}" class="nav-link">
+                                <i class="fas fa-users"></i>
+                                Clientes
+                            </a>
+                        </li>
                         <li class="nav-item">
-                            <a href="{{ url_for('pets_page') }}" class="nav-link"
-                               onclick="window.location.href='{{ url_for('pets_page') }}'; return false;">
+                            <a href="{{ url_for('pets_page') }}" class="nav-link">
                                 <i class="fas fa-paw"></i>
                                 Pets
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ url_for('salas_page') }}" class="nav-link"
-                               onclick="window.location.href='{{ url_for('salas_page') }}'; return false;">
-                                 <i class="fas fa-door-open"></i>
-                                 Salas
-                             </a>
-                         </li>
+                            <a href="{{ url_for('salas_page') }}" class="nav-link">
+                                <i class="fas fa-door-open"></i>
+                                Salas
+                            </a>
+                        </li>
                     </ul>
                 </div>
 
@@ -89,22 +595,19 @@
                     <h3 class="sidebar-title">Administração</h3>
                     <ul class="nav-menu">
                         <li class="nav-item">
-                            <a href="{{ url_for('relatorios_dashboard') }}" class="nav-link"
-                               onclick="window.location.href='{{ url_for('relatorios_dashboard') }}'; return false;">
+                            <a href="{{ url_for('relatorios_dashboard') }}" class="nav-link">
                                 <i class="fas fa-chart-bar"></i>
                                 Relatórios ADM
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ url_for('relatorios_pets') }}" class="nav-link"
-                               onclick="window.location.href='{{ url_for('relatorios_pets') }}'; return false;">
+                            <a href="{{ url_for('relatorios_pets') }}" class="nav-link">
                                 <i class="fas fa-file-medical"></i>
                                 Histórico Pets
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ url_for('usuarios_page') }}" class="nav-link"
-                               onclick="window.location.href='{{ url_for('usuarios_page') }}'; return false;">
+                            <a href="{{ url_for('usuarios_page') }}" class="nav-link">
                                 <i class="fas fa-user-cog"></i>
                                 Usuários
                             </a>
@@ -114,86 +617,86 @@
             </aside>
 
             <div class="dashboard-content">
-                <section class="stats-grid" style="grid-template-columns: repeat(3, 1fr);">
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <div class="stat-info">
-                                <div class="stat-value" id="stat-consultas-hoje">{{ consultas_hoje }}</div>
-                                <div class="stat-label">Consultas Hoje</div>
-                            </div>
-                            <div class="stat-icon green">
-                                <i class="fas fa-calendar-check"></i>
-                            </div>
-                        </div>
-                        <div class="stat-trend trend-positive">
-                            <i class="fas fa-arrow-up"></i>
-                            <span>+15% vs ontem</span>
-                        </div>
+                <section class="page-header">
+                    <div>
+                        <h1 class="page-title">
+                            <i class="fas fa-chart-pie"></i>
+                            Visão Geral da Clínica
+                        </h1>
+                        <p class="section-subtitle">Acompanhe os principais indicadores e tome decisões rápidas.</p>
                     </div>
-
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <div class="stat-info">
-                                <div class="stat-value" id="stat-salas-disponiveis">{{ salas_disponiveis }}</div>
-                                <div class="stat-label">Salas Disponíveis</div>
-                            </div>
-                            <div class="stat-icon blue">
-                                <i class="fas fa-door-open"></i>
-                            </div>
-                        </div>
-                        <div class="stat-trend trend-positive">
-                            <i class="fas fa-check-circle"></i>
-                            <span><span id="stat-salas-ocupadas">{{ salas_ocupadas }}</span> ocupadas</span>
-                        </div>
+                    <div class="page-actions">
+                        <button class="btn btn-secondary" onclick="window.location.href='{{ url_for('agenda_page') }}'">
+                            <i class="fas fa-calendar-alt"></i>
+                            Ver Agenda
+                        </button>
+                        <button class="btn btn-primary" onclick="window.location.href='{{ url_for('agendamento_page') }}'">
+                            <i class="fas fa-plus"></i>
+                            Novo Agendamento
+                        </button>
                     </div>
-
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <div class="stat-info">
-                                <div class="stat-value" id="stat-clientes-ativos">{{ clientes_ativos }}</div>
-                                <div class="stat-label">Clientes Ativos</div>
-                            </div>
-                            <div class="stat-icon orange">
-                                <i class="fas fa-users"></i>
-                            </div>
-                        </div>
-                        <div class="stat-trend trend-positive">
-                            <i class="fas fa-arrow-up"></i>
-                            <span>+8 este mês</span>
-                        </div>
-                    </div>
-
                 </section>
 
-                <section class="quick-actions">
-                    <h2 class="section-title">Ações Rápidas</h2>
+                <section class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <div class="stat-label">Consultas Hoje</div>
+                            <div class="stat-value" id="stat-consultas-hoje">{{ consultas_hoje }}</div>
+                        </div>
+                        <div class="stat-icon green">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <div class="stat-label">Salas Disponíveis</div>
+                            <div class="stat-value" id="stat-salas-disponiveis">{{ salas_disponiveis }}</div>
+                            <small class="section-subtitle"><span id="stat-salas-ocupadas">{{ salas_ocupadas }}</span> ocupadas</small>
+                        </div>
+                        <div class="stat-icon blue">
+                            <i class="fas fa-door-open"></i>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <div class="stat-label">Clientes Ativos</div>
+                            <div class="stat-value" id="stat-clientes-ativos">{{ clientes_ativos }}</div>
+                        </div>
+                        <div class="stat-icon orange">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="card-section">
+                    <h2 class="card-title">Ações Rápidas</h2>
                     <div class="action-buttons">
                         <button class="action-btn" onclick="window.location.href='{{ url_for('agendamento_page') }}'">
                             <i class="fas fa-plus-circle"></i>
                             <div>
                                 <h4>Novo Agendamento</h4>
-                                <p>Agendar consulta</p>
+                                <p>Cadastre consultas e procedimentos.</p>
                             </div>
                         </button>
                         <button class="action-btn" onclick="window.location.href='{{ url_for('clientes_page') }}'">
                             <i class="fas fa-user-plus"></i>
                             <div>
                                 <h4>Cadastrar Cliente</h4>
-                                <p>Novo cliente/pet</p>
+                                <p>Adicione clientes e seus pets.</p>
                             </div>
                         </button>
                         <button class="action-btn" onclick="verAgenda()">
                             <i class="fas fa-calendar-alt"></i>
                             <div>
                                 <h4>Visualizar Agenda</h4>
-                                <p>Agenda completa</p>
+                                <p>Consulte horários e salas.</p>
                             </div>
                         </button>
                         <button class="action-btn" onclick="window.location.href='{{ url_for('gerar_relatorio_dashboard_pdf') }}'">
                             <i class="fas fa-file-export"></i>
                             <div>
                                 <h4>Gerar Relatório</h4>
-                                <p>Relatórios em PDF</p>
+                                <p>Baixe indicadores em PDF.</p>
                             </div>
                         </button>
                     </div>
@@ -216,7 +719,6 @@
                                     </div>
                                 {% endif %}
                             {% endfor %}
-                            
                             {% if not ns.found %}
                                 <div class="schedule-item">
                                     <div class="schedule-details">
@@ -235,11 +737,10 @@
 
                     <div class="schedule-card">
                         <h2 class="section-title">Notificações</h2>
-                        <div class="notifications">
-                            {% if notificacoes %}
-                                {% for notif in notificacoes %}
+                        {% if notificacoes %}
+                            {% for notif in notificacoes %}
                                 <div class="notification-item">
-                                    <div class="notification-icon {{ notif.tipo }}">
+                                    <div class="notification-icon {{ notif.tipo if notif.tipo else 'default' }}">
                                         {% if notif.tipo == 'info' %}
                                             <i class="fas fa-info"></i>
                                         {% elif notif.tipo == 'warning' %}
@@ -253,18 +754,13 @@
                                     <div class="notification-content">
                                         <h5>{{ notif.titulo }}</h5>
                                         <p>{{ notif.mensagem }}</p>
-                                        <p class="text-muted small" style="font-size: 0.75rem; margin-top: 2px;">{{ notif.created_at }}</p>
+                                        <p class="section-subtitle" style="font-size: 0.8rem;">{{ notif.created_at }}</p>
                                     </div>
                                 </div>
-                                {% endfor %}
-                            {% else %}
-                                <div class="notification-item">
-                                    <div class="notification-content">
-                                        <p class="text-muted">Sem notificações no momento...</p>
-                                    </div>
-                                </div>
-                            {% endif %}
-                        </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="section-subtitle">Sem notificações no momento.</p>
+                        {% endif %}
                     </div>
                 </section>
             </div>
@@ -273,37 +769,5 @@
 
     <script src="{{ url_for('static', filename='assets/js/dashboard.js') }}" defer></script>
     <script src="{{ url_for('static', filename='assets/js/vta-nav.js') }}" defer></script>
-
-    {% raw %}
-    <script>
-        // Nav links: permite navegação para rotas do servidor e para arquivos estáticos
-        (function () {
-            'use strict';
-            const navLinks = document.querySelectorAll('.nav-link');
-            if (!navLinks || !navLinks.length) return;
-
-            navLinks.forEach(function (link) {
-                link.addEventListener('click', function (e) {
-                    const href = (link.getAttribute('href') || '').trim();
-
-                    // Se for rota do servidor (começa com /) ou URL externa, deixa o navegador navegar
-                    if (href.startsWith('/') || href.startsWith('http')) {
-                        navLinks.forEach(function (l) { l.classList.remove('active'); });
-                        link.classList.add('active');
-                        return;
-                    }
-
-                    // Se for link relativo para arquivo estático (ex: "6.%20pets_vta.html"), navega explicitamente
-                    if (href && href !== '#') {
-                        e.preventDefault();
-                        navLinks.forEach(function (l) { l.classList.remove('active'); });
-                        link.classList.add('active');
-                        window.location.href = href;
-                    }
-                }, { passive: true });
-            });
-        })();
-    </script>
-    {% endraw %}
 </body>
 </html>

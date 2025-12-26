@@ -41,20 +41,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (navMenu) {
         navMenu.addEventListener('click', (e) => {
             const link = e.target.closest('.nav-link');
-            if (link) {
+            if (!link) return;
+
+            document.querySelectorAll('.nav-link').forEach((l) => l.classList.remove('active'));
+            link.classList.add('active');
+
+            if (!link.getAttribute('href') || link.getAttribute('href') === '#') {
                 e.preventDefault();
-
-                // Remove a classe 'active' de todos os links
-                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-
-                // Adiciona a classe 'active' ao link clicado
-                link.classList.add('active');
-
-                // Simula a navegação
-                const linkText = link.innerText.trim();
-                if (linkText !== 'Dashboard') {
-                    alert(`Navegando para: ${linkText}`);
-                }
             }
         });
     }

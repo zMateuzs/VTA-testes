@@ -147,10 +147,10 @@ body {
 /* Conteúdo Principal: Layout da área principal, com sidebar e conteúdo */
 .main-content {
     display: grid;
-    grid-template-columns: 250px 1fr; /* Coluna fixa para sidebar, o resto para o conteúdo */
+    grid-template-columns: 220px 1fr; /* Coluna fixa para sidebar, o resto para o conteúdo */
     gap: 2rem;
-    padding: 2rem;
-    max-width: 1400px;
+    padding: 1.5rem 2rem;
+    max-width: 100%;
     margin: 0 auto;
 }
 
@@ -158,11 +158,11 @@ body {
 .sidebar {
     background: var(--white);
     border-radius: 15px;
-    padding: 1.5rem;
+    padding: 1rem 1.25rem;
     height: fit-content; /* Altura se ajusta ao conteúdo */
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-    position: sticky; /* Mantém a sidebar fixa ao rolar */
-    top: 100px;
+    position: relative; /* Mantém a sidebar fixa ao rolar */
+    width: 220px;
 }
 
 /* Seções da Sidebar */
@@ -457,12 +457,10 @@ body {
 @media (max-width: 1024px) {
     .main-content {
         grid-template-columns: 1fr; /* Muda para layout de coluna única */
-        gap: 1.5rem;
     }
 
     .sidebar {
-        position: static; /* Remove o posicionamento fixo */
-        order: 2; /* Move a sidebar para baixo do conteúdo principal */
+        width: 100%;
     }
 
     .schedule-section {
