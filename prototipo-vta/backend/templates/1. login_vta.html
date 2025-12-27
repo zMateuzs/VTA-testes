@@ -308,53 +308,126 @@
 
         /* Responsividade */
         @media (max-width: 768px) {
+            body {
+                padding: 14px 10px;
+                align-items: flex-start;
+                justify-content: flex-start;
+                background: linear-gradient(180deg, var(--vta-green) 0%, var(--gray-light) 50%);
+            }
+
             .login-container {
                 grid-template-columns: 1fr;
                 max-width: 400px;
+                width: 100%;
+                margin: 0 auto;
+                min-height: auto;
+                border-radius: 18px;
             }
 
             .login-branding {
-                padding: 40px 30px;
-                min-height: 300px;
+                padding: 32px 22px;
+                min-height: 220px;
+                text-align: center;
             }
 
             .branding-title {
-                font-size: 2em;
+                font-size: 1.9em;
+                margin-bottom: 10px;
+            }
+
+            .branding-subtitle {
+                font-size: 0.9em;
+                line-height: 1.4;
             }
 
             .logo {
-                width: 100px;
-                height: 100px;
+                width: 92px;
+                height: 92px;
+                margin-bottom: 22px;
             }
 
-            .logo i {
-                font-size: 40px;
+            .logo img {
+                width: 72px !important;
             }
 
             .login-form-container {
-                padding: 40px 30px;
+                padding: 30px 22px 24px;
             }
 
             .form-header h2 {
-                font-size: 1.8em;
+                font-size: 1.6em;
+            }
+
+            .form-header p {
+                font-size: 0.9em;
+            }
+
+            .login-form {
+                gap: 20px;
+            }
+
+            .form-group input {
+                padding: 13px 18px 13px 46px;
+                font-size: 0.95em;
+            }
+
+            .form-options {
+                gap: 8px;
+            }
+
+            .login-button {
+                margin-top: 2px;
+                padding: 14px 20px;
+                font-size: 1em;
             }
         }
 
         @media (max-width: 480px) {
             body {
-                padding: 10px;
+                padding: 10px 8px;
+            }
+
+            .login-container {
+                max-width: 360px;
+                border-radius: 16px;
             }
 
             .login-branding {
-                padding: 30px 20px;
+                padding: 26px 18px;
+            }
+
+            .branding-title {
+                font-size: 1.6em;
+            }
+
+            .branding-subtitle {
+                font-size: 0.85em;
+            }
+
+            .pet-icon {
+                display: none;
             }
 
             .login-form-container {
-                padding: 30px 20px;
+                padding: 24px 18px 22px;
+            }
+
+            .form-header h2 {
+                font-size: 1.45em;
+            }
+
+            .form-options {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 6px;
             }
 
             .form-group input {
-                padding: 12px 16px 12px 45px;
+                padding: 12px 16px 12px 44px;
+            }
+
+            .login-button {
+                width: 100%;
             }
         }
     </style>
