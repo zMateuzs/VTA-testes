@@ -1,0 +1,16 @@
+# Virtual environment
+venv/
+
+# Environment files
+.env
+
+# Python cache
+__pycache__/
+**/__pycache__/
+*.pyc
+
+# macOS junk
+.DS_Store
+
+# Nested duplicate project copy
+backend/TIC55-AGENDA-VTA/

@@ -2176,7 +2176,8 @@
         function calcularEstatisticas() {
             const hoje = new Date().toISOString().split('T')[0];
             const estatisticas = {
-                hoje: agendamentos.filter(a => a.data === hoje).length,
+                // Contabiliza apenas agendamentos do dia que não foram cancelados
+                hoje: agendamentos.filter(a => a.data === hoje && a.status !== 'cancelado').length,
                 pendentes: agendamentos.filter(a => a.status === 'agendado').length,
                 confirmados: agendamentos.filter(a => a.status === 'confirmado').length,
                 realizados: agendamentos.filter(a => a.status === 'realizado').length,

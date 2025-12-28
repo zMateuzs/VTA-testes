@@ -45,12 +45,12 @@ No back-end, a aplicação segue um modelo monolítico em Flask, com todas as ro
 |------------------|----------------------------------------------------------------------------|
 | Front-end        | HTML5, CSS3, JavaScript (renderização server-side via templates Flask)    |
 | Back-end         | Python, Flask                                                              |
-| Banco de dados   | SQLite (arquivo `agenda.db`, acessado via `sqlite3`)                      |
+| Banco de dados   | PostgreSQL (acesso via `psycopg2`)                                        |
 | Versionamento    | Git, GitHub                                                                |
 | Gerenciamento    | Trello                                                                     |
 | Prototipagem     | Figma                                                                      |
 
-Observação: scripts legados para PostgreSQL (como `backend/setup_db.py`) foram mantidos apenas para referência acadêmica. A versão atual do sistema em produção/uso local trabalha com **SQLite**.
+Observação: a stack ativa usa **PostgreSQL** e o script de provisionamento está em `backend/setup_db.py` (seed do admin e salas padrão).
 
 ---
 
@@ -71,7 +71,7 @@ git clone https://github.com/trickGit/TIC55-AGENDA-VTA.git
 cd TIC55-AGENDA-VTA/prototipo-vta
 ```
 
-### 3. Configurar o back-end (Flask + SQLite)
+### 3. Configurar o back-end (Flask + PostgreSQL)
 
 Dentro da pasta `prototipo-vta`, navegue até o diretório `backend` e crie o ambiente virtual:
 
@@ -82,27 +82,28 @@ source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-Opcionalmente, crie um arquivo `.env` na pasta `backend` para configurar a chave secreta da aplicação:
+Crie um arquivo `.env` na pasta `backend` para configurar a aplicação e o banco PostgreSQL:
 
 ```bash
 SECRET_KEY=sua-chave-secreta-segura
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=agenda_vta
+DB_USER=postgres
+DB_PASS=postgres
 ```
 
-Se o arquivo `.env` não for configurado, a aplicação utiliza um valor padrão adequado para ambiente de desenvolvimento.
+Se o arquivo `.env` não for configurado, a aplicação utiliza valores padrão apenas para desenvolvimento.
 
-### 4. Inicializar o banco de dados SQLite
+### 4. Inicializar o banco de dados PostgreSQL
 
-Ainda dentro de `backend`, execute os scripts de criação das tabelas:
+Ainda dentro de `backend`, execute o script de criação das tabelas e seed:
 
 ```bash
-python setup_sqlite.py
-python setup_clientes_table.py
-python setup_pets_table.py
-python setup_salas_table.py
-python create_notifications_table.py
+python setup_db.py
 ```
 
-Esses scripts criam o arquivo `agenda.db` na raiz de `backend` e todas as tabelas necessárias (agendamentos, usuários, clientes, pets, salas e notificações). O usuário administrador padrão é criado automaticamente:
+Ele cria todas as tabelas necessárias (agendamentos, usuários, clientes, pets, salas e notificações) e garante o usuário administrador padrão:
 
 - E-mail: `admin@vta.com`
 - Senha: `admin123`

@@ -1,17 +1,21 @@
 from flask import render_template, request, redirect, url_for, flash, jsonify
 from datetime import datetime
 from flask import request, jsonify, session, render_template, redirect, url_for, send_file
-import sqlite3
-from werkzeug.security import check_password_hash, generate_password_hash
 import os
-from datetime import datetime, date
 import io
+import psycopg2
+from psycopg2 import extras
+from werkzeug.security import check_password_hash, generate_password_hash
+from datetime import datetime, date
+from dotenv import load_dotenv
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 
 # Importa a instância 'app' do arquivo app.py
 from app import app
+
+load_dotenv()
 
 @app.after_request
 def add_header(response):
@@ -25,13 +29,23 @@ def add_header(response):
     return response
 
 # --- Configuração da Conexão com o Banco de Dados ---
-DB_FILE = 'agenda.db'
+DB_HOST = os.getenv("DB_HOST", "localhost")
+DB_PORT = os.getenv("DB_PORT", "5432")
+DB_NAME = os.getenv("DB_NAME", "vta_agenda")
+DB_USER = os.getenv("DB_USER", "vta_user")
+DB_PASS = os.getenv("DB_PASS", "")
+
 
 def get_db_connection():
-    """Cria e retorna uma nova conexão com o banco de dados SQLite."""
-    conn = sqlite3.connect(DB_FILE)
-    conn.row_factory = sqlite3.Row
-    return conn
+    """Cria e retorna uma nova conexão com o banco de dados PostgreSQL."""
+    return psycopg2.connect(
+        host=DB_HOST,
+        port=DB_PORT,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASS,
+        cursor_factory=extras.DictCursor,
+    )
 
 def update_appointment_statuses(conn):
     """Atualiza automaticamente o status dos agendamentos baseados na data e hora atuais."""
@@ -43,18 +57,24 @@ def update_appointment_statuses(conn):
         current_time_str = now.strftime('%H:%M')
 
         # 1. Passou do dia -> Realizado (se não cancelado/realizado)
-        cur.execute("""
+        cur.execute(
+            """
             UPDATE agendamentos 
             SET status = 'realizado' 
-            WHERE data_agendamento < ? AND status NOT IN ('cancelado', 'realizado')
-        """, (today_str,))
+            WHERE data_agendamento < %s AND status NOT IN ('cancelado', 'realizado')
+            """,
+            (today_str,),
+        )
 
         # 2. Mesmo dia, passou do horário -> Confirmado (se agendado)
-        cur.execute("""
+        cur.execute(
+            """
             UPDATE agendamentos 
             SET status = 'confirmado' 
-            WHERE data_agendamento = ? AND horario < ? AND status = 'agendado'
-        """, (today_str, current_time_str))
+            WHERE data_agendamento = %s AND horario < %s AND status = 'agendado'
+            """,
+            (today_str, current_time_str),
+        )
         
         conn.commit()
         cur.close()
@@ -88,7 +108,7 @@ def login():
         conn = get_db_connection()
         cur = conn.cursor()
         
-        cur.execute("SELECT id, email, senha_hash, perfil FROM usuarios WHERE email = ?", (email,))
+        cur.execute("SELECT id, email, senha_hash, perfil FROM usuarios WHERE email = %s", (email,))
         user = cur.fetchone()
         
         cur.close()
@@ -137,7 +157,7 @@ def dashboard():
         today_str = today.isoformat()
         
         # 1. Consultas Hoje (Total)
-        cur.execute("SELECT COUNT(*) FROM agendamentos WHERE data_agendamento = ? AND status != 'cancelado'", (today_str,))
+        cur.execute("SELECT COUNT(*) FROM agendamentos WHERE data_agendamento = %s AND status != 'cancelado'", (today_str,))
         consultas_hoje_count = cur.fetchone()[0]
         
         # 2. Clientes Ativos (Total de clientes únicos)
@@ -146,7 +166,7 @@ def dashboard():
         
         # 3. Salas Disponíveis e Ocupadas
         # Buscando agendamentos de hoje para calcular ocupação e listar na agenda
-        cur.execute("SELECT * FROM agendamentos WHERE data_agendamento = ? ORDER BY horario", (today_str,))
+        cur.execute("SELECT * FROM agendamentos WHERE data_agendamento = %s ORDER BY horario", (today_str,))
         agendamentos_hoje = cur.fetchall()
         
         TOTAL_SALAS = 5 # Definindo um total fixo de salas para o sistema
@@ -244,7 +264,7 @@ def dashboard_stats():
         today_str = today.isoformat()
         
         # 1. Consultas Hoje (Total) - Excluindo cancelados
-        cur.execute("SELECT COUNT(*) FROM agendamentos WHERE data_agendamento = ? AND status != 'cancelado'", (today_str,))
+        cur.execute("SELECT COUNT(*) FROM agendamentos WHERE data_agendamento = %s AND status != 'cancelado'", (today_str,))
         consultas_hoje_count = cur.fetchone()[0]
         
         # 2. Clientes Ativos
@@ -252,7 +272,7 @@ def dashboard_stats():
         clientes_ativos_count = cur.fetchone()[0]
         
         # 3. Salas
-        cur.execute("SELECT * FROM agendamentos WHERE data_agendamento = ? AND status != 'cancelado' ORDER BY horario", (today_str,))
+        cur.execute("SELECT * FROM agendamentos WHERE data_agendamento = %s AND status != 'cancelado' ORDER BY horario", (today_str,))
         agendamentos_hoje = cur.fetchall()
         
         TOTAL_SALAS = 5
@@ -324,6 +344,7 @@ def clientes_page():
     offset = (page - 1) * per_page
     
     conn = get_db_connection()
+    cur = conn.cursor()
     
     # Base query for clients
     query = 'SELECT * FROM clientes'
@@ -331,46 +352,54 @@ def clientes_page():
     params = []
     
     if status_filter and status_filter in ['active', 'inactive']:
-        query += ' WHERE status = ?'
-        count_query += ' WHERE status = ?'
+        query += ' WHERE status = %s'
+        count_query += ' WHERE status = %s'
         params.append(status_filter)
         
-    query += ' ORDER BY created_at DESC LIMIT ? OFFSET ?'
+    query += ' ORDER BY created_at DESC LIMIT %s OFFSET %s'
     query_params = params + [per_page, offset]
     
     # Fetch paginated clients
-    clients = conn.execute(query, query_params).fetchall()
+    cur.execute(query, query_params)
+    clients = cur.fetchall()
     
     # Filtered count for pagination
-    filtered_count = conn.execute(count_query, params).fetchone()[0]
+    cur.execute(count_query, params)
+    filtered_count = cur.fetchone()[0]
     
     # 1. Total Clients (Global)
-    all_clients_count = conn.execute('SELECT COUNT(*) FROM clientes').fetchone()[0]
+    cur.execute('SELECT COUNT(*) FROM clientes')
+    all_clients_count = cur.fetchone()[0]
     
     # Calculate total pages
     total_pages = (filtered_count + per_page - 1) // per_page
     
     # 2. New Clients (Current Month)
     current_month = datetime.now().strftime('%Y-%m')
-    # Note: created_at is TIMESTAMP, strftime works on it in SQLite
-    new_clients = conn.execute("SELECT COUNT(*) FROM clientes WHERE strftime('%Y-%m', created_at) = ?", (current_month,)).fetchone()[0]
+    cur.execute("SELECT COUNT(*) FROM clientes WHERE to_char(created_at, 'YYYY-MM') = %s", (current_month,))
+    new_clients = cur.fetchone()[0]
     
     # 3. Active Clients
-    active_clients = conn.execute("SELECT COUNT(*) FROM clientes WHERE status = 'active'").fetchone()[0]
+    cur.execute("SELECT COUNT(*) FROM clientes WHERE status = 'active'")
+    active_clients = cur.fetchone()[0]
     
     # 4. Recurring Clients (> 1 appointment in current year)
     current_year = datetime.now().strftime('%Y')
-    # We count distinct clients in agendamentos who have > 1 appointment this year
-    recurring_clients = conn.execute("""
+    cur.execute(
+        """
         SELECT COUNT(*) FROM (
             SELECT cliente 
             FROM agendamentos 
-            WHERE strftime('%Y', data_agendamento) = ?
+            WHERE to_char(data_agendamento, 'YYYY') = %s
             GROUP BY cliente
             HAVING COUNT(*) > 1
-        )
-    """, (current_year,)).fetchone()[0]
+        ) AS sub
+        """,
+        (current_year,),
+    )
+    recurring_clients = cur.fetchone()[0]
     
+    cur.close()
     conn.close()
     
     return render_template('5. clientes_vta.html', 
@@ -395,16 +424,19 @@ def search_clientes():
         return jsonify([])
         
     conn = get_db_connection()
+    cur = conn.cursor()
     # Search by name, email or cpf
     # Using LIKE for partial match
     sql = """
         SELECT id, nome, email, telefone, cpf, observacoes 
         FROM clientes 
-        WHERE lower(nome) LIKE ? OR lower(email) LIKE ? OR cpf LIKE ?
+        WHERE lower(nome) LIKE %s OR lower(email) LIKE %s OR cpf LIKE %s
         LIMIT 10
     """
     search_term = f"%{query}%"
-    clients = conn.execute(sql, (search_term, search_term, search_term)).fetchall()
+    cur.execute(sql, (search_term, search_term, search_term))
+    clients = cur.fetchall()
+    cur.close()
     conn.close()
     
     result = []
@@ -429,21 +461,25 @@ def create_cliente():
     conn = get_db_connection()
     try:
         cur = conn.cursor()
-        cur.execute("""
+        cur.execute(
+            """
             INSERT INTO clientes (nome, email, telefone, cpf, data_nascimento, endereco, observacoes, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            data.get('name'),
-            data.get('email'),
-            data.get('phone'),
-            data.get('cpf'),
-            data.get('birthDate'),
-            data.get('address'),
-            data.get('notes'),
-            data.get('status', 'active')
-        ))
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            RETURNING id
+            """,
+            (
+                data.get('name'),
+                data.get('email'),
+                data.get('phone'),
+                data.get('cpf'),
+                data.get('birthDate'),
+                data.get('address'),
+                data.get('notes'),
+                data.get('status', 'active'),
+            ),
+        )
+        new_id = cur.fetchone()[0]
         conn.commit()
-        new_id = cur.lastrowid
         return jsonify({'success': True, 'id': new_id})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -459,21 +495,24 @@ def update_cliente(client_id):
     conn = get_db_connection()
     try:
         cur = conn.cursor()
-        cur.execute("""
+        cur.execute(
+            """
             UPDATE clientes 
-            SET nome=?, email=?, telefone=?, cpf=?, data_nascimento=?, endereco=?, observacoes=?, status=?
-            WHERE id=?
-        """, (
-            data.get('name'),
-            data.get('email'),
-            data.get('phone'),
-            data.get('cpf'),
-            data.get('birthDate'),
-            data.get('address'),
-            data.get('notes'),
-            data.get('status'),
-            client_id
-        ))
+            SET nome=%s, email=%s, telefone=%s, cpf=%s, data_nascimento=%s, endereco=%s, observacoes=%s, status=%s
+            WHERE id=%s
+            """,
+            (
+                data.get('name'),
+                data.get('email'),
+                data.get('phone'),
+                data.get('cpf'),
+                data.get('birthDate'),
+                data.get('address'),
+                data.get('notes'),
+                data.get('status'),
+                client_id,
+            ),
+        )
         conn.commit()
         return jsonify({'success': True})
     except Exception as e:
@@ -488,7 +527,8 @@ def delete_cliente(client_id):
     
     conn = get_db_connection()
     try:
-        conn.execute('DELETE FROM clientes WHERE id = ?', (client_id,))
+        cur = conn.cursor()
+        cur.execute('DELETE FROM clientes WHERE id = %s', (client_id,))
         conn.commit()
         return jsonify({'success': True})
     except Exception as e:
@@ -503,17 +543,20 @@ def export_clientes():
 
     status_filter = request.args.get('status')
     conn = get_db_connection()
+    cur = conn.cursor()
     
     query = 'SELECT * FROM clientes'
     params = []
     
     if status_filter and status_filter in ['active', 'inactive']:
-        query += ' WHERE status = ?'
+        query += ' WHERE status = %s'
         params.append(status_filter)
         
     query += ' ORDER BY nome'
     
-    clients = conn.execute(query, params).fetchall()
+    cur.execute(query, params)
+    clients = cur.fetchall()
+    cur.close()
     conn.close()
 
     buffer = io.BytesIO()
@@ -588,6 +631,7 @@ def relatorios_pets():
         return redirect(url_for('login_page'))
         
     conn = get_db_connection()
+    cur = conn.cursor()
     
     # Buscar todos os pets com dados dos tutores
     query_pets = '''
@@ -595,7 +639,8 @@ def relatorios_pets():
         FROM pets p 
         LEFT JOIN clientes c ON p.tutor_id = c.id
     '''
-    pets_db = conn.execute(query_pets).fetchall()
+    cur.execute(query_pets)
+    pets_db = cur.fetchall()
     
     pets_data = []
     for pet in pets_db:
@@ -613,10 +658,11 @@ def relatorios_pets():
         # Buscar histórico de agendamentos deste pet
         query_hist = '''
             SELECT * FROM agendamentos 
-            WHERE pet = ? 
+            WHERE pet = %s 
             ORDER BY data_agendamento DESC, horario DESC
         '''
-        historico_db = conn.execute(query_hist, (pet['nome'],)).fetchall()
+        cur.execute(query_hist, (pet['nome'],))
+        historico_db = cur.fetchall()
         
         historico = []
         ultima_consulta = None
@@ -650,6 +696,7 @@ def relatorios_pets():
             'historico': historico
         })
     
+    cur.close()
     conn.close()
     return render_template('10. relatorios_pets.html', pets=pets_data)
 
@@ -668,6 +715,7 @@ def get_usuarios():
         return jsonify({'error': 'Unauthorized'}), 401
     
     conn = get_db_connection()
+    cur = conn.cursor()
     
     # Filtros
     query = request.args.get('q', '').lower()
@@ -678,21 +726,22 @@ def get_usuarios():
     params = []
     
     if query:
-        sql += " AND (lower(nome) LIKE ? OR lower(email) LIKE ?)"
+        sql += " AND (lower(nome) LIKE %s OR lower(email) LIKE %s)"
         params.extend([f"%{query}%", f"%{query}%"])
         
     if role:
-        sql += " AND perfil = ?"
+        sql += " AND perfil = %s"
         params.append(role)
         
     if status:
-        sql += " AND status = ?"
+        sql += " AND status = %s"
         params.append(status)
         
     sql += " ORDER BY nome"
     
-    users = conn.execute(sql, params).fetchall()
-    conn.close()
+    cur.execute(sql, params)
+    users = cur.fetchall()
+    cur.close()
     
     result = []
     for user in users:
@@ -722,28 +771,33 @@ def create_usuario():
         
     conn = get_db_connection()
     try:
+        cur = conn.cursor()
         # Verificar se email já existe
-        existing = conn.execute("SELECT id FROM usuarios WHERE email = ?", (data.get('email'),)).fetchone()
+        cur.execute("SELECT id FROM usuarios WHERE email = %s", (data.get('email'),))
+        existing = cur.fetchone()
         if existing:
             return jsonify({'error': 'Email já cadastrado'}), 400
             
         senha_hash = generate_password_hash(data.get('password'))
         
-        cur = conn.cursor()
-        cur.execute("""
+        cur.execute(
+            """
             INSERT INTO usuarios (nome, email, senha_hash, cpf, telefone, perfil, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, (
-            data.get('name'),
-            data.get('email'),
-            senha_hash,
-            data.get('cpf'),
-            data.get('phone'),
-            data.get('role', 'usuario'),
-            data.get('status', 'ativo')
-        ))
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            RETURNING id
+            """,
+            (
+                data.get('name'),
+                data.get('email'),
+                senha_hash,
+                data.get('cpf'),
+                data.get('phone'),
+                data.get('role', 'usuario'),
+                data.get('status', 'ativo'),
+            ),
+        )
+        new_id = cur.fetchone()[0]
         conn.commit()
-        new_id = cur.lastrowid
         return jsonify({'success': True, 'id': new_id})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -763,34 +817,40 @@ def update_usuario(user_id):
         # Se senha foi fornecida, atualiza também a senha
         if data.get('password'):
             senha_hash = generate_password_hash(data.get('password'))
-            cur.execute("""
+            cur.execute(
+                """
                 UPDATE usuarios 
-                SET nome=?, email=?, senha_hash=?, cpf=?, telefone=?, perfil=?, status=?
-                WHERE id=?
-            """, (
-                data.get('name'),
-                data.get('email'),
-                senha_hash,
-                data.get('cpf'),
-                data.get('phone'),
-                data.get('role'),
-                data.get('status'),
-                user_id
-            ))
+                SET nome=%s, email=%s, senha_hash=%s, cpf=%s, telefone=%s, perfil=%s, status=%s
+                WHERE id=%s
+                """,
+                (
+                    data.get('name'),
+                    data.get('email'),
+                    senha_hash,
+                    data.get('cpf'),
+                    data.get('phone'),
+                    data.get('role'),
+                    data.get('status'),
+                    user_id,
+                ),
+            )
         else:
-            cur.execute("""
+            cur.execute(
+                """
                 UPDATE usuarios 
-                SET nome=?, email=?, cpf=?, telefone=?, perfil=?, status=?
-                WHERE id=?
-            """, (
-                data.get('name'),
-                data.get('email'),
-                data.get('cpf'),
-                data.get('phone'),
-                data.get('role'),
-                data.get('status'),
-                user_id
-            ))
+                SET nome=%s, email=%s, cpf=%s, telefone=%s, perfil=%s, status=%s
+                WHERE id=%s
+                """,
+                (
+                    data.get('name'),
+                    data.get('email'),
+                    data.get('cpf'),
+                    data.get('phone'),
+                    data.get('role'),
+                    data.get('status'),
+                    user_id,
+                ),
+            )
             
         conn.commit()
         return jsonify({'success': True})
@@ -810,7 +870,8 @@ def delete_usuario(user_id):
     
     conn = get_db_connection()
     try:
-        conn.execute('DELETE FROM usuarios WHERE id = ?', (user_id,))
+        cur = conn.cursor()
+        cur.execute('DELETE FROM usuarios WHERE id = %s', (user_id,))
         conn.commit()
         return jsonify({'success': True})
     except Exception as e:
@@ -992,7 +1053,7 @@ def gerar_relatorio_dashboard_pdf():
         today_fmt = today.strftime('%d/%m/%Y')
         
         # 1. Consultas Hoje (Total)
-        cur.execute("SELECT COUNT(*) FROM agendamentos WHERE data_agendamento = ?", (today_str,))
+        cur.execute("SELECT COUNT(*) FROM agendamentos WHERE data_agendamento = %s", (today_str,))
         consultas_hoje_count = cur.fetchone()[0]
         
         # 2. Clientes Ativos (Total de clientes únicos)
@@ -1000,7 +1061,7 @@ def gerar_relatorio_dashboard_pdf():
         clientes_ativos_count = cur.fetchone()[0]
         
         # 3. Salas Disponíveis e Ocupadas
-        cur.execute("SELECT * FROM agendamentos WHERE data_agendamento = ? ORDER BY horario", (today_str,))
+        cur.execute("SELECT * FROM agendamentos WHERE data_agendamento = %s ORDER BY horario", (today_str,))
         agendamentos_hoje = cur.fetchall()
         
         TOTAL_SALAS = 5
@@ -1179,21 +1240,25 @@ def create_agendamento():
         conn = get_db_connection()
         cur = conn.cursor()
         
-        cur.execute("""
+        cur.execute(
+            """
             INSERT INTO agendamentos (cliente, cliente_id, pet, sala, data_agendamento, horario, status, observacoes)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            data.get('cliente'),
-            data.get('cliente_id'), # Pode ser None
-            data.get('pet'),
-            data.get('sala'),
-            data.get('data'),
-            data.get('horario'),
-            data.get('status', 'agendado'),
-            data.get('obs')
-        ))
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            RETURNING id
+            """,
+            (
+                data.get('cliente'),
+                data.get('cliente_id'),  # Pode ser None
+                data.get('pet'),
+                data.get('sala'),
+                data.get('data'),
+                data.get('horario'),
+                data.get('status', 'agendado'),
+                data.get('obs'),
+            ),
+        )
         
-        new_id = cur.lastrowid
+        new_id = cur.fetchone()[0]
         
         # Criar notificação
         titulo = "Novo Agendamento"
@@ -1205,7 +1270,7 @@ def create_agendamento():
             data_fmt = data.get('data')
             
         msg = f"{data.get('pet')} - {data_fmt} às {data.get('horario')}"
-        cur.execute("INSERT INTO notificacoes (titulo, mensagem, tipo) VALUES (?, ?, ?)", (titulo, msg, 'info'))
+        cur.execute("INSERT INTO notificacoes (titulo, mensagem, tipo) VALUES (%s, %s, %s)", (titulo, msg, 'info'))
         
         conn.commit()
         cur.close()
@@ -1234,39 +1299,50 @@ def update_agendamento(id):
         if 'checkin' in data:
             checkin = data['checkin']
             if checkin:
-                cur.execute("""
+                cur.execute(
+                    """
                     UPDATE agendamentos 
-                    SET checkin_realizado = ?, checkin_horario = ?, status = ?
-                    WHERE id = ?
-                """, (True, checkin.get('horario'), 'confirmado', id))
+                    SET checkin_realizado = %s, checkin_horario = %s, status = %s
+                    WHERE id = %s
+                    """,
+                    (True, checkin.get('horario'), 'confirmado', id),
+                )
                 
                 # Notificação Check-in
-                cur.execute("SELECT pet FROM agendamentos WHERE id = ?", (id,))
+                cur.execute("SELECT pet FROM agendamentos WHERE id = %s", (id,))
                 row = cur.fetchone()
                 if row:
-                    cur.execute("INSERT INTO notificacoes (titulo, mensagem, tipo) VALUES (?, ?, ?)", 
-                               ("Check-in Realizado", f"{row['pet']}", 'success'))
+                    cur.execute(
+                        "INSERT INTO notificacoes (titulo, mensagem, tipo) VALUES (%s, %s, %s)",
+                        ("Check-in Realizado", f"{row['pet']}", 'success'),
+                    )
             else:
-                cur.execute("""
+                cur.execute(
+                    """
                     UPDATE agendamentos 
-                    SET checkin_realizado = ?, checkin_horario = NULL, status = ?
-                    WHERE id = ?
-                """, (False, 'agendado', id))
+                    SET checkin_realizado = %s, checkin_horario = NULL, status = %s
+                    WHERE id = %s
+                    """,
+                    (False, 'agendado', id),
+                )
         else:
-            cur.execute("""
+            cur.execute(
+                """
                 UPDATE agendamentos 
-                SET cliente = ?, pet = ?, sala = ?, data_agendamento = ?, horario = ?, status = ?, observacoes = ?
-                WHERE id = ?
-            """, (
-                data.get('cliente'),
-                data.get('pet'),
-                data.get('sala'),
-                data.get('data'),
-                data.get('horario'),
-                data.get('status'),
-                data.get('obs'),
-                id
-            ))
+                SET cliente = %s, pet = %s, sala = %s, data_agendamento = %s, horario = %s, status = %s, observacoes = %s
+                WHERE id = %s
+                """,
+                (
+                    data.get('cliente'),
+                    data.get('pet'),
+                    data.get('sala'),
+                    data.get('data'),
+                    data.get('horario'),
+                    data.get('status'),
+                    data.get('obs'),
+                    id,
+                ),
+            )
             
             # Notificação Edição
             status = data.get('status')
@@ -1284,7 +1360,7 @@ def update_agendamento(id):
                 titulo = "Consulta Realizada"
                 tipo = 'success'
                 
-            cur.execute("INSERT INTO notificacoes (titulo, mensagem, tipo) VALUES (?, ?, ?)", (titulo, msg, tipo))
+            cur.execute("INSERT INTO notificacoes (titulo, mensagem, tipo) VALUES (%s, %s, %s)", (titulo, msg, tipo))
             
         conn.commit()
         cur.close()
@@ -1308,15 +1384,17 @@ def delete_agendamento(id):
         cur = conn.cursor()
         
         # Buscar nome do pet antes de excluir para a notificação
-        cur.execute("SELECT pet FROM agendamentos WHERE id = ?", (id,))
+        cur.execute("SELECT pet FROM agendamentos WHERE id = %s", (id,))
         row = cur.fetchone()
         pet_name = row['pet'] if row else "Desconhecido"
         
-        cur.execute("DELETE FROM agendamentos WHERE id = ?", (id,))
+        cur.execute("DELETE FROM agendamentos WHERE id = %s", (id,))
         
         # Notificação
-        cur.execute("INSERT INTO notificacoes (titulo, mensagem, tipo) VALUES (?, ?, ?)", 
-                   ("Agendamento Excluído", f"{pet_name}", 'warning'))
+        cur.execute(
+            "INSERT INTO notificacoes (titulo, mensagem, tipo) VALUES (%s, %s, %s)",
+            ("Agendamento Excluído", f"{pet_name}", 'warning'),
+        )
         
         conn.commit()
         cur.close()
@@ -1402,23 +1480,27 @@ def create_pet():
         conn = get_db_connection()
         cur = conn.cursor()
         
-        cur.execute("""
+        cur.execute(
+            """
             INSERT INTO pets (nome, especie, raca, sexo, data_nascimento, peso, cor, tutor_id, observacoes)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            data.get('nome'),
-            data.get('especie'),
-            clean(data.get('raca')),
-            data.get('sexo'),
-            clean(data.get('dataNascimento')),
-            clean(data.get('peso')),
-            clean(data.get('cor')),
-            data.get('tutor'),
-            clean(data.get('observacoes'))
-        ))
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            RETURNING id
+            """,
+            (
+                data.get('nome'),
+                data.get('especie'),
+                clean(data.get('raca')),
+                data.get('sexo'),
+                clean(data.get('dataNascimento')),
+                clean(data.get('peso')),
+                clean(data.get('cor')),
+                data.get('tutor'),
+                clean(data.get('observacoes')),
+            ),
+        )
         
+        pet_id = cur.fetchone()[0]
         conn.commit()
-        pet_id = cur.lastrowid
         cur.close()
         
         return jsonify({"message": "Pet criado com sucesso", "id": pet_id}), 201
@@ -1444,22 +1526,25 @@ def update_pet(id):
         conn = get_db_connection()
         cur = conn.cursor()
         
-        cur.execute("""
+        cur.execute(
+            """
             UPDATE pets 
-            SET nome=?, especie=?, raca=?, sexo=?, data_nascimento=?, peso=?, cor=?, tutor_id=?, observacoes=?
-            WHERE id=?
-        """, (
-            data.get('nome'),
-            data.get('especie'),
-            clean(data.get('raca')),
-            data.get('sexo'),
-            clean(data.get('dataNascimento')),
-            clean(data.get('peso')),
-            clean(data.get('cor')),
-            data.get('tutor'),
-            clean(data.get('observacoes')),
-            id
-        ))
+            SET nome=%s, especie=%s, raca=%s, sexo=%s, data_nascimento=%s, peso=%s, cor=%s, tutor_id=%s, observacoes=%s
+            WHERE id=%s
+            """,
+            (
+                data.get('nome'),
+                data.get('especie'),
+                clean(data.get('raca')),
+                data.get('sexo'),
+                clean(data.get('dataNascimento')),
+                clean(data.get('peso')),
+                clean(data.get('cor')),
+                data.get('tutor'),
+                clean(data.get('observacoes')),
+                id,
+            ),
+        )
         
         conn.commit()
         cur.close()
@@ -1482,7 +1567,7 @@ def delete_pet(id):
         conn = get_db_connection()
         cur = conn.cursor()
         
-        cur.execute("DELETE FROM pets WHERE id = ?", (id,))
+        cur.execute("DELETE FROM pets WHERE id = %s", (id,))
         
         conn.commit()
         cur.close()
@@ -1569,19 +1654,23 @@ def create_sala():
         conn = get_db_connection()
         cur = conn.cursor()
         
-        cur.execute("""
+        cur.execute(
+            """
             INSERT INTO salas (nome, tipo, capacidade, status, observacoes)
-            VALUES (?, ?, ?, ?, ?)
-        """, (
-            data.get('nome'),
-            data.get('tipo'),
-            data.get('capacidade'),
-            data.get('status', 'disponivel'),
-            data.get('descricao') # Mapping frontend 'descricao' to backend 'observacoes'
-        ))
+            VALUES (%s, %s, %s, %s, %s)
+            RETURNING id
+            """,
+            (
+                data.get('nome'),
+                data.get('tipo'),
+                data.get('capacidade'),
+                data.get('status', 'disponivel'),
+                data.get('descricao'),
+            ),
+        )
         
+        new_id = cur.fetchone()[0]
         conn.commit()
-        new_id = cur.lastrowid
         cur.close()
         
         return jsonify({"message": "Sala criada com sucesso", "id": new_id}), 201
@@ -1603,18 +1692,21 @@ def update_sala(id):
         conn = get_db_connection()
         cur = conn.cursor()
         
-        cur.execute("""
+        cur.execute(
+            """
             UPDATE salas 
-            SET nome=?, tipo=?, capacidade=?, status=?, observacoes=?
-            WHERE id=?
-        """, (
-            data.get('nome'),
-            data.get('tipo'),
-            data.get('capacidade'),
-            data.get('status'),
-            data.get('descricao'),
-            id
-        ))
+            SET nome=%s, tipo=%s, capacidade=%s, status=%s, observacoes=%s
+            WHERE id=%s
+            """,
+            (
+                data.get('nome'),
+                data.get('tipo'),
+                data.get('capacidade'),
+                data.get('status'),
+                data.get('descricao'),
+                id,
+            ),
+        )
         
         conn.commit()
         cur.close()
@@ -1637,7 +1729,7 @@ def delete_sala(id):
         conn = get_db_connection()
         cur = conn.cursor()
         
-        cur.execute("DELETE FROM salas WHERE id = ?", (id,))
+        cur.execute("DELETE FROM salas WHERE id = %s", (id,))
         
         conn.commit()
         cur.close()

@@ -2,3 +2,4 @@ Flask
 psycopg2-binary
 python-dotenv
 Werkzeug
+reportlab==4.0.9

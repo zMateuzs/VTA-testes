@@ -2,16 +2,16 @@
 
 ## Architecture Snapshot
 - Flask entrypoint lives in [backend/app.py](backend/app.py); all page routes, REST APIs, and PDF exports sit in the monolithic [backend/routes.py](backend/routes.py), so new endpoints should extend that file and reuse the existing helpers instead of creating new blueprints.
-- Runtime persistence is SQLite (`agenda.db`) via the `sqlite3` helpers declared at the top of [backend/routes.py](backend/routes.py); Postgres scripts under [backend/setup_db.py](backend/setup_db.py) are legacy and should only be touched if the team confirms a future migration.
+- Runtime persistence is PostgreSQL via `psycopg2` and the `get_db_connection()` helper declared at the top of [backend/routes.py](backend/routes.py); keep new queries parameterized and always reuse that helper so the cursor factory stays as `DictCursor`.
 - Templates under [backend/templates](backend/templates) are rendered server-side; each screen (login, dashboard, agenda, etc.) is a standalone HTML file with inline CSS/JS, so align with the conventions shown in [backend/templates/2.%20dashboard_vta.html](backend/templates/2.%20dashboard_vta.html) and [backend/templates/6.%20pets_vta.html](backend/templates/6.%20pets_vta.html) when designing new views.
 - Shared front-end behavior (sidebar nav, logout, session glue) is centralized in [backend/static/assets/js/vta-nav.js](backend/static/assets/js/vta-nav.js); page-specific logic (e.g., dashboard counters) stays in scripts that live next to each template.
 - Reporting relies on ReportLab; see `gerar_relatorio_agendamentos_pdf()` and `gerar_relatorio_dashboard_pdf()` inside [backend/routes.py](backend/routes.py) for examples that stream PDFs using the clinic logo stored in [backend/static/img/logo.png](backend/static/img/logo.png).
 
 ## Running & Environment
 - Use the bundled venv and run `source backend/venv/bin/activate && python backend/app.py`; the server expects a `.env` with `SECRET_KEY` (defaults to a dev-safe value if absent).
-- Database bootstrap for SQLite happens through the helper scripts: run `python backend/setup_sqlite.py` first, then the table-specific scripts such as [backend/setup_clientes_table.py](backend/setup_clientes_table.py), [backend/setup_pets_table.py](backend/setup_pets_table.py), [backend/setup_salas_table.py](backend/setup_salas_table.py), and [backend/create_notifications_table.py](backend/create_notifications_table.py) whenever you need a clean slate.
+- Bootstrap the Postgres schema with `python backend/setup_db.py` after exporting `DB_HOST/DB_PORT/DB_NAME/DB_USER/DB_PASS` in `.env`; the script seeds the admin (`admin@vta.com` / `admin123`) and base rooms.
 - Hot reloading comes from `app.run(debug=True)`; there is no task runner, so any asset compilation or linting must be invoked manually.
-- Sample admin credentials are seeded by [backend/setup_sqlite.py](backend/setup_sqlite.py) (`admin@vta.com` / `admin123`). When adding auth features, ensure routes continue to guard on `session['user_id']` exactly as shown in existing handlers.
+- Sample admin credentials are seeded by [backend/setup_db.py](backend/setup_db.py) (`admin@vta.com` / `admin123`). When adding auth features, ensure routes continue to guard on `session['user_id']` exactly as shown in existing handlers.
 
 ## Backend Patterns & APIs
 - Always acquire database connections through `get_db_connection()` and make sure to `conn.close()` in a `finally` block—copy the structure used in each API route of [backend/routes.py](backend/routes.py) to stay consistent.
@@ -27,8 +27,8 @@
 - Navigation highlights (`.nav-link.active`) are toggled manually both in the template and within [backend/static/assets/js/vta-nav.js](backend/static/assets/js/vta-nav.js); keep that class in sync when adding links so the sidebar state remains accurate.
 
 ## Data & Tooling Notes
-- SQLite schema: `agendamentos`, `clientes`, `pets`, `salas`, `usuarios`, and `notificacoes`. Foreign keys are minimal, so enforce integrity in code (e.g., a pet stores `tutor_id` but deletions do not cascade—double-check usage before deleting records).
-- The codebase mixes legacy Postgres helpers with the active SQLite flow. When writing migrations or maintenance scripts, prefer the SQLite versions unless the team explicitly requests Postgres compatibility.
+- PostgreSQL schema: `agendamentos`, `clientes`, `pets`, `salas`, `usuarios`, and `notificacoes`. Foreign keys are minimal, so enforce integrity in code (e.g., a pet stores `tutor_id` but deletions do not cascade—double-check usage before deleting records).
+- Legacy SQLite bootstrap scripts were removed; rely on Postgres and `setup_db.py` for any resets.
 - ReportLab and jsPDF are both in use (server-side PDFs vs. client-side exports). Decide which path to follow based on where the button lives: template exports (like the pets table) lean on jsPDF, while routes behind `/relatorios/...` use ReportLab.
 - Shared UI assets live under [backend/static/assets](backend/static/assets); add new CSS or JS there when multiple templates will consume it instead of stuffing everything into each HTML file.
 
