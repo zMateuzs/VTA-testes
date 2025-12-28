@@ -5,13 +5,13 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # Copia arquivo de dependências
-COPY backend/requirements.txt ./
+COPY prototipo-vta/backend/requirements.txt ./
 
 # Instala dependências Python
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copia TODO o projeto
-COPY . . 
+COPY prototipo-vta/ . 
 
 # Expõe a porta (Railway define $PORT)
 EXPOSE 8000
