@@ -1193,9 +1193,8 @@
 
             .header {
                 padding: 0.9rem 1.25rem;
-                width: 100vw;
-                margin-left: calc(50% - 50vw);
-                margin-right: calc(50% - 50vw);
+                width: 100%;
+                margin: 0;
                 border-radius: 0;
             }
 
@@ -1220,15 +1219,17 @@
                 padding: 1rem 1.25rem 1.5rem;
                 gap: 1.25rem;
                 max-width: 480px;
+                margin: 0 auto;
             }
 
             .sidebar {
                 width: 100%;
                 max-width: 480px;
-                margin: 0 auto;
-                padding: 0.5rem 0;
-                background: transparent;
-                box-shadow: none;
+                margin: 0.5rem auto 0;
+                padding: 0.9rem 0.9rem;
+                background: var(--white);
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+                border-radius: 15px;
             }
 
             .sidebar-section {
@@ -1238,33 +1239,25 @@
             .sidebar-title {
                 text-align: center;
                 font-size: 0.75rem;
-                margin-bottom: 0.4rem;
+                margin-bottom: 0.5rem;
             }
 
             .nav-menu {
-                display: flex;
-                gap: 0.6rem;
-                overflow-x: auto;
-                padding: 0.25rem 0.25rem 0.5rem;
-                scrollbar-width: none;
-            }
-
-            .nav-menu::-webkit-scrollbar {
-                display: none;
+                display: block;
+                padding: 0;
             }
 
             .nav-item {
-                margin: 0;
-                flex: 0 0 auto;
+                margin: 0 0 0.5rem 0;
             }
 
             .nav-link {
-                padding: 0.55rem 1rem;
+                padding: 0.55rem 0.75rem;
                 font-size: 0.9rem;
-                border-radius: 999px;
-                background: rgba(255, 255, 255, 0.7);
-                border: 1px solid rgba(82, 183, 136, 0.2);
-                box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+                border-radius: 10px;
+                background: transparent;
+                border: none;
+                box-shadow: none;
             }
 
             .content-area {
