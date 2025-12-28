@@ -35,6 +35,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: var(--gray-light);
             color: var(--gray-dark);
+            overflow-x: hidden;
         }
 
         /* Layout Principal */
@@ -59,8 +60,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            max-width: 1400px;
-            margin: 0 auto;
+            width: 100%;
         }
 
         .header-left {
@@ -376,6 +376,10 @@
             overflow: hidden;
         }
 
+        .table-container {
+            overflow-x: auto;
+        }
+
         .table-header {
             padding: 1.5rem;
             border-bottom: 1px solid var(--gray-light);
@@ -623,10 +627,12 @@
         @media (max-width: 1024px) {
             .main-content {
                 grid-template-columns: 1fr;
+                gap: 1.5rem;
             }
 
             .sidebar {
                 width: 100%;
+                position: static;
             }
 
             .filters-grid {
@@ -634,32 +640,112 @@
             }
 
             .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             }
         }
 
         @media (max-width: 768px) {
+            body {
+                background: linear-gradient(180deg, var(--vta-green) 0%, var(--gray-light) 45%);
+            }
+
             .header-content {
                 flex-direction: column;
                 gap: 1rem;
             }
 
+            .header {
+                padding: 0.9rem 1.25rem;
+            }
+
+            .header-right {
+                width: 100%;
+                justify-content: space-between;
+            }
+
             .page-header {
                 flex-direction: column;
                 gap: 1rem;
-                text-align: center;
+                text-align: left;
+                padding: 1.4rem 1.1rem;
             }
 
             .main-content {
-                padding: 1rem;
+                grid-template-columns: 1fr;
+                padding: 1rem 1.1rem 1.3rem;
+                gap: 1.1rem;
+                max-width: 520px;
+                margin: 0 auto;
+            }
+
+            .sidebar {
+                width: 100%;
+                max-width: 520px;
+                margin: 0.5rem auto 0;
+                padding: 0.9rem 0.9rem;
+                background: var(--white);
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+                border-radius: 15px;
+            }
+
+            .page-content {
+                max-width: 520px;
+                margin: 0 auto;
+                gap: 1.1rem;
+                order: 1;
+            }
+
+            .sidebar {
+                order: 2;
+            }
+
+            .sidebar-title {
+                text-align: center;
+                margin-bottom: 0.5rem;
+            }
+
+            .nav-menu {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+            }
+
+            .nav-item {
+                margin-bottom: 0.45rem;
+            }
+
+            .nav-link {
+                padding: 0.55rem 0.8rem;
+                border-radius: 10px;
+                background: transparent;
+                border: none;
+                box-shadow: none;
+            }
+
+            .page-content {
+                max-width: 520px;
+                margin: 0 auto;
+                gap: 1.1rem;
+            }
+
+            .page-title h1 {
+                font-size: 1.6rem;
             }
 
             .stats-grid {
                 grid-template-columns: 1fr;
             }
 
+            .filters-section {
+                padding: 1.15rem 1.05rem;
+            }
+
             .users-table {
                 font-size: 0.9rem;
+            }
+
+            .user-details {
+                display: none;
             }
 
             .users-table th,
@@ -681,6 +767,97 @@
 
             .modal-actions {
                 flex-direction: column;
+            }
+
+            .table-header {
+                padding: 1.1rem 1rem;
+            }
+
+            .table-container {
+                overflow: visible;
+            }
+
+            .users-table thead {
+                display: none;
+            }
+
+            .users-table tbody {
+                display: grid;
+                gap: 0.85rem;
+            }
+
+            .users-table tr {
+                display: block;
+                background: var(--white);
+                border: 1px solid rgba(0, 0, 0, 0.06);
+                border-radius: 14px;
+                box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+                padding: 0.75rem 0.9rem;
+            }
+
+            .users-table td {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                gap: 0.75rem;
+                padding: 0.55rem 0;
+                border: none;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+            }
+
+            .users-table td:last-child {
+                border-bottom: none;
+            }
+
+            .users-table td::before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: var(--gray-medium);
+                font-size: 0.9rem;
+                min-width: 120px;
+            }
+
+            .users-table td > * {
+                text-align: right;
+                width: 100%;
+            }
+
+            /* Labels por coluna */
+            .users-table td:nth-child(1)::before { content: 'Usuário'; }
+            .users-table td:nth-child(2)::before { content: 'Função'; }
+            .users-table td:nth-child(3)::before { content: 'Status'; }
+            .users-table td:nth-child(4)::before { content: 'Último Acesso'; }
+            .users-table td:nth-child(5)::before { content: 'Ações'; }
+
+            .user-info-cell {
+                align-items: center;
+                gap: 0.75rem;
+            }
+
+            .actions-cell {
+                justify-content: flex-end;
+            }
+
+            .btn-primary,
+            .btn-secondary,
+            .btn-action,
+            .btn-cancel {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .header-title h1 {
+                font-size: 1.4rem;
+            }
+
+            .page-title h1 {
+                font-size: 1.45rem;
+            }
+
+            .users-table td::before {
+                min-width: 100px;
             }
         }
     </style>
@@ -858,20 +1035,22 @@
                     <div class="table-header">
                         <h2 class="table-title">Lista de Usuários</h2>
                     </div>
-                    <table class="users-table">
-                        <thead>
-                            <tr>
-                                <th>Usuário</th>
-                                <th>Função</th>
-                                <th>Status</th>
-                                <th>Último Acesso</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="usersTableBody">
-                            <!-- Usuários serão carregados via JavaScript -->
-                        </tbody>
-                    </table>
+                    <div class="table-container">
+                        <table class="users-table">
+                            <thead>
+                                <tr>
+                                    <th>Usuário</th>
+                                    <th>Função</th>
+                                    <th>Status</th>
+                                    <th>Último Acesso</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody">
+                                <!-- Usuários serão carregados via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </main>
