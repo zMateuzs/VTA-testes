@@ -37,6 +37,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: var(--gray-light);
             color: var(--gray-dark);
+            overflow-x: hidden;
         }
 
         /* Layout Principal */
@@ -240,7 +241,7 @@
         /* Page Header */
         .page-header {
             display: flex;
-            justify-content: between;
+            justify-content: space-between;
             align-items: center;
             background: var(--white);
             padding: 2rem;
@@ -407,6 +408,10 @@
         .search-box {
             position: relative;
             width: 300px;
+        }
+
+        .table-container {
+            overflow-x: auto;
         }
 
         .search-input {
@@ -654,6 +659,10 @@
         }
 
         @media (max-width: 768px) {
+            body {
+                background: linear-gradient(180deg, var(--vta-green) 0%, var(--gray-light) 45%);
+            }
+
             .header-content {
                 flex-direction: column;
                 gap: 1rem;
@@ -664,8 +673,87 @@
                 justify-content: space-between;
             }
 
+            .header {
+                padding: 0.9rem 1.25rem;
+            }
+
             .main-content {
-                padding: 1rem;
+                grid-template-columns: 1fr;
+                padding: 1rem 1.1rem 1.3rem;
+                gap: 1.1rem;
+                max-width: 520px;
+                margin: 0 auto;
+            }
+
+            .sidebar {
+                width: 100%;
+                max-width: 520px;
+                margin: 0.5rem auto 0;
+                padding: 0.9rem 0.9rem;
+                background: var(--white);
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+                border-radius: 15px;
+                position: static;
+            }
+
+            .sidebar-title {
+                text-align: center;
+                margin-bottom: 0.5rem;
+            }
+
+            .nav-menu {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+            }
+
+            .nav-item {
+                margin-bottom: 0.45rem;
+            }
+
+            .nav-link {
+                padding: 0.55rem 0.8rem;
+                border-radius: 10px;
+                background: transparent;
+                border: none;
+                box-shadow: none;
+            }
+
+            .pets-content {
+                max-width: 520px;
+                margin: 0 auto;
+                gap: 1.1rem;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.9rem;
+                padding: 1.35rem 1.1rem;
+            }
+
+            .page-title {
+                font-size: 1.6rem;
+            }
+
+            .page-actions {
+                width: 100%;
+                justify-content: center;
+                gap: 0.6rem;
+            }
+
+            .page-actions .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .stat-card {
+                padding: 1.25rem 1.1rem;
             }
 
             .form-row {
@@ -677,11 +765,115 @@
             }
 
             .pets-table {
-                font-size: 0.8rem;
+                font-size: 0.9rem;
             }
 
             .user-details {
                 display: none;
+            }
+
+            .table-section {
+                border-radius: 18px;
+                padding: 1.4rem 1.1rem;
+            }
+
+            .table-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.6rem;
+            }
+
+            .search-box {
+                width: 100%;
+            }
+
+            .table-container {
+                overflow: visible;
+            }
+
+            .pets-table thead {
+                display: none;
+            }
+
+            .pets-table tbody {
+                display: grid;
+                gap: 0.85rem;
+            }
+
+            .pets-table tr {
+                display: block;
+                background: var(--white);
+                border: 1px solid rgba(0, 0, 0, 0.06);
+                border-radius: 14px;
+                box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+                padding: 0.75rem 0.9rem;
+            }
+
+            .pets-table td {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                gap: 0.75rem;
+                padding: 0.55rem 0;
+                border: none;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+            }
+
+            .pets-table td:last-child {
+                border-bottom: none;
+            }
+
+            .pets-table td::before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: var(--gray-medium);
+                font-size: 0.9rem;
+                min-width: 120px;
+            }
+
+            .pets-table td > * {
+                text-align: right;
+                width: 100%;
+            }
+
+            /* Labels por coluna */
+            .pets-table td:nth-child(1)::before { content: 'Pet'; }
+            .pets-table td:nth-child(2)::before { content: 'Espécie'; }
+            .pets-table td:nth-child(3)::before { content: 'Tutor'; }
+            .pets-table td:nth-child(4)::before { content: 'Idade'; }
+            .pets-table td:nth-child(5)::before { content: 'Status'; }
+            .pets-table td:nth-child(6)::before { content: 'Ações'; }
+
+            .pet-info {
+                align-items: center;
+                gap: 0.75rem;
+            }
+
+            .actions {
+                justify-content: flex-end;
+            }
+
+            .btn {
+                padding: 0.6rem 1.1rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .header-title h1 {
+                font-size: 1.4rem;
+            }
+
+            .page-title {
+                font-size: 1.45rem;
+            }
+
+            .stat-card {
+                padding: 1.1rem 1rem;
+            }
+
+            .pets-table td::before {
+                min-width: 100px;
             }
         }
     </style>
@@ -802,7 +994,7 @@
                     </div>
                 </section>
 
-                <section class="stats-grid" style="grid-template-columns: repeat(4, 1fr); gap: 1.5rem;">
+                <section class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-icon">
                             <i class="fas fa-paw"></i>
@@ -844,7 +1036,7 @@
                             </div>
                         </div>
 
-                        <div style="overflow-x: auto;">
+                        <div class="table-container">
                             <table class="pets-table" id="tabelaPets">
                                 <thead>
                                     <tr>
