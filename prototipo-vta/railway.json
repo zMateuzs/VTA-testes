@@ -1,0 +1,10 @@
+{
+  "build": {
+    "builder":  "NIXPACKS"
+  },
+  "deploy": {
+    "startCommand":  "cd prototipo-vta/backend && gunicorn -w 4 -b 0.0.0.0:$PORT app:app",
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 10
+  }
+}
