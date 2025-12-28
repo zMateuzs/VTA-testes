@@ -37,6 +37,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: var(--gray-light);
             color: var(--gray-dark);
+            overflow-x: hidden;
         }
 
         /* Header */
@@ -328,6 +329,14 @@
             border-radius: 15px;
             overflow: hidden;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+
+        .agenda-grid-scroll {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior-inline: contain;
         }
 
         .grid-header {
@@ -1161,6 +1170,7 @@
 
             .sidebar {
                 position: static;
+                width: 100%;
             }
 
             .grid-header,
@@ -1174,19 +1184,256 @@
             }
         }
 
+        /* Versão mobile: visual mais "app" */
         @media (max-width: 768px) {
+            body {
+                background: linear-gradient(180deg, var(--vta-green) 0%, var(--gray-light) 45%);
+                padding-bottom: 2rem;
+            }
+
+            .header {
+                padding: 0.9rem 1.25rem;
+                width: 100vw;
+                margin-left: calc(50% - 50vw);
+                margin-right: calc(50% - 50vw);
+                border-radius: 0;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 0.75rem;
+                text-align: center;
+                align-items: center;
+            }
+
+            .header-right {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .user-details {
+                display: none;
+            }
+
             .main-container {
-                padding: 1rem;
+                grid-template-columns: 1fr;
+                padding: 1rem 1.25rem 1.5rem;
+                gap: 1.25rem;
+                max-width: 480px;
+            }
+
+            .sidebar {
+                width: 100%;
+                max-width: 480px;
+                margin: 0 auto;
+                padding: 0.5rem 0;
+                background: transparent;
+                box-shadow: none;
+            }
+
+            .sidebar-section {
+                margin-bottom: 1rem;
+            }
+
+            .sidebar-title {
+                text-align: center;
+                font-size: 0.75rem;
+                margin-bottom: 0.4rem;
+            }
+
+            .nav-menu {
+                display: flex;
+                gap: 0.6rem;
+                overflow-x: auto;
+                padding: 0.25rem 0.25rem 0.5rem;
+                scrollbar-width: none;
+            }
+
+            .nav-menu::-webkit-scrollbar {
+                display: none;
+            }
+
+            .nav-item {
+                margin: 0;
+                flex: 0 0 auto;
+            }
+
+            .nav-link {
+                padding: 0.55rem 1rem;
+                font-size: 0.9rem;
+                border-radius: 999px;
+                background: rgba(255, 255, 255, 0.7);
+                border: 1px solid rgba(82, 183, 136, 0.2);
+                box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+            }
+
+            .content-area {
+                max-width: 480px;
+                width: 100%;
+                margin: 0 auto;
+            }
+
+            .controls-section {
+                padding: 1.25rem 1.1rem;
+                border: 1px solid rgba(82, 183, 136, 0.1);
             }
 
             .view-controls {
                 flex-direction: column;
                 align-items: stretch;
+                gap: 0.9rem;
+            }
+
+            .view-toggle {
+                justify-content: space-between;
+                border: 1px solid rgba(82, 183, 136, 0.15);
+            }
+
+            .view-btn {
+                flex: 1;
+                text-align: center;
+            }
+
+            .date-navigation {
+                justify-content: space-between;
+            }
+
+            .current-period {
+                font-size: 1rem;
+                min-width: auto;
+            }
+
+            .action-buttons {
+                flex-wrap: wrap;
+                justify-content: stretch;
+            }
+
+            .btn {
+                padding: 0.6rem 1.2rem;
+                font-size: 0.9rem;
+            }
+
+            .agenda-grid {
+                border-radius: 18px;
+            }
+
+            .agenda-grid-scroll {
+                padding-bottom: 0.5rem;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                overscroll-behavior-inline: contain;
             }
 
             .grid-header,
             .grid-row {
-                grid-template-columns: 60px repeat(2, 1fr);
+                min-width: 640px;
+                grid-template-columns: 90px repeat(4, minmax(130px, 1fr));
+            }
+
+            .grid-body {
+                max-height: 60vh;
+            }
+
+            .grid-cell {
+                padding: 0.75rem 0.45rem;
+                font-size: 0.8rem;
+            }
+
+            .time-cell {
+                padding: 0.75rem 0.45rem;
+                font-size: 0.75rem;
+            }
+
+            .appointment-cell {
+                min-height: 65px;
+            }
+
+            .appointment-title {
+                font-size: 0.9rem;
+            }
+
+            .appointment-subtitle,
+            .appointment-details {
+                font-size: 0.7rem;
+            }
+
+            .calendar-day {
+                min-height: 90px;
+                padding: 0.6rem;
+            }
+        }
+
+        /* Celulares menores */
+        @media (max-width: 576px) {
+            .header-title h1 {
+                font-size: 1.5rem;
+            }
+
+            .header-subtitle {
+                font-size: 0.8rem;
+            }
+
+            .logo-mini {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
+
+            .main-container {
+                padding: 0.9rem 1rem 1.3rem;
+            }
+
+            .controls-section {
+                padding: 1.1rem 1rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                gap: 0.6rem;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .grid-body {
+                max-height: 65vh;
+            }
+
+            .calendar-day {
+                min-height: 80px;
+                padding: 0.5rem;
+            }
+
+            .day-number {
+                font-size: 1rem;
+            }
+
+            .event-badge {
+                min-width: 20px;
+                height: 20px;
+                font-size: 0.7rem;
+            }
+
+            .modal {
+                align-items: flex-end;
+            }
+
+            .modal-content {
+                width: 100%;
+                max-width: 100%;
+                max-height: 90vh;
+                border-radius: 18px 18px 0 0;
+                margin: 0;
+            }
+
+            .modal-header {
+                padding: 1.4rem 1.4rem 1rem 1.4rem;
+            }
+
+            .modal-body {
+                padding: 1.4rem;
             }
         }
     </style>
@@ -1340,12 +1587,14 @@
             </div>
 
             <div class="agenda-grid">
-                <div class="grid-header" id="gridHeader">
-                    <!-- Header será preenchido dinamicamente -->
-                </div>
+                <div class="agenda-grid-scroll">
+                    <div class="grid-header" id="gridHeader">
+                        <!-- Header será preenchido dinamicamente -->
+                    </div>
 
-                <div class="grid-body" id="agendaGridBody">
-                    <!-- Grid será preenchido dinamicamente -->
+                    <div class="grid-body" id="agendaGridBody">
+                        <!-- Grid será preenchido dinamicamente -->
+                    </div>
                 </div>
             </div>
         </div>
