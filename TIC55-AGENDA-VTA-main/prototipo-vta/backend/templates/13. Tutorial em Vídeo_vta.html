@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutoriais em Vídeo - VTA</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --vta-green: #52B788;
+            --vta-green-light: #74C69D;
+            --vta-green-dark: #40916C;
+            --vta-blue: #2E86AB;
+            --vta-blue-light: #48A3C7;
+            --vta-blue-dark: #1B5E7A;
+            --vta-orange: #F77F00;
+            --vta-orange-light: #FCBF49;
+            --vta-orange-dark: #D62828;
+            --vta-purple: #9D4EDD;
+            --vta-purple-light: #C77DFF;
+            --white: #FFFFFF;
+            --gray-light: #F8F9FA;
+            --gray-medium: #6C757D;
+            --gray-dark: #343A40;
+        }
+
+        body {
+            background: var(--gray-light);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--gray-dark);
+        }
+
+        .dashboard-container {
+            display: grid;
+            grid-template-rows: auto 1fr;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--vta-green) 0%, var(--vta-green-dark) 100%);
+            color: var(--white);
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-mini {
+            width: 45px;
+            height: 45px;
+            background: var(--white);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--vta-green);
+            font-size: 1.5rem;
+        }
+
+        .header-title h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .header-subtitle {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            background: var(--white);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--vta-green);
+            font-weight: bold;
+        }
+
+        .user-details h3 {
+            font-size: 0.9rem;
+            margin-bottom: 2px;
+        }
+
+        .user-role {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: var(--white);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: rotate(15deg);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 2rem;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .sidebar {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 1.5rem;
+            height: fit-content;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 100px;
+        }
+
+        .sidebar-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .sidebar-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--gray-medium);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 1rem;
+            padding-left: 0.5rem;
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            text-decoration: none;
+            color: var(--gray-dark);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: linear-gradient(135deg, var(--vta-green) 0%, var(--vta-green-light) 100%);
+            color: var(--white);
+            transform: translateX(5px);
+        }
+
+        .nav-link i {
+            font-size: 1.1rem;
+            width: 20px;
+        }
+
+        .page-content {
+            display: grid;
+            gap: 2rem;
+        }
+
+        .page-header {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .page-header-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--vta-purple), var(--vta-purple-light));
+            color: var(--white);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--gray-dark);
+            margin: 0;
+        }
+
+        .page-subtitle {
+            color: var(--gray-medium);
+            margin: 0;
+            margin-top: 0.5rem;
+        }
+
+        .tutorial-categories {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .category-card {
+            background: var(--white);
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .category-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .category-header {
+            padding: 1.5rem 2rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .category-header:hover {
+            background: var(--gray-light);
+        }
+
+        .category-header.active {
+            background: linear-gradient(135deg, var(--vta-green), var(--vta-green-light));
+            color: var(--white);
+        }
+
+        .category-info {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .category-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--white);
+            transition: all 0.3s ease;
+        }
+
+        .category-icon.recepcionista {
+            background: linear-gradient(135deg, var(--vta-blue), var(--vta-blue-light));
+        }
+
+        .category-icon.administrador {
+            background: linear-gradient(135deg, var(--vta-orange-dark), var(--vta-orange));
+        }
+
+        .category-icon.veterinario {
+            background: linear-gradient(135deg, var(--vta-green), var(--vta-green-light));
+        }
+
+        .category-header.active .category-icon {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .category-details h3 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .category-description {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .category-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .video-count {
+            background: rgba(82, 183, 136, 0.1);
+            color: var(--vta-green-dark);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .category-header.active .video-count {
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--white);
+        }
+
+        .expand-icon {
+            font-size: 1.5rem;
+            color: var(--vta-green);
+            transition: all 0.3s ease;
+        }
+
+        .category-header.active .expand-icon {
+            transform: rotate(180deg);
+            color: var(--white);
+        }
+
+        .video-list {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+        }
+
+        .video-list.active {
+            max-height: 2000px;
+        }
+
+        .video-item {
+            padding: 1.25rem 2rem;
+            border-top: 1px solid var(--gray-light);
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .video-item:hover {
+            background: var(--gray-light);
+            padding-left: 2.5rem;
+        }
+
+        .video-thumbnail {
+            width: 120px;
+            height: 68px;
+            background: var(--gray-light);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray-medium);
+            font-size: 2rem;
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .video-thumbnail::after {
+            content: '\f04b';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            color: var(--white);
+            background: rgba(82, 183, 136, 0.9);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            padding-left: 3px;
+            transition: all 0.3s ease;
+        }
+
+        .video-item:hover .video-thumbnail::after {
+            transform: scale(1.1);
+            background: var(--vta-green);
+        }
+
+        .video-info {
+            flex: 1;
+        }
+
+        .video-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--gray-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .video-description {
+            font-size: 0.9rem;
+            color: var(--gray-medium);
+            line-height: 1.5;
+        }
+
+        .video-meta {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .video-duration,
+        .video-views {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--gray-medium);
+        }
+
+        .video-badge {
+            background: var(--vta-green);
+            color: var(--white);
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--gray-medium);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state small {
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .sidebar {
+                position: static;
+                order: 2;
+            }
+
+            .page-content {
+                margin-left: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .header-right {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .page-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .user-details {
+                display: none;
+            }
+
+            .category-header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .video-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .video-thumbnail {
+                width: 100%;
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="header-left">
+                    <div class="logo-mini">
+                        <i class="fas fa-stethoscope"></i>
+                    </div>
+                    <div class="header-title">
+                        <h1>VTA - Vet Assistance</h1>
+                        <p class="header-subtitle">Sistema de Agendamento Veterinário</p>
+                    </div>
+                </div>
+
+                <div class="header-right">
+                    <div class="user-info">
+                        <div class="user-avatar">A</div>
+                        <div class="user-details">
+                            <h3>Administrador</h3>
+                            <p class="user-role">admin@vta.com</p>
+                        </div>
+                    </div>
+                    <button class="logout-btn" onclick="logout()" title="Sair do sistema">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-section">
+                    <h3 class="sidebar-title">Menu Principal</h3>
+                    <ul class="nav-menu">
+                        <li class="nav-item">
+                            <a href="2. dashboard_vta.html" class="nav-link">
+                                <i class="fas fa-chart-pie"></i>
+                                Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="3. agenda_vta.html" class="nav-link">
+                                <i class="fas fa-calendar"></i>
+                                Agenda
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="4. agendamento_vta.html" class="nav-link">
+                                <i class="fas fa-calendar-check"></i>
+                                Agendamentos
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="12. servicos_vta.html" class="nav-link">
+                                <i class="fas fa-briefcase-medical"></i>
+                                Serviços
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="5. clientes_vta.html" class="nav-link">
+                                <i class="fas fa-users"></i>
+                                Clientes
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="6. pets_vta.html" class="nav-link">
+                                <i class="fas fa-paw"></i>
+                                Pets
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="8. salas_vta.html" class="nav-link">
+                                <i class="fas fa-door-open"></i>
+                                Salas
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="7. usuarios_vta.html" class="nav-link">
+                                <i class="fas fa-user-cog"></i>
+                                Usuários
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3 class="sidebar-title">Relatórios</h3>
+                    <ul class="nav-menu">
+                        <li class="nav-item">
+                            <a href="9. relatorios_dashboard.html" class="nav-link">
+                                <i class="fas fa-chart-bar"></i>
+                                Relatórios ADM
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="10. relatorios_pets.html" class="nav-link">
+                                <i class="fas fa-file-medical"></i>
+                                Histórico Pets
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3 class="sidebar-title">Ajuda</h3>
+                    <ul class="nav-menu">
+                        <li class="nav-item">
+                            <a href="13. Tutorial em Vídeo_vta.html" class="nav-link active">
+                                <i class="fas fa-play-circle"></i>
+                                Tutoriais
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </aside>
+
+            <!-- Page Content -->
+            <div class="page-content">
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div class="page-header-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <div>
+                        <h2 class="page-title">Tutoriais em Vídeo</h2>
+                        <p class="page-subtitle">Aprenda a usar todas as funcionalidades do sistema VTA</p>
+                    </div>
+                </div>
+
+                <!-- Tutorial Categories -->
+                <div class="tutorial-categories">
+                    <!-- Recepcionista -->
+                    <div class="category-card">
+                        <div class="category-header" onclick="toggleCategory('recepcionista')">
+                            <div class="category-info">
+                                <div class="category-icon recepcionista">
+                                    <i class="fas fa-user-tie"></i>
+                                </div>
+                                <div class="category-details">
+                                    <h3>Recepcionista</h3>
+                                    <p class="category-description">Tutoriais para atendimento e gestão de agendamentos</p>
+                                </div>
+                            </div>
+                            <div class="category-actions">
+                                <span class="video-count">0 vídeos</span>
+                                <i class="fas fa-chevron-down expand-icon"></i>
+                            </div>
+                        </div>
+                        <div class="video-list" id="recepcionista-videos">
+                            <div class="empty-state">
+                                <i class="fas fa-video-slash"></i>
+                                <p>Nenhum vídeo disponível ainda</p>
+                                <small>Os tutoriais serão adicionados em breve</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Administrador -->
+                    <div class="category-card">
+                        <div class="category-header" onclick="toggleCategory('administrador')">
+                            <div class="category-info">
+                                <div class="category-icon administrador">
+                                    <i class="fas fa-user-shield"></i>
+                                </div>
+                                <div class="category-details">
+                                    <h3>Administrador</h3>
+                                    <p class="category-description">Tutoriais para configuração e gestão do sistema</p>
+                                </div>
+                            </div>
+                            <div class="category-actions">
+                                <span class="video-count">0 vídeos</span>
+                                <i class="fas fa-chevron-down expand-icon"></i>
+                            </div>
+                        </div>
+                        <div class="video-list" id="administrador-videos">
+                            <div class="empty-state">
+                                <i class="fas fa-video-slash"></i>
+                                <p>Nenhum vídeo disponível ainda</p>
+                                <small>Os tutoriais serão adicionados em breve</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Veterinário -->
+                    <div class="category-card">
+                        <div class="category-header" onclick="toggleCategory('veterinario')">
+                            <div class="category-info">
+                                <div class="category-icon veterinario">
+                                    <i class="fas fa-user-md"></i>
+                                </div>
+                                <div class="category-details">
+                                    <h3>Veterinário</h3>
+                                    <p class="category-description">Tutoriais para atendimento e gestão de consultas</p>
+                                </div>
+                            </div>
+                            <div class="category-actions">
+                                <span class="video-count">0 vídeos</span>
+                                <i class="fas fa-chevron-down expand-icon"></i>
+                            </div>
+                        </div>
+                        <div class="video-list" id="veterinario-videos">
+                            <div class="empty-state">
+                                <i class="fas fa-video-slash"></i>
+                                <p>Nenhum vídeo disponível ainda</p>
+                                <small>Os tutoriais serão adicionados em breve</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Dados de vídeos (estrutura para adicionar posteriormente)
+        const videosData = {
+            recepcionista: [
+                // Exemplo de estrutura (comentado para ser preenchido depois):
+                // {
+                //     id: 1,
+                //     title: 'Como fazer um agendamento',
+                //     description: 'Aprenda a criar e gerenciar agendamentos no sistema',
+                //     duration: '5:30',
+                //     views: '1.2k',
+                //     url: 'https://youtube.com/...',
+                //     badge: 'Novo'
+                // }
+            ],
+            administrador: [
+                // Vídeos para administrador serão adicionados aqui
+            ],
+            veterinario: [
+                // Vídeos para veterinário serão adicionados aqui
+            ]
+        };
+
+        // Função para alternar visualização de categoria
+        function toggleCategory(categoryId) {
+            const categoryCard = event.currentTarget.parentElement;
+            const videoList = document.getElementById(`${categoryId}-videos`);
+            const header = event.currentTarget;
+
+            // Toggle active class
+            header.classList.toggle('active');
+            videoList.classList.toggle('active');
+
+            // Se estiver abrindo e tiver vídeos, renderizar
+            if (videoList.classList.contains('active') && videosData[categoryId].length > 0) {
+                renderVideos(categoryId);
+            }
+        }
+
+        // Função para renderizar vídeos
+        function renderVideos(categoryId) {
+            const videoList = document.getElementById(`${categoryId}-videos`);
+            const videos = videosData[categoryId];
+
+            if (videos.length === 0) {
+                return; // Mantém o empty state
+            }
+
+            let html = '';
+            videos.forEach(video => {
+                html += `
+                    <div class="video-item" onclick="playVideo('${video.url}')">
+                        <div class="video-thumbnail">
+                            <i class="fas fa-film"></i>
+                        </div>
+                        <div class="video-info">
+                            <div class="video-title">${video.title}</div>
+                            <div class="video-description">${video.description}</div>
+                            <div class="video-meta">
+                                <span class="video-duration">
+                                    <i class="far fa-clock"></i>
+                                    ${video.duration}
+                                </span>
+                                <span class="video-views">
+                                    <i class="far fa-eye"></i>
+                                    ${video.views} visualizações
+                                </span>
+                                ${video.badge ? `<span class="video-badge">${video.badge}</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            videoList.innerHTML = html;
+
+            // Atualizar contador
+            updateVideoCount(categoryId);
+        }
+
+        // Função para atualizar contador de vídeos
+        function updateVideoCount(categoryId) {
+            const count = videosData[categoryId].length;
+            const categoryCard = document.querySelector(`#${categoryId}-videos`).closest('.category-card');
+            const countElement = categoryCard.querySelector('.video-count');
+            countElement.textContent = `${count} vídeo${count !== 1 ? 's' : ''}`;
+        }
+
+        // Função para reproduzir vídeo (placeholder)
+        function playVideo(url) {
+            if (url) {
+                window.open(url, '_blank');
+            } else {
+                alert('URL do vídeo será adicionada em breve!');
+            }
+        }
+
+        // Função de logout
+        function logout() {
+            if (confirm('Deseja realmente sair do sistema?')) {
+                window.location.href = '1. login_vta.html';
+            }
+        }
+
+        // Inicializar contadores ao carregar a página
+        document.addEventListener('DOMContentLoaded', function() {
+            updateVideoCount('recepcionista');
+            updateVideoCount('administrador');
+            updateVideoCount('veterinario');
+        });
+
+        // Exemplo de como adicionar vídeos posteriormente:
+        /*
+        function addVideo(category, videoData) {
+            videosData[category].push(videoData);
+            updateVideoCount(category);
+
+            // Se a categoria estiver aberta, re-renderizar
+            const videoList = document.getElementById(`${category}-videos`);
+            if (videoList.classList.contains('active')) {
+                renderVideos(category);
+            }
+        }
+
+        // Uso:
+        addVideo('recepcionista', {
+            id: 1,
+            title: 'Como fazer um agendamento',
+            description: 'Aprenda a criar e gerenciar agendamentos no sistema',
+            duration: '5:30',
+            views: '1.2k',
+            url: 'https://youtube.com/...',
+            badge: 'Novo'
+        });
+        */
+    </script>
+</body>
+</html>
