@@ -11,12 +11,14 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
     <style>
+        /* Reset e configurações básicas */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
+        /* Paleta de cores VTA */
         :root {
             --vta-green: #52B788;
             --vta-green-light: #74C69D;
@@ -27,6 +29,8 @@
             --vta-orange: #F77F00;
             --vta-orange-light: #FCBF49;
             --vta-orange-dark: #D62828;
+            --vta-purple: #9D4EDD;
+            --vta-purple-light: #C77DFF;
             --white: #FFFFFF;
             --gray-light: #F8F9FA;
             --gray-medium: #6C757D;
@@ -34,15 +38,11 @@
         }
 
         body {
-            background: var(--gray-light);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--gray-light);
             color: var(--gray-dark);
-        }
-
-        .dashboard-container {
-            display: grid;
-            grid-template-rows: auto 1fr;
-            min-height: 100vh;
+            padding-top: 0;
+            overflow-x: hidden;
         }
 
         /* Header */
