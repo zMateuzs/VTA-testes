@@ -786,250 +786,250 @@
 
             <!-- Page Content -->
             <div class="page-content">
-                <!-- Page Header -->
-                <div class="page-header">
-                    <div>
-                        <h2 class="page-title">Gerenciamento de Agendamentos</h2>
-                        <p class="page-subtitle">Gerencie consultas, exames e procedimentos</p>
-                    </div>
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#agendamentoModal">
-                        <i class="fas fa-plus me-2"></i>Novo Agendamento
-                    </button>
-                </div>
+        <!-- Page Header -->
+        <div class="page-header">
+            <div>
+                <h2 class="page-title">Gerenciamento de Agendamentos</h2>
+                <p class="page-subtitle">Gerencie consultas, exames e procedimentos</p>
+            </div>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#agendamentoModal">
+                <i class="fas fa-plus me-2"></i>Novo Agendamento
+            </button>
+        </div>
 
-                <!-- Search and Filters -->
-                <div class="search-filters">
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <label class="form-label">Buscar</label>
-                            <div class="input-group">
-                                <input type="text" class="form-control" placeholder="Cliente, pet ou serviço..." id="searchInput">
-                                <button class="btn btn-outline-primary" type="button">
-                                    <i class="fas fa-search"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label">Status</label>
-                            <select class="form-select" id="statusFilter">
-                                <option value="">Todos</option>
-                                <option value="agendado">Agendado</option>
-                                <option value="confirmado">Confirmado</option>
-                                <option value="realizado">Realizado</option>
-                                <option value="cancelado">Cancelado</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label">Sala</label>
-                            <select class="form-select" id="salaFilter">
-                                <option value="">Todas</option>
-                                <option value="1">Consultório 1</option>
-                                <option value="2">Consultório 2</option>
-                                <option value="3">Cirurgia</option>
-                                <option value="4">Raio-X</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label">Data Inicial</label>
-                            <input type="date" class="form-control" id="dataInicio">
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label">Data Final</label>
-                            <input type="date" class="form-control" id="dataFim">
-                        </div>
-                    </div>
-                    <div class="row mt-3">
-                        <div class="col-12">
-                            <div class="quick-actions">
-                                <button class="btn btn-outline-primary btn-sm" onclick="filtrarHoje()">
-                                    <i class="fas fa-calendar-day me-1"></i>Hoje
-                                </button>
-                                <button class="btn btn-outline-primary btn-sm" onclick="filtrarSemana()">
-                                    <i class="fas fa-calendar-week me-1"></i>Esta Semana
-                                </button>
-                                <button class="btn btn-outline-primary btn-sm" onclick="filtrarMes()">
-                                    <i class="fas fa-calendar me-1"></i>Este Mês
-                                </button>
-                                <button class="btn btn-outline-secondary btn-sm" onclick="limparFiltros()">
-                                    <i class="fas fa-times me-1"></i>Limpar Filtros
-                                </button>
-                            </div>
-                        </div>
+        <!-- Search and Filters -->
+        <div class="search-filters">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Buscar</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Cliente, pet ou serviço..." id="searchInput">
+                        <button class="btn btn-outline-primary" type="button">
+                            <i class="fas fa-search"></i>
+                        </button>
                     </div>
                 </div>
-
-                <!-- Agendamentos Table -->
-                <div class="card">
-                    <div class="card-header">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">
-                                <i class="fas fa-list me-2"></i>Lista de Agendamentos
-                            </h5>
-                            <div class="d-flex gap-2">
-                                <button class="btn btn-outline-light btn-sm" onclick="exportarAgendamentos()">
-                                    <i class="fas fa-download me-1"></i>Exportar
-                                </button>
-                                <button class="btn btn-outline-light btn-sm" onclick="atualizarLista()">
-                                    <i class="fas fa-sync-alt me-1"></i>Atualizar
-                                </button>
-                            </div>
-                        </div>
+                <div class="col-md-2">
+                    <label class="form-label">Status</label>
+                    <select class="form-select" id="statusFilter">
+                        <option value="">Todos</option>
+                        <option value="agendado">Agendado</option>
+                        <option value="confirmado">Confirmado</option>
+                        <option value="realizado">Realizado</option>
+                        <option value="cancelado">Cancelado</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Sala</label>
+                    <select class="form-select" id="salaFilter">
+                        <option value="">Todas</option>
+                        <option value="1">Consultório 1</option>
+                        <option value="2">Consultório 2</option>
+                        <option value="3">Cirurgia</option>
+                        <option value="4">Raio-X</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Data Inicial</label>
+                    <input type="date" class="form-control" id="dataInicio">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Data Final</label>
+                    <input type="date" class="form-control" id="dataFim">
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-12">
+                    <div class="quick-actions">
+                        <button class="btn btn-outline-primary btn-sm" onclick="filtrarHoje()">
+                            <i class="fas fa-calendar-day me-1"></i>Hoje
+                        </button>
+                        <button class="btn btn-outline-primary btn-sm" onclick="filtrarSemana()">
+                            <i class="fas fa-calendar-week me-1"></i>Esta Semana
+                        </button>
+                        <button class="btn btn-outline-primary btn-sm" onclick="filtrarMes()">
+                            <i class="fas fa-calendar me-1"></i>Este Mês
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="limparFiltros()">
+                            <i class="fas fa-times me-1"></i>Limpar Filtros
+                        </button>
                     </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0" id="agendamentosTable">
-                                <thead>
-                                    <tr>
-                                        <th>Data/Hora</th>
-                                        <th>Cliente</th>
-                                        <th>Pet</th>
-                                        <th>Serviço</th>
-                                        <th>Veterinário</th>
-                                        <th>Sala</th>
-                                        <th>Status</th>
-                                        <th>Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="agendamentosTableBody">
-                                    <tr>
-                                        <td>
-                                            <div>
-                                                <strong>15/08/2025</strong><br>
-                                                <small class="text-muted">09:00</small>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div>
-                                                <strong>Maria Silva</strong><br>
-                                                <small class="text-muted">(51) 99999-9999</small>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div>
-                                                <strong>Rex</strong><br>
-                                                <small class="text-muted">Golden Retriever</small>
-                                            </div>
-                                        </td>
-                                        <td>Consulta Geral</td>
-                                        <td>Dr. João Silva</td>
-                                        <td>Consultório 1</td>
-                                        <td><span class="badge status-confirmado">Confirmado</span></td>
-                                        <td>
-                                            <div class="dropdown">
-                                                <button class="btn btn-outline-primary btn-sm dropdown-toggle" data-bs-toggle="dropdown">
-                                                    Ações
-                                                </button>
-                                                <ul class="dropdown-menu">
-                                                    <li><a class="dropdown-item" href="#" onclick="visualizarAgendamento(1)">
-                                                        <i class="fas fa-eye me-2"></i>Visualizar
-                                                    </a></li>
-                                                    <li><a class="dropdown-item" href="#" onclick="editarAgendamento(1)">
-                                                        <i class="fas fa-edit me-2"></i>Editar
-                                                    </a></li>
-                                                    <li><a class="dropdown-item" href="#" onclick="confirmarAgendamento(1)">
-                                                        <i class="fas fa-check me-2"></i>Confirmar
-                                                    </a></li>
-                                                    <li><a class="dropdown-item" href="#" onclick="realizarAgendamento(1)">
-                                                        <i class="fas fa-user-md me-2"></i>Realizar
-                                                    </a></li>
-                                                    <li><hr class="dropdown-divider"></li>
-                                                    <li><a class="dropdown-item text-danger" href="#" onclick="cancelarAgendamento(1)">
-                                                        <i class="fas fa-times me-2"></i>Cancelar
-                                                    </a></li>
-                                                </ul>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div>
-                                                <strong>15/08/2025</strong><br>
-                                                <small class="text-muted">10:30</small>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div>
-                                                <strong>João Santos</strong><br>
-                                                <small class="text-muted">(51) 88888-8888</small>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div>
-                                                <strong>Mimi</strong><br>
-                                                <small class="text-muted">Persa</small>
-                                            </div>
-                                        </td>
-                                        <td>Vacinação</td>
-                                        <td>Dra. Ana Costa</td>
-                                        <td>Consultório 2</td>
-                                        <td><span class="badge status-agendado">Agendado</span></td>
-                                        <td>
-                                            <div class="dropdown">
-                                                <button class="btn btn-outline-primary btn-sm dropdown-toggle" data-bs-toggle="dropdown">
-                                                    Ações
-                                                </button>
-                                                <ul class="dropdown-menu">
-                                                    <li><a class="dropdown-item" href="#" onclick="visualizarAgendamento(2)">
-                                                        <i class="fas fa-eye me-2"></i>Visualizar
-                                                    </a></li>
-                                                    <li><a class="dropdown-item" href="#" onclick="editarAgendamento(2)">
-                                                        <i class="fas fa-edit me-2"></i>Editar
-                                                    </a></li>
-                                                    <li><a class="dropdown-item" href="#" onclick="confirmarAgendamento(2)">
-                                                        <i class="fas fa-check me-2"></i>Confirmar
-                                                    </a></li>
-                                                    <li><a class="dropdown-item" href="#" onclick="realizarAgendamento(2)">
-                                                        <i class="fas fa-user-md me-2"></i>Realizar
-                                                    </a></li>
-                                                    <li><hr class="dropdown-divider"></li>
-                                                    <li><a class="dropdown-item text-danger" href="#" onclick="cancelarAgendamento(2)">
-                                                        <i class="fas fa-times me-2"></i>Cancelar
-                                                    </a></li>
-                                                </ul>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div>
-                                                <strong>14/08/2025</strong><br>
-                                                <small class="text-muted">14:00</small>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div>
-                                                <strong>Carlos Oliveira</strong><br>
-                                                <small class="text-muted">(51) 77777-7777</small>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div>
-                                                <strong>Bolt</strong><br>
-                                                <small class="text-muted">Labrador</small>
-                                            </div>
-                                        </td>
-                                        <td>Cirurgia</td>
-                                        <td>Dr. Pedro Lima</td>
-                                        <td>Cirurgia</td>
-                                        <td><span class="badge status-realizado">Realizado</span></td>
-                                        <td>
-                                            <div class="dropdown">
-                                                <button class="btn btn-outline-primary btn-sm dropdown-toggle" data-bs-toggle="dropdown">
-                                                    Ações
-                                                </button>
-                                                <ul class="dropdown-menu">
-                                                    <li><a class="dropdown-item" href="#" onclick="visualizarAgendamento(3)">
-                                                        <i class="fas fa-eye me-2"></i>Visualizar
-                                                    </a></li>
-                                                    <li><a class="dropdown-item" href="#" onclick="gerarRelatorio(3)">
-                                                        <i class="fas fa-file-medical me-2"></i>Relatório
-                                                    </a></li>
-                                                </ul>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Agendamentos Table -->
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list me-2"></i>Lista de Agendamentos
+                    </h5>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-light btn-sm" onclick="exportarAgendamentos()">
+                            <i class="fas fa-download me-1"></i>Exportar
+                        </button>
+                        <button class="btn btn-outline-light btn-sm" onclick="atualizarLista()">
+                            <i class="fas fa-sync-alt me-1"></i>Atualizar
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0" id="agendamentosTable">
+                        <thead>
+                            <tr>
+                                <th>Data/Hora</th>
+                                <th>Cliente</th>
+                                <th>Pet</th>
+                                <th>Serviço</th>
+                                <th>Veterinário</th>
+                                <th>Sala</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="agendamentosTableBody">
+                            <tr>
+                                <td>
+                                    <div>
+                                        <strong>15/08/2025</strong><br>
+                                        <small class="text-muted">09:00</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>
+                                        <strong>Maria Silva</strong><br>
+                                        <small class="text-muted">(51) 99999-9999</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>
+                                        <strong>Rex</strong><br>
+                                        <small class="text-muted">Golden Retriever</small>
+                                    </div>
+                                </td>
+                                <td>Consulta Geral</td>
+                                <td>Dr. João Silva</td>
+                                <td>Consultório 1</td>
+                                <td><span class="badge status-confirmado">Confirmado</span></td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button class="btn btn-outline-primary btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+                                            Ações
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" href="#" onclick="visualizarAgendamento(1)">
+                                                <i class="fas fa-eye me-2"></i>Visualizar
+                                            </a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="editarAgendamento(1)">
+                                                <i class="fas fa-edit me-2"></i>Editar
+                                            </a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="confirmarAgendamento(1)">
+                                                <i class="fas fa-check me-2"></i>Confirmar
+                                            </a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="realizarAgendamento(1)">
+                                                <i class="fas fa-user-md me-2"></i>Realizar
+                                            </a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><a class="dropdown-item text-danger" href="#" onclick="cancelarAgendamento(1)">
+                                                <i class="fas fa-times me-2"></i>Cancelar
+                                            </a></li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div>
+                                        <strong>15/08/2025</strong><br>
+                                        <small class="text-muted">10:30</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>
+                                        <strong>João Santos</strong><br>
+                                        <small class="text-muted">(51) 88888-8888</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>
+                                        <strong>Mimi</strong><br>
+                                        <small class="text-muted">Persa</small>
+                                    </div>
+                                </td>
+                                <td>Vacinação</td>
+                                <td>Dra. Ana Costa</td>
+                                <td>Consultório 2</td>
+                                <td><span class="badge status-agendado">Agendado</span></td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button class="btn btn-outline-primary btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+                                            Ações
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" href="#" onclick="visualizarAgendamento(2)">
+                                                <i class="fas fa-eye me-2"></i>Visualizar
+                                            </a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="editarAgendamento(2)">
+                                                <i class="fas fa-edit me-2"></i>Editar
+                                            </a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="confirmarAgendamento(2)">
+                                                <i class="fas fa-check me-2"></i>Confirmar
+                                            </a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="realizarAgendamento(2)">
+                                                <i class="fas fa-user-md me-2"></i>Realizar
+                                            </a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><a class="dropdown-item text-danger" href="#" onclick="cancelarAgendamento(2)">
+                                                <i class="fas fa-times me-2"></i>Cancelar
+                                            </a></li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div>
+                                        <strong>14/08/2025</strong><br>
+                                        <small class="text-muted">14:00</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>
+                                        <strong>Carlos Oliveira</strong><br>
+                                        <small class="text-muted">(51) 77777-7777</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>
+                                        <strong>Bolt</strong><br>
+                                        <small class="text-muted">Labrador</small>
+                                    </div>
+                                </td>
+                                <td>Cirurgia</td>
+                                <td>Dr. Pedro Lima</td>
+                                <td>Cirurgia</td>
+                                <td><span class="badge status-realizado">Realizado</span></td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button class="btn btn-outline-primary btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+                                            Ações
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" href="#" onclick="visualizarAgendamento(3)">
+                                                <i class="fas fa-eye me-2"></i>Visualizar
+                                            </a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="gerarRelatorio(3)">
+                                                <i class="fas fa-file-medical me-2"></i>Relatório
+                                            </a></li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                         </div>
                     </div>
                 </div>
