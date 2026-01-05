@@ -48,7 +48,7 @@
         .header {
             background: linear-gradient(135deg, var(--vta-green) 0%, var(--vta-green-dark) 100%);
             color: var(--white);
-            padding: 1rem 2rem;
+            padding: 16px 32px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
             position: sticky;
             top: 0;
@@ -60,13 +60,13 @@
             justify-content: space-between;
             align-items: center;
             width: 100%;
-            padding: 0 2rem;
+            padding: 0 32px;
         }
 
         .header-left {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 16px;
         }
 
         .logo-mini {
@@ -78,31 +78,31 @@
             align-items: center;
             justify-content: center;
             color: var(--vta-green);
-            font-size: 1.5rem;
+            font-size: 24px;
         }
 
         .header-title h1 {
-            font-size: 1.8rem;
+            font-size: 29px;
             font-weight: 600;
             margin-bottom: 2px;
         }
 
         .header-subtitle {
-            font-size: 0.9rem;
+            font-size: 14px;
             opacity: 0.8;
         }
 
         .header-right {
             display: flex;
             align-items: center;
-            gap: 1.5rem;
+            gap: 24px;
         }
 
         .user-info {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            padding: 0.5rem 1rem;
+            gap: 12px;
+            padding: 8px 16px;
             border-radius: 25px;
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
@@ -121,12 +121,12 @@
         }
 
         .user-details h3 {
-            font-size: 0.9rem;
+            font-size: 14px;
             margin-bottom: 2px;
         }
 
         .user-role {
-            font-size: 0.8rem;
+            font-size: 13px;
             opacity: 0.8;
         }
 
@@ -134,9 +134,9 @@
             background: none;
             border: none;
             color: var(--white);
-            font-size: 1.2rem;
+            font-size: 19px;
             cursor: pointer;
-            padding: 0.5rem;
+            padding: 8px;
             border-radius: 50%;
             transition: all 0.3s ease;
         }
@@ -150,8 +150,8 @@
        /* Main Content */
         .main-content {
             display: flex;
-            gap: 2rem;
-            padding: 2rem;
+            gap: 32px;
+            padding: 32px;
             position: relative;
             width: 100%;
         }
@@ -162,12 +162,12 @@
         .sidebar {
             background: var(--white);
             border-radius: 15px;
-            padding: 1rem 1.25rem;
+            padding: 16px 20px;
             height: fit-content;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
             position: fixed;
             top: 120px;
-            left: 2rem;
+            left: 32px;
             width: 220px;
             z-index: 50;
         }
@@ -175,7 +175,7 @@
         /* Ajuste para telas menores que 1450px */
         @media (max-width: 1450px) {
             .sidebar {
-                left: 2rem;
+                left: 32px;
             }
         }
         
@@ -198,17 +198,17 @@
         }
 
         .sidebar-section {
-            margin-bottom: 1.5rem;
+            margin-bottom: 24px;
         }
 
         .sidebar-title {
-            font-size: 0.75rem;
+            font-size: 12px;
             font-weight: 600;
             color: var(--gray-medium);
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-bottom: 0.75rem;
-            padding-left: 0.25rem;
+            padding-left: 4px;
         }
 
         .nav-menu {
@@ -216,20 +216,20 @@
         }
 
         .nav-item {
-            margin-bottom: 0.5rem;
+            margin-bottom: 8px;
         }
 
         .nav-link {
             display: flex;
             align-items: center;
-            gap: 0.65rem;
-            padding: 0.65rem 0.85rem;
+            gap: 10px;
+            padding: 10px 14px;
             text-decoration: none;
             color: var(--gray-dark);
             border-radius: 10px;
             transition: all 0.3s ease;
             font-weight: 500;
-            font-size: 0.95rem;
+            font-size: 15px;
         }
 
         .nav-link:hover, .nav-link.active {
@@ -239,14 +239,14 @@
         }
 
         .nav-link i {
-            font-size: 1rem;
+            font-size: 16px;
             width: 18px;
         }
 
         /* Page Content */
         .page-content {
             display: grid;
-            gap: 2rem;
+            gap: 32px;
             margin-left: 260px;
             flex: 1;
             width: 100%;
@@ -254,7 +254,7 @@
 
         .page-header {
             background: var(--white);
-            padding: 2rem;
+            padding: 32px;
             border-radius: 15px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
             display: flex;
@@ -265,7 +265,7 @@
         .page-title {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 16px;
         }
 
         .page-title i {
@@ -277,7 +277,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
+            font-size: 24px;
         }
 
         .page-title h1 {
@@ -289,7 +289,7 @@
 
         .page-subtitle {
             color: var(--gray-medium);
-            font-size: 1rem;
+            font-size: 16px;
         }
 
         .btn-primary {
@@ -299,7 +299,7 @@
             padding: 0.75rem 1.5rem;
             border-radius: 10px;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 16px;
             font-weight: 500;
             transition: all 0.3s ease;
             display: flex;
@@ -316,13 +316,13 @@
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
+            gap: 24px;
             margin-bottom: 2rem;
         }
 
         .stat-card {
             background: var(--white);
-            padding: 1.5rem;
+            padding: 16px 20px;
             border-radius: 15px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
             text-align: center;
@@ -366,18 +366,18 @@
             font-size: 2rem;
             font-weight: 700;
             color: var(--gray-dark);
-            margin-bottom: 0.5rem;
+            margin-bottom: 8px;
         }
 
         .stat-label {
             color: var(--gray-medium);
-            font-size: 0.9rem;
+            font-size: 14px;
         }
 
         /* Filters and Search */
         .filters-section {
             background: var(--white);
-            padding: 1.5rem;
+            padding: 16px 20px;
             border-radius: 15px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
             margin-bottom: 2rem;
@@ -386,13 +386,13 @@
         .filters-grid {
             display: grid;
             grid-template-columns: 2fr 1fr 1fr 1fr auto;
-            gap: 1rem;
+            gap: 16px;
             align-items: end;
         }
 
         .quick-actions {
             display: flex;
-            gap: 0.75rem;
+            gap: 12px;
             flex-wrap: wrap;
             margin-top: 1rem;
         }
@@ -401,10 +401,10 @@
             background: transparent;
             border: 2px solid var(--vta-orange);
             color: var(--vta-orange);
-            padding: 0.5rem 1rem;
+            padding: 8px 16px;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 14px;
             font-weight: 500;
             transition: all 0.3s ease;
             display: flex;
@@ -420,7 +420,7 @@
 
         .btn-sm {
             padding: 0.4rem 0.85rem;
-            font-size: 0.85rem;
+            font-size: 12px;
         }
 
         .form-group {
@@ -430,7 +430,7 @@
 
         .form-label {
             font-weight: 500;
-            margin-bottom: 0.5rem;
+            margin-bottom: 8px;
             color: var(--gray-dark);
         }
 
@@ -438,7 +438,7 @@
             padding: 0.75rem;
             border: 2px solid var(--gray-light);
             border-radius: 8px;
-            font-size: 1rem;
+            font-size: 16px;
             transition: all 0.3s ease;
         }
 
@@ -455,7 +455,7 @@
             padding: 0.75rem 1.5rem;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 16px;
             transition: all 0.3s ease;
         }
 
@@ -473,7 +473,7 @@
         }
 
         .table-header {
-            padding: 1.5rem;
+            padding: 16px 20px;
             border-bottom: 1px solid var(--gray-light);
         }
 
@@ -499,7 +499,7 @@
             background: var(--gray-light);
             font-weight: 600;
             color: var(--gray-dark);
-            font-size: 0.9rem;
+            font-size: 14px;
         }
 
         .users-table tbody tr:hover {
@@ -509,7 +509,7 @@
         .user-info-cell {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 16px;
         }
 
         .user-avatar-table {
@@ -526,18 +526,18 @@
 
         .user-details-table h4 {
             margin-bottom: 0.25rem;
-            font-size: 1rem;
+            font-size: 16px;
         }
 
         .user-email {
-            font-size: 0.85rem;
+            font-size: 12px;
             color: var(--gray-medium);
         }
 
         .role-badge {
             padding: 0.25rem 0.75rem;
             border-radius: 20px;
-            font-size: 0.8rem;
+            font-size: 13px;
             font-weight: 500;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -561,7 +561,7 @@
         .status-badge {
             padding: 0.25rem 0.75rem;
             border-radius: 20px;
-            font-size: 0.8rem;
+            font-size: 13px;
             font-weight: 500;
         }
 
@@ -586,7 +586,7 @@
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 14px;
             transition: all 0.3s ease;
         }
 
@@ -644,7 +644,7 @@
         .modal {
             background: var(--white);
             border-radius: 15px;
-            padding: 2rem;
+            padding: 32px;
             max-width: 500px;
             width: 90%;
             max-height: 90vh;
@@ -670,7 +670,7 @@
         }
 
         .modal-title {
-            font-size: 1.5rem;
+            font-size: 24px;
             font-weight: 600;
             color: var(--gray-dark);
         }
@@ -678,10 +678,10 @@
         .btn-close {
             background: none;
             border: none;
-            font-size: 1.5rem;
+            font-size: 24px;
             color: var(--gray-medium);
             cursor: pointer;
-            padding: 0.5rem;
+            padding: 8px;
             border-radius: 50%;
             transition: all 0.3s ease;
         }
@@ -693,18 +693,18 @@
 
         .modal-form {
             display: grid;
-            gap: 1.5rem;
+            gap: 24px;
         }
 
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 1rem;
+            gap: 16px;
         }
 
         .modal-actions {
             display: flex;
-            gap: 1rem;
+            gap: 16px;
             justify-content: flex-end;
             margin-top: 2rem;
             padding-top: 1rem;
@@ -718,7 +718,7 @@
             padding: 0.75rem 1.5rem;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 16px;
             transition: all 0.3s ease;
         }
 
@@ -733,7 +733,7 @@
         @media (max-width: 1024px) {
             .main-content {
                 grid-template-columns: 1fr;
-                gap: 1.5rem;
+                gap: 24px;
                 padding: 1rem;
             }
 
@@ -750,7 +750,7 @@
 
             .filters-grid {
                 grid-template-columns: 1fr 1fr;
-                gap: 1rem;
+                gap: 16px;
             }
 
             .filters-grid .form-group:first-child {
@@ -763,7 +763,7 @@
 
             .page-header {
                 flex-direction: column;
-                gap: 1rem;
+                gap: 16px;
                 align-items: flex-start;
             }
 
@@ -781,7 +781,7 @@
         @media (max-width: 768px) {
             .header-content {
                 flex-direction: column;
-                gap: 1rem;
+                gap: 16px;
                 text-align: center;
             }
 
@@ -800,21 +800,21 @@
             }
 
             .page-header {
-                padding: 1.5rem;
+                padding: 16px 20px;
             }
 
             .page-title i {
                 width: 40px;
                 height: 40px;
-                font-size: 1.2rem;
+                font-size: 19px;
             }
 
             .page-title h1 {
-                font-size: 1.5rem;
+                font-size: 24px;
             }
 
             .page-subtitle {
-                font-size: 0.9rem;
+                font-size: 14px;
             }
 
             .main-content {
@@ -823,7 +823,7 @@
 
             .stats-grid {
                 grid-template-columns: 1fr;
-                gap: 1rem;
+                gap: 16px;
             }
 
             .filters-grid {
@@ -850,7 +850,7 @@
             }
 
             .users-table tr {
-                margin-bottom: 1rem;
+                margin-bottom: 12px;
                 border: 1px solid var(--gray-light);
                 border-radius: 10px;
                 padding: 1rem;
@@ -874,7 +874,7 @@
                 content: attr(data-label);
                 font-weight: 600;
                 color: var(--gray-medium);
-                font-size: 0.85rem;
+                font-size: 12px;
                 text-transform: uppercase;
                 letter-spacing: 0.5px;
             }
@@ -886,16 +886,16 @@
             }
 
             .user-details-table h4 {
-                font-size: 0.9rem;
+                font-size: 14px;
             }
 
             .user-email {
-                font-size: 0.8rem;
+                font-size: 13px;
             }
 
             .actions-cell {
                 justify-content: center;
-                gap: 0.75rem;
+                gap: 12px;
             }
 
             .btn-action {
@@ -906,7 +906,7 @@
             /* Modal responsivo */
             .modal {
                 width: 95%;
-                padding: 1.5rem;
+                padding: 16px 20px;
                 max-height: 95vh;
             }
 
@@ -936,7 +936,7 @@
             .logo-mini {
                 width: 40px;
                 height: 40px;
-                font-size: 1.2rem;
+                font-size: 19px;
             }
 
             .header-title h1 {
@@ -944,21 +944,21 @@
             }
 
             .header-subtitle {
-                font-size: 0.8rem;
+                font-size: 13px;
             }
 
             .user-avatar {
                 width: 30px;
                 height: 30px;
-                font-size: 0.9rem;
+                font-size: 14px;
             }
 
             .user-details h3 {
-                font-size: 0.85rem;
+                font-size: 12px;
             }
 
             .user-role {
-                font-size: 0.75rem;
+                font-size: 12px;
             }
 
             .page-title h1 {
@@ -966,15 +966,15 @@
             }
 
             .stat-value {
-                font-size: 1.5rem;
+                font-size: 24px;
             }
 
             .stat-label {
-                font-size: 0.8rem;
+                font-size: 13px;
             }
 
             .nav-link {
-                font-size: 0.9rem;
+                font-size: 14px;
                 padding: 0.6rem 0.75rem;
             }
 
@@ -983,13 +983,13 @@
             }
 
             .form-control {
-                font-size: 0.9rem;
+                font-size: 14px;
             }
 
             .btn-primary,
             .btn-secondary {
                 padding: 0.65rem 1.25rem;
-                font-size: 0.9rem;
+                font-size: 14px;
             }
         }
     </style>
@@ -1505,7 +1505,7 @@
                 
                 <div class="form-group">
                     <label class="form-label">Permissões Especiais</label>
-                    <div style="display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 0.5rem;">
+                    <div style="display: flex; flex-wrap: wrap; gap: 16px; margin-top: 0.5rem;">
                         <label style="display: flex; align-items: center; gap: 0.5rem;">
                             <input type="checkbox" id="permRelatorios">
                             <span>Visualizar Relatórios</span>
