@@ -811,164 +811,164 @@
 
             <!-- Stats Cards -->
             <section class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <div class="stat-info">
-                                <div class="stat-value">24</div>
-                                <div class="stat-label">Consultas Hoje</div>
-                            </div>
-                            <div class="stat-icon green">
-                                <i class="fas fa-calendar-check"></i>
-                            </div>
-                        </div>
-                        <div class="stat-trend trend-positive">
-                            <i class="fas fa-arrow-up"></i>
-                            <span>+15% vs ontem</span>
-                        </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-info">
+                        <div class="stat-value">24</div>
+                        <div class="stat-label">Consultas Hoje</div>
                     </div>
-
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <div class="stat-info">
-                                <div class="stat-value">3</div>
-                                <div class="stat-label">Salas Disponíveis</div>
-                            </div>
-                            <div class="stat-icon blue">
-                                <i class="fas fa-door-open"></i>
-                            </div>
-                        </div>
-                        <div class="stat-trend trend-positive">
-                            <i class="fas fa-check-circle"></i>
-                            <span>2 ocupadas</span>
-                        </div>
-                    </div>
-
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <div class="stat-info">
-                                <div class="stat-value">156</div>
-                                <div class="stat-label">Clientes Ativos</div>
-                            </div>
-                            <div class="stat-icon orange">
-                                <i class="fas fa-users"></i>
-                            </div>
-                        </div>
-                        <div class="stat-trend trend-positive">
-                            <i class="fas fa-arrow-up"></i>
-                            <span>+8 este mês</span>
-                        </div>
-                    </div>
-
-                </section>
-
-                <!-- Search and Filters -->
-                <div class="search-filters">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Buscar</label>
-                            <div class="input-group">
-                                <input type="text" class="form-control" placeholder="Nome do serviço ou categoria..." id="searchInput">
-                                <button class="btn btn-outline-primary" type="button">
-                                    <i class="fas fa-search"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Categoria</label>
-                            <select class="form-select" id="categoriaFilter">
-                                <option value="">Todas</option>
-                                <option value="consulta">Consultas</option>
-                                <option value="vacinacao">Vacinação</option>
-                                <option value="cirurgia">Cirurgias</option>
-                                <option value="exame">Exames</option>
-                                <option value="banho">Banho e Tosa</option>
-                                <option value="outros">Outros</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Status</label>
-                            <select class="form-select" id="statusFilter">
-                                <option value="">Todos</option>
-                                <option value="ativo">Ativo</option>
-                                <option value="inativo">Inativo</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="row mt-3">
-                        <div class="col-12">
-                            <div class="quick-actions">
-                                <button class="btn btn-outline-primary btn-sm" onclick="filtrarCategoria('consulta')">
-                                    <i class="fas fa-user-md me-1"></i>Consultas
-                                </button>
-                                <button class="btn btn-outline-primary btn-sm" onclick="filtrarCategoria('vacinacao')">
-                                    <i class="fas fa-syringe me-1"></i>Vacinação
-                                </button>
-                                <button class="btn btn-outline-primary btn-sm" onclick="filtrarCategoria('cirurgia')">
-                                    <i class="fas fa-cut me-1"></i>Cirurgias
-                                </button>
-                                <button class="btn btn-outline-secondary btn-sm" onclick="limparFiltros()">
-                                    <i class="fas fa-times me-1"></i>Limpar Filtros
-                                </button>
-                            </div>
-                        </div>
+                    <div class="stat-icon green">
+                        <i class="fas fa-calendar-check"></i>
                     </div>
                 </div>
+                <div class="stat-trend trend-positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>+15% vs ontem</span>
+                </div>
+            </div>
 
-                <!-- Serviços Table -->
-                <div class="card">
-                    <div class="card-header">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">
-                                <i class="fas fa-list me-2"></i>Lista de Serviços
-                            </h5>
-                            <div class="d-flex gap-2">
-                                <button class="btn btn-outline-light btn-sm" onclick="exportarServicos()">
-                                    <i class="fas fa-download me-1"></i>Exportar
-                                </button>
-                                <button class="btn btn-outline-light btn-sm" onclick="atualizarLista()">
-                                    <i class="fas fa-sync-alt me-1"></i>Atualizar
-                                </button>
-                            </div>
-                        </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-info">
+                        <div class="stat-value">3</div>
+                        <div class="stat-label">Salas Disponíveis</div>
                     </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0" id="servicosTable">
-                                <thead>
-                                    <tr>
-                                        <th>Serviço</th>
-                                        <th>Categoria</th>
-                                        <th>Duração</th>
-                                        <th>Valor</th>
-                                        <th>Status</th>
-                                        <th>Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="servicosTableBody">
-                                    <!-- Dados serão carregados via JavaScript -->
-                                </tbody>
-                            </table>
-                        </div>
+                    <div class="stat-icon blue">
+                        <i class="fas fa-door-open"></i>
                     </div>
                 </div>
-
-                <!-- Paginação -->
-                <div class="d-flex justify-content-between align-items-center mt-3">
-                    <small class="text-muted">Mostrando <span id="infoInicio">1</span>-<span id="infoFim">5</span> de <span id="infoTotal">5</span> serviços</small>
-                    <nav>
-                        <ul class="pagination pagination-sm mb-0">
-                            <li class="page-item disabled">
-                                <a class="page-link" href="#">Anterior</a>
-                            </li>
-                            <li class="page-item active">
-                                <a class="page-link" href="#">1</a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link" href="#">Próximo</a>
-                            </li>
-                        </ul>
-                    </nav>
+                <div class="stat-trend trend-positive">
+                    <i class="fas fa-check-circle"></i>
+                    <span>2 ocupadas</span>
                 </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-info">
+                        <div class="stat-value">156</div>
+                        <div class="stat-label">Clientes Ativos</div>
+                    </div>
+                    <div class="stat-icon orange">
+                        <i class="fas fa-users"></i>
+                    </div>
+                </div>
+                <div class="stat-trend trend-positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>+8 este mês</span>
+                </div>
+            </div>
+
+            </section>
+
+            <!-- Search and Filters -->
+            <div class="search-filters">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Buscar</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Nome do serviço ou categoria..." id="searchInput">
+                        <button class="btn btn-outline-primary" type="button">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Categoria</label>
+                    <select class="form-select" id="categoriaFilter">
+                        <option value="">Todas</option>
+                        <option value="consulta">Consultas</option>
+                        <option value="vacinacao">Vacinação</option>
+                        <option value="cirurgia">Cirurgias</option>
+                        <option value="exame">Exames</option>
+                        <option value="banho">Banho e Tosa</option>
+                        <option value="outros">Outros</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Status</label>
+                    <select class="form-select" id="statusFilter">
+                        <option value="">Todos</option>
+                        <option value="ativo">Ativo</option>
+                        <option value="inativo">Inativo</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-12">
+                    <div class="quick-actions">
+                        <button class="btn btn-outline-primary btn-sm" onclick="filtrarCategoria('consulta')">
+                            <i class="fas fa-user-md me-1"></i>Consultas
+                        </button>
+                        <button class="btn btn-outline-primary btn-sm" onclick="filtrarCategoria('vacinacao')">
+                            <i class="fas fa-syringe me-1"></i>Vacinação
+                        </button>
+                        <button class="btn btn-outline-primary btn-sm" onclick="filtrarCategoria('cirurgia')">
+                            <i class="fas fa-cut me-1"></i>Cirurgias
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="limparFiltros()">
+                            <i class="fas fa-times me-1"></i>Limpar Filtros
+                        </button>
+                    </div>
+                </div>
+            </div>
+            </div>
+
+            <!-- Serviços Table -->
+            <div class="card">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list me-2"></i>Lista de Serviços
+                    </h5>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-light btn-sm" onclick="exportarServicos()">
+                            <i class="fas fa-download me-1"></i>Exportar
+                        </button>
+                        <button class="btn btn-outline-light btn-sm" onclick="atualizarLista()">
+                            <i class="fas fa-sync-alt me-1"></i>Atualizar
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0" id="servicosTable">
+                        <thead>
+                            <tr>
+                                <th>Serviço</th>
+                                <th>Categoria</th>
+                                <th>Duração</th>
+                                <th>Valor</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="servicosTableBody">
+                            <!-- Dados serão carregados via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            </div>
+
+            <!-- Paginação -->
+            <div class="d-flex justify-content-between align-items-center mt-3">
+            <small class="text-muted">Mostrando <span id="infoInicio">1</span>-<span id="infoFim">5</span> de <span id="infoTotal">5</span> serviços</small>
+            <nav>
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#">Anterior</a>
+                    </li>
+                    <li class="page-item active">
+                        <a class="page-link" href="#">1</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">Próximo</a>
+                    </li>
+                </ul>
+            </nav>
+            </div>
             </div>
         </div>
 
