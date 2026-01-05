@@ -3,20 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerenciamento de Serviços - VTA</title>
-
-    <!-- Bootstrap 5 -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-
+    <title>Clientes - VTA System</title>
+    <title>Serviços - VTA System</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        /* Reset e configurações básicas */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
+        /* Paleta de cores VTA */
         :root {
             --vta-green: #52B788;
             --vta-green-light: #74C69D;
@@ -27,6 +25,8 @@
             --vta-orange: #F77F00;
             --vta-orange-light: #FCBF49;
             --vta-orange-dark: #D62828;
+            --vta-purple: #9D4EDD;
+            --vta-purple-light: #C77DFF;
             --white: #FFFFFF;
             --gray-light: #F8F9FA;
             --gray-medium: #6C757D;
@@ -34,17 +34,14 @@
         }
 
         body {
-            background: var(--gray-light);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--gray-light);
             color: var(--gray-dark);
+            padding-top: 0;
+            overflow-x: hidden;
         }
 
-        .dashboard-container {
-            display: grid;
-            grid-template-rows: auto 1fr;
-            min-height: 100vh;
-        }
-
+        /* Header */
         .header {
             background: linear-gradient(135deg, var(--vta-green) 0%, var(--vta-green-dark) 100%);
             color: var(--white);
@@ -59,8 +56,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            max-width: 1400px;
-            margin: 0 auto;
+            width: 100%;
+            padding: 0 2rem;
         }
 
         .header-left {
@@ -146,37 +143,57 @@
             transform: rotate(15deg);
         }
 
+        /* Main Content */
         .main-content {
-            display: grid;
-            grid-template-columns: 250px 1fr;
+            display: flex;
             gap: 2rem;
             padding: 2rem;
-            max-width: 1400px;
-            margin: 0 auto;
+            width: 100%;
         }
 
+        /* Sidebar */
         .sidebar {
             background: var(--white);
             border-radius: 15px;
-            padding: 1.5rem;
+            padding: 1rem 1.25rem;
             height: fit-content;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-            position: sticky;
-            top: 100px;
+            position: fixed;
+            top: 120px;
+            left: 2rem;
+            width: 220px;
+            z-index: 50;
+        }
+
+        @media (max-width: 1450px) {
+            .sidebar {
+                left: 2rem;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                position: static;
+                width: 100%;
+            }
+
+            .page-content {
+                margin-left: 0 !important;
+            }
         }
 
         .sidebar-section {
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
         }
 
         .sidebar-title {
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             font-weight: 600;
             color: var(--gray-medium);
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 1rem;
-            padding-left: 0.5rem;
+            margin-bottom: 0.75rem;
+            padding-left: 0.25rem;
         }
 
         .nav-menu {
@@ -190,125 +207,123 @@
         .nav-link {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem 1rem;
+            gap: 0.65rem;
+            padding: 0.65rem 0.85rem;
             text-decoration: none;
             color: var(--gray-dark);
             border-radius: 10px;
             transition: all 0.3s ease;
             font-weight: 500;
+            font-size: 0.95rem;
         }
 
-        .nav-link:hover, .nav-link.active {
+        .nav-link:hover,
+        .nav-link.active {
             background: linear-gradient(135deg, var(--vta-green) 0%, var(--vta-green-light) 100%);
             color: var(--white);
             transform: translateX(5px);
         }
 
         .nav-link i {
-            font-size: 1.1rem;
-            width: 20px;
+            font-size: 1rem;
+            width: 18px;
         }
 
+        /* Page Content */
         .page-content {
-            display: grid;
+            margin-left: 260px;
+            flex: 1;
+            width: 100%;
+        }
+
+        /* Clients Content */
+        .clients-content {
+            display: flex;
+            flex-direction: column;
             gap: 2rem;
         }
 
         .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             background: var(--white);
             padding: 2rem;
             border-radius: 15px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
 
         .page-title {
-            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .page-title i {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--vta-blue), var(--vta-blue-light));
+            color: var(--white);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .page-title h2 {
+            font-size: 2rem;
             font-weight: 600;
-            color: var(--gray-dark);
-            margin: 0;
+            margin-bottom: 0.25rem;
         }
 
         .page-subtitle {
             color: var(--gray-medium);
-            margin: 0;
-            margin-top: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            font-size: 0.9rem;
         }
 
         .btn-primary {
             background: linear-gradient(135deg, var(--vta-green), var(--vta-green-light));
-            border: none;
-            border-radius: 12px;
-            padding: 0.75rem 1.5rem;
-            font-weight: 600;
-            transition: all 0.3s ease;
             color: var(--white);
         }
 
         .btn-primary:hover {
-            background: linear-gradient(135deg, var(--vta-green-dark), var(--vta-green));
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(82, 183, 136, 0.3);
-            color: var(--white);
         }
 
-        .btn-success {
-            background: linear-gradient(135deg, var(--vta-green), var(--vta-green-light));
-            border: none;
-            border-radius: 12px;
+        .btn-secondary {
+            background: var(--gray-light);
+            color: var(--gray-dark);
+            border: 1px solid var(--gray-medium);
         }
 
-        .btn-warning {
-            background: linear-gradient(135deg, var(--vta-orange), var(--vta-orange-light));
-            border: none;
-            border-radius: 12px;
-        }
-
-        .btn-danger {
-            background: linear-gradient(135deg, var(--vta-orange-dark), var(--vta-orange));
-            border: none;
-            border-radius: 12px;
-        }
-
-        .btn-outline-primary {
-            border: 2px solid var(--vta-green);
-            color: var(--vta-green);
-            border-radius: 12px;
-            font-weight: 600;
-            background: transparent;
-            transition: all 0.3s ease;
-        }
-
-        .btn-outline-primary:hover {
-            background: var(--vta-green);
-            color: var(--white);
-            transform: translateY(-1px);
-        }
-
-        .card {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s ease;
+        .btn-secondary:hover {
             background: var(--white);
-        }
-
-        .card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
 
-        .card-header {
-            background: linear-gradient(135deg, var(--vta-green), var(--vta-green-light));
-            color: var(--white);
-            border-radius: 15px 15px 0 0 !important;
-            padding: 1.5rem;
-            border: none;
-        }
-
+        /* Search and Filters */
         .search-filters {
             background: var(--white);
             padding: 2rem;
@@ -316,66 +331,12 @@
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
         }
 
-        .form-label {
-            font-weight: 600;
-            color: var(--gray-dark);
-            margin-bottom: 0.5rem;
-        }
-
-        .form-control, .form-select {
-            border-radius: 10px;
-            border: 2px solid var(--gray-light);
-            padding: 0.75rem 1rem;
-            transition: all 0.3s ease;
-            background: var(--white);
-        }
-
-        .form-control:focus, .form-select:focus {
-            border-color: var(--vta-green);
-            box-shadow: 0 0 0 0.2rem rgba(82, 183, 136, 0.15);
-            background: var(--white);
-        }
-
-        .table {
-            background: var(--white);
-            border-radius: 15px;
-            overflow: hidden;
-        }
-
-        .table th {
-            background: var(--gray-light);
-            border: none;
-            font-weight: 600;
-            color: var(--gray-dark);
-            padding: 1rem 1.5rem;
-        }
-
-        .table td {
-            padding: 1rem 1.5rem;
-            border: none;
-            border-bottom: 1px solid var(--gray-light);
-            vertical-align: middle;
-        }
-
-        .table tbody tr:hover {
-            background: rgba(82, 183, 136, 0.05);
-        }
-
-        .badge {
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 0.8rem;
-        }
-
-        .status-ativo {
-            background: linear-gradient(135deg, var(--vta-green), var(--vta-green-light));
-            color: var(--white);
-        }
-
-        .status-inativo {
-            background: linear-gradient(135deg, var(--gray-medium), #868e96);
-            color: var(--white);
+        .search-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr auto;
+            gap: 1rem;
+            align-items: end;
+            margin-bottom: 1rem;
         }
 
         .quick-actions {
@@ -387,81 +348,434 @@
         .btn-sm {
             padding: 0.5rem 1rem;
             font-size: 0.875rem;
-            border-radius: 10px;
-        }
-
-        .modal-content {
-            border-radius: 15px;
-            border: none;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-        }
-
-        .modal-header {
-            background: linear-gradient(135deg, var(--vta-green), var(--vta-green-light));
-            color: var(--white);
-            border-radius: 15px 15px 0 0;
-            border: none;
-        }
-
-        .modal-footer {
-            border: none;
-            padding: 1.5rem;
-        }
-
-        .btn-close-white {
-            filter: invert(1) grayscale(100%) brightness(200%);
-        }
-
-        .input-group .form-control {
-            border-right: none;
-        }
-
-        .input-group .btn {
-            border-left: none;
-            border-color: var(--gray-light);
-        }
-
-        .pagination {
-            --bs-pagination-color: var(--vta-green);
-            --bs-pagination-hover-color: var(--white);
-            --bs-pagination-hover-bg: var(--vta-green);
-            --bs-pagination-active-bg: var(--vta-green);
-            --bs-pagination-active-border-color: var(--vta-green);
-        }
-
-        .page-link {
             border-radius: 8px;
-            margin: 0 2px;
-            border: none;
         }
 
-        .dropdown-menu {
-            border: none;
-            border-radius: 12px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-            padding: 0.5rem;
+        .btn-outline-primary {
+            background: transparent;
+            border: 2px solid var(--vta-green);
+            color: var(--vta-green);
+            font-weight: 500;
         }
 
-        .dropdown-item {
-            border-radius: 8px;
-            padding: 0.75rem 1rem;
-            transition: all 0.3s ease;
-        }
-
-        .dropdown-item:hover {
+        .btn-outline-primary:hover {
             background: var(--vta-green);
             color: var(--white);
         }
 
+        .btn-outline-secondary {
+            background: transparent;
+            border: 2px solid var(--gray-medium);
+            color: var(--gray-medium);
+            font-weight: 500;
+        }
+
+        .btn-outline-secondary:hover {
+            background: var(--gray-medium);
+            color: var(--white);
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: var(--gray-dark);
+            font-size: 0.9rem;
+        }
+
+        .form-input {
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--gray-light);
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: var(--white);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--vta-green);
+            box-shadow: 0 0 0 3px rgba(82, 183, 136, 0.1);
+        }
+
+        .search-input {
+            position: relative;
+        }
+
+        .search-input input {
+            padding-left: 3rem;
+        }
+
+        .search-input i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-medium);
+            font-size: 1.1rem;
+        }
+
+        /* Clients Table */
+        .clients-table {
+            background: var(--white);
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .table-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--gray-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .table-stats {
+            color: var(--gray-medium);
+            font-size: 0.9rem;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th {
+            background: var(--gray-light);
+            padding: 1rem 1.5rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--gray-dark);
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        .data-table td {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--gray-light);
+            color: var(--gray-dark);
+        }
+
+        .data-table tr:hover {
+            background: rgba(82, 183, 136, 0.05);
+        }
+
+        .client-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .client-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--vta-green), var(--vta-green-light));
+            color: var(--white);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .client-details h4 {
+            margin-bottom: 2px;
+            font-size: 0.95rem;
+        }
+
+        .client-email {
+            color: var(--gray-medium);
+            font-size: 0.85rem;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: rgba(82, 183, 136, 0.1);
+            color: var(--vta-green-dark);
+        }
+
+        .status-inactive {
+            background: rgba(214, 40, 40, 0.1);
+            color: var(--vta-orange-dark);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-small {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+            border-radius: 6px;
+            min-width: auto;
+        }
+
+        .btn-edit {
+            background: rgba(46, 134, 171, 0.1);
+            color: var(--vta-blue-dark);
+            border: 1px solid rgba(46, 134, 171, 0.2);
+        }
+
+        .btn-edit:hover {
+            background: var(--vta-blue);
+            color: var(--white);
+        }
+
+        .btn-delete {
+            background: rgba(214, 40, 40, 0.1);
+            color: var(--vta-orange-dark);
+            border: 1px solid rgba(214, 40, 40, 0.2);
+        }
+
+        .btn-delete:hover {
+            background: var(--vta-orange-dark);
+            color: var(--white);
+        }
+
+        .btn-view {
+            background: rgba(157, 78, 221, 0.1);
+            color: var(--vta-purple);
+            border: 1px solid rgba(157, 78, 221, 0.2);
+        }
+
+        .btn-view:hover {
+            background: var(--vta-purple);
+            color: var(--white);
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-card {
+            background: var(--white);
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--vta-blue), var(--vta-blue-light));
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--vta-blue), var(--vta-blue-light));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 1.5rem;
+            margin: 0 auto 1rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--gray-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--gray-medium);
+        }
+
+        /* Pagination */
+        .pagination {
+            padding: 1.5rem 2rem;
+            border-top: 1px solid var(--gray-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .pagination-info {
+            color: var(--gray-medium);
+            font-size: 0.9rem;
+        }
+
+        .pagination-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .page-btn {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--gray-light);
+            background: var(--white);
+            color: var(--gray-dark);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .page-btn:hover, .page-btn.active {
+            background: var(--vta-green);
+            color: var(--white);
+            border-color: var(--vta-green);
+        }
+
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            padding: 2rem;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--gray-dark);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--gray-medium);
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: var(--gray-light);
+            color: var(--gray-dark);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            padding-top: 2rem;
+            border-top: 1px solid var(--gray-light);
+        }
+
+        /* Responsive */
         @media (max-width: 1024px) {
             .main-content {
-                grid-template-columns: 1fr;
-                gap: 1.5rem;
+                flex-direction: column;
             }
 
             .sidebar {
                 position: static;
-                order: 2;
+                width: 100%;
+                left: auto;
+            }
+
+            .page-content {
+                margin-left: 0;
+            }
+
+            .search-row {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .quick-actions {
+                flex-direction: column;
+            }
+
+            .btn-sm {
+                width: 100%;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
             }
         }
 
@@ -471,314 +785,137 @@
                 gap: 1rem;
             }
 
-            .header-right {
-                width: 100%;
-                justify-content: space-between;
-            }
-
-            .main-content {
-                padding: 1rem;
-            }
-
             .page-header {
                 flex-direction: column;
-                align-items: flex-start;
                 gap: 1rem;
+                text-align: center;
+            }
+
+            .header-actions {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .table-container {
+                overflow-x: scroll;
+            }
+
+            .data-table {
+                min-width: 600px;
             }
 
             .user-details {
                 display: none;
             }
-
-            .quick-actions {
-                flex-direction: column;
-            }
-        }
-
-        .loading {
-            position: relative;
-            overflow: hidden;
-        }
-
-        .loading::after {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-            animation: loading 1.5s infinite;
-        }
-
-        @keyframes loading {
-            0% { left: -100%; }
-            100% { left: 100%; }
-        }
-
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--gray-light);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--vta-green);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--vta-green-dark);
-        }
-
-        .toast-container {
-            z-index: 9999 !important;
-        }
-
-        .alert {
-            border: none;
-            border-radius: 12px;
-            padding: 1rem 1.5rem;
-        }
-
-        .alert-warning {
-            background: linear-gradient(135deg, rgba(247, 127, 0, 0.1), rgba(252, 191, 73, 0.1));
-            color: var(--vta-orange-dark);
-            border-left: 4px solid var(--vta-orange);
-        }
-
-        .service-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            margin-right: 1rem;
-        }
-
-        .icon-consulta {
-            background: linear-gradient(135deg, var(--vta-blue), var(--vta-blue-light));
-            color: var(--white);
-        }
-
-        .icon-vacinacao {
-            background: linear-gradient(135deg, var(--vta-green), var(--vta-green-light));
-            color: var(--white);
-        }
-
-        .icon-cirurgia {
-            background: linear-gradient(135deg, var(--vta-orange-dark), var(--vta-orange));
-            color: var(--white);
-        }
-
-        .icon-exame {
-            background: linear-gradient(135deg, #6f42c1, #8B5CF6);
-            color: var(--white);
-        }
-
-        .icon-banho {
-            background: linear-gradient(135deg, #17a2b8, #20c997);
-            color: var(--white);
-        }
-
-        .icon-default {
-            background: linear-gradient(135deg, var(--gray-medium), #868e96);
-            color: var(--white);
-        }
-
-        /* Estatísticas: grid e cartões */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .stat-card {
-            background: var(--white);
-            border-radius: 12px;
-            padding: 1.25rem;
-            box-shadow: 0 6px 18px rgba(0,0,0,0.06);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            min-height: 110px;
-        }
-
-        .stat-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 0.75rem;
-        }
-
-        .stat-info .stat-value {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--gray-dark);
-            line-height: 1;
-        }
-
-        .stat-info .stat-label {
-            font-size: 0.9rem;
-            color: var(--gray-medium);
-            margin-top: 0.25rem;
-            font-weight: 600;
-        }
-
-        .stat-icon {
-            width: 52px;
-            height: 52px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
-            color: var(--white);
-        }
-
-        .stat-icon.green { background: linear-gradient(135deg, var(--vta-green), var(--vta-green-light)); }
-        .stat-icon.blue { background: linear-gradient(135deg, var(--vta-blue), var(--vta-blue-light)); }
-        .stat-icon.orange { background: linear-gradient(135deg, var(--vta-orange-dark), var(--vta-orange)); }
-
-        .stat-trend {
-            margin-top: 0.75rem;
-            font-size: 0.875rem;
-            color: var(--gray-medium);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .stat-trend i { font-size: 0.9rem; }
-
-        .trend-positive { color: var(--vta-green-dark); }
-        .trend-negative { color: var(--vta-orange-dark); }
-
-        @media (max-width: 1024px) {
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
-        }
-
-        @media (max-width: 576px) {
-            .stats-grid { grid-template-columns: 1fr; }
-            .stat-header { gap: 0.5rem; }
         }
     </style>
-</head>
 <body>
-    <div class="dashboard-container">
-        <!-- Header -->
-        <header class="header">
-            <div class="header-content">
-                <div class="header-left">
-                    <div class="logo-mini">
-                        <i class="fas fa-stethoscope"></i>
-                    </div>
-                    <div class="header-title">
-                        <h1>VTA - Vet Assistance</h1>
-                        <p class="header-subtitle">Sistema de Agendamento Veterinário</p>
-                    </div>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <div class="logo-mini">
+                    <i class="fas fa-stethoscope"></i>
                 </div>
-
-            <div class="header-right">
-                    <div class="user-info">
-                        <div class="user-avatar">A</div>
-                        <div class="user-details">
-                            <h3>Administrador</h3>
-                            <p class="user-role">admin@vta.com</p>
-                        </div>
-                    </div>
-                    <button class="logout-btn" onclick="logout()" title="Sair do sistema">
-                        <i class="fas fa-sign-out-alt"></i>
-                    </button>
+                <div class="header-title">
+                    <h1>Agenda VTA</h1>
+                    <p class="header-subtitle">Sistema de Agendamento Veterinário</p>
                 </div>
             </div>
-        </header>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Sidebar -->
-            <aside class="sidebar">
-                <div class="sidebar-section">
-                    <h3 class="sidebar-title">Menu Principal</h3>
-                    <ul class="nav-menu">
-                        <li class="nav-item">
-                            <a href="2. dashboard_vta.html" class="nav-link">
-                                <i class="fas fa-chart-pie"></i>
-                                Dashboard
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="3. agenda_vta.html" class="nav-link">
-                                <i class="fas fa-calendar"></i>
-                                Agenda
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="4. agendamento_vta.html" class="nav-link">
-                                <i class="fas fa-calendar-check"></i>
-                                Agendamentos
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="12. servicos_vta.html" class="nav-link active">
-                                <i class="fas fa-briefcase-medical"></i>
-                                Serviços
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="5. clientes_vta.html" class="nav-link">
-                                <i class="fas fa-users"></i>
-                                Clientes
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="6. pets_vta.html" class="nav-link">
-                                <i class="fas fa-paw"></i>
-                                Pets
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="8. salas_vta.html" class="nav-link">
-                                <i class="fas fa-door-open"></i>
-                                Salas
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="7. usuarios_vta.html" class="nav-link">
-                                <i class="fas fa-user-cog"></i>
-                                Usuários
-                            </a>
-                        </li>
-                    </ul>
+            <div class="header-right">
+                <div class="user-info">
+                    <div class="user-avatar">A</div>
+                    <div class="user-details">
+                        <h3>Administrador</h3>
+                        <p class="user-role">admin@vta.com</p>
+                    </div>
                 </div>
+                <button class="logout-btn" onclick="logout()" title="Sair do sistema">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+    </header>
 
-                <div class="sidebar-section">
-                    <h3 class="sidebar-title">Relatórios</h3>
-                    <ul class="nav-menu">
-                        <li class="nav-item">
-                            <a href="9. relatorios_dashboard.html" class="nav-link">
-                                <i class="fas fa-chart-bar"></i>
-                                Relatórios ADM
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="10. relatorios_pets.html" class="nav-link">
-                                <i class="fas fa-file-medical"></i>
-                                Histórico Pets
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </aside>
+    <!-- Container Principal -->
+    <div class="main-content">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">Menu Principal</h3>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="2. dashboard_vta.html" class="nav-link">
+                            <i class="fas fa-chart-pie"></i>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="3. agenda_vta.html" class="nav-link">
+                            <i class="fas fa-calendar"></i>
+                            Agenda
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="4. agendamento_vta.html" class="nav-link">
+                            <i class="fas fa-calendar-check"></i>
+                            Agendamentos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="12. servicos_vta.html" class="nav-link active">
+                            <i class="fas fa-briefcase-medical"></i>
+                            Serviços
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="5. clientes_vta.html" class="nav-link">
+                            <i class="fas fa-users"></i>
+                            Clientes
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="6. pets_vta.html" class="nav-link">
+                            <i class="fas fa-paw"></i>
+                            Pets
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="8. salas_vta.html" class="nav-link">
+                            <i class="fas fa-door-open"></i>
+                            Salas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="7. usuarios_vta.html" class="nav-link">
+                            <i class="fas fa-user-cog"></i>
+                            Usuários
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">Relatórios</h3>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="9. relatorios_dashboard.html" class="nav-link">
+                            <i class="fas fa-chart-bar"></i>
+                            Relatórios ADM
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="10. relatorios_pets.html" class="nav-link">
+                            <i class="fas fa-file-medical"></i>
+                            Histórico Pets
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </aside>
 
 
-            <!-- Page Content -->
             <div class="page-content">
                 <!-- Page Header -->
                 <div class="page-header">
@@ -953,7 +1090,9 @@
                     </nav>
                 </div>
             </div>
-        </main>
+            </div>
+        </div>
+    </div>
     </div>
 
     <!-- Modal Novo/Editar Serviço -->
