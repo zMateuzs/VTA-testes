@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clientes - VTA System</title>
     <title>Agendamentos - VTA System</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -44,7 +45,7 @@
         .header {
             background: linear-gradient(135deg, var(--vta-green) 0%, var(--vta-green-dark) 100%);
             color: var(--white);
-            padding: 16px 32px;
+            padding: 1rem 2rem;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
             position: sticky;
             top: 0;
@@ -56,13 +57,13 @@
             justify-content: space-between;
             align-items: center;
             width: 100%;
-            padding: 0 32px;
+            padding: 0 2rem;
         }
 
         .header-left {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 1rem;
         }
 
         .logo-mini {
@@ -74,31 +75,31 @@
             align-items: center;
             justify-content: center;
             color: var(--vta-green);
-            font-size: 24px;
+            font-size: 1.5rem;
         }
 
         .header-title h1 {
-            font-size: 29px;
+            font-size: 1.8rem;
             font-weight: 600;
             margin-bottom: 2px;
         }
 
         .header-subtitle {
-            font-size: 14px;
+            font-size: 0.9rem;
             opacity: 0.8;
         }
 
         .header-right {
             display: flex;
             align-items: center;
-            gap: 24px;
+            gap: 1.5rem;
         }
 
         .user-info {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 8px 16px;
+            gap: 0.75rem;
+            padding: 0.5rem 1rem;
             border-radius: 25px;
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
@@ -117,12 +118,12 @@
         }
 
         .user-details h3 {
-            font-size: 14px;
+            font-size: 0.9rem;
             margin-bottom: 2px;
         }
 
         .user-role {
-            font-size: 13px;
+            font-size: 0.8rem;
             opacity: 0.8;
         }
 
@@ -130,9 +131,9 @@
             background: none;
             border: none;
             color: var(--white);
-            font-size: 19px;
+            font-size: 1.2rem;
             cursor: pointer;
-            padding: 8px;
+            padding: 0.5rem;
             border-radius: 50%;
             transition: all 0.3s ease;
         }
@@ -145,8 +146,8 @@
         /* Main Content */
         .main-content {
             display: flex;
-            gap: 32px;
-            padding: 32px;
+            gap: 2rem;
+            padding: 2rem;
             width: 100%;
         }
 
@@ -154,19 +155,19 @@
         .sidebar {
             background: var(--white);
             border-radius: 15px;
-            padding: 16px 20px;
+            padding: 1rem 1.25rem;
             height: fit-content;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
             position: fixed;
             top: 120px;
-            left: 32px;
+            left: 2rem;
             width: 220px;
             z-index: 50;
         }
 
         @media (max-width: 1450px) {
             .sidebar {
-                left: 32px;
+                left: 2rem;
             }
         }
 
@@ -182,17 +183,17 @@
         }
 
         .sidebar-section {
-            margin-bottom: 24px;
+            margin-bottom: 1.5rem;
         }
 
         .sidebar-title {
-            font-size: 12px;
+            font-size: 0.75rem;
             font-weight: 600;
             color: var(--gray-medium);
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 12px;
-            padding-left: 4px;
+            margin-bottom: 0.75rem;
+            padding-left: 0.25rem;
         }
 
         .nav-menu {
@@ -200,20 +201,20 @@
         }
 
         .nav-item {
-            margin-bottom: 8px;
+            margin-bottom: 0.5rem;
         }
 
         .nav-link {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 10px 14px;
+            gap: 0.65rem;
+            padding: 0.65rem 0.85rem;
             text-decoration: none;
             color: var(--gray-dark);
             border-radius: 10px;
             transition: all 0.3s ease;
             font-weight: 500;
-            font-size: 15px;
+            font-size: 0.95rem;
         }
 
         .nav-link:hover,
@@ -224,7 +225,7 @@
         }
 
         .nav-link i {
-            font-size: 16px;
+            font-size: 1rem;
             width: 18px;
         }
 
@@ -808,7 +809,6 @@
             }
         }
     </style>
-</head>
 <body>
     <!-- Header -->
     <header class="header">
