@@ -161,6 +161,26 @@
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
             position: fixed;
             top: 120px;
+            left: 32px;
+            width: 220px;
+            z-index: 50;
+        }
+
+        @media (max-width: 1450px) {
+            .sidebar {
+                left: 32px;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                position: static;
+                width: 100%;
+            }
+
+            .page-content {
+                margin-left: 0 !important;
+            }
         }
 
         .sidebar-section {
@@ -188,13 +208,14 @@
         .nav-link {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             padding: 10px 14px;
             text-decoration: none;
             color: var(--gray-dark);
             border-radius: 10px;
             transition: all 0.3s ease;
             font-weight: 500;
+            font-size: 15px;
         }
 
         .nav-link:hover,
@@ -206,7 +227,7 @@
 
         .nav-link i {
             font-size: 16px;
-            width: 20px;
+            width: 18px;
         }
 
         /* Page Content */
