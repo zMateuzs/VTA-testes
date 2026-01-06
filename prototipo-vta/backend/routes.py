@@ -1201,6 +1201,7 @@ def get_agendamentos():
             item = {
                 'id': agendamento['id'],
                 'cliente': agendamento['cliente'],
+                'cliente_id': agendamento.get('cliente_id'),
                 'pet': agendamento['pet'],
                 'sala': agendamento['sala'],
                 'data': str(agendamento['data_agendamento']),
@@ -1329,11 +1330,12 @@ def update_agendamento(id):
             cur.execute(
                 """
                 UPDATE agendamentos 
-                SET cliente = %s, pet = %s, sala = %s, data_agendamento = %s, horario = %s, status = %s, observacoes = %s
+                SET cliente = %s, cliente_id = %s, pet = %s, sala = %s, data_agendamento = %s, horario = %s, status = %s, observacoes = %s
                 WHERE id = %s
                 """,
                 (
                     data.get('cliente'),
+                    data.get('cliente_id'),
                     data.get('pet'),
                     data.get('sala'),
                     data.get('data'),
