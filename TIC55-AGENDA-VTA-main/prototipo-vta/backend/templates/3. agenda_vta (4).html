@@ -1604,11 +1604,17 @@
                 <form id="agendamentoForm">
                     <div class="form-group">
                         <label>Cliente:</label>
-                        <input type="text" id="clienteInput" placeholder="Nome do cliente" required>
+                        <select id="clienteSelect" required>
+                            <option value="">Selecione um cliente</option>
+                            <!-- Clientes serão carregados do banco de dados -->
+                        </select>
                     </div>
                     <div class="form-group">
                         <label>Pet:</label>
-                        <input type="text" id="petInput" placeholder="Nome do pet" required>
+                        <select id="petSelect" required>
+                            <option value="">Selecione um pet</option>
+                            <!-- Pets serão carregados ao selecionar um cliente -->
+                        </select>
                     </div>
                     <div class="form-group">
                         <label>Sala:</label>
@@ -1763,12 +1769,96 @@
         };
 
         let agendamentos = []; // Inicialmente vazio, carregado do backend
+        let clientesDisponiveis = []; // Lista de clientes do banco de dados
 
         let proximoId = 0; // Gerado pelo backend
         let agendamentoParaExcluir = null;
         let agendamentoEditando = null;
         let movimentacaoPendente = null;
         let visualizacaoSemana = 'agendados'; // 'agendados' ou 'livres'
+
+        // Função para carregar clientes do backend
+        async function carregarClientes() {
+            try {
+                const response = await fetch('/api/clientes');
+                if (!response.ok) throw new Error('Erro ao carregar clientes');
+
+                clientesDisponiveis = await response.json();
+                atualizarSelectClientes();
+            } catch (error) {
+                console.error('Erro ao carregar clientes:', error);
+                // Se o endpoint não existir, mantém a lista vazia
+                clientesDisponiveis = [];
+                atualizarSelectClientes();
+            }
+        }
+
+        // Função para atualizar o select de clientes
+        function atualizarSelectClientes() {
+            const clienteSelect = document.getElementById('clienteSelect');
+            clienteSelect.innerHTML = '<option value="">Selecione um cliente</option>';
+
+            clientesDisponiveis.forEach(cliente => {
+                const option = document.createElement('option');
+                option.value = cliente.nome;
+                option.textContent = cliente.nome;
+                option.dataset.clienteId = cliente.id;
+                clienteSelect.appendChild(option);
+            });
+
+            if (clientesDisponiveis.length === 0) {
+                const option = document.createElement('option');
+                option.value = "";
+                option.textContent = "Nenhum cliente cadastrado";
+                option.disabled = true;
+                clienteSelect.appendChild(option);
+            }
+        }
+
+        // Função para carregar pets de um cliente específico
+        async function carregarPetsDoCliente(clienteNome) {
+            const petSelect = document.getElementById('petSelect');
+            petSelect.innerHTML = '<option value="">Selecione um pet</option>';
+
+            if (!clienteNome) return;
+
+            try {
+                // Busca pets do cliente selecionado
+                const response = await fetch(`/api/pets?cliente=${encodeURIComponent(clienteNome)}`);
+                if (!response.ok) throw new Error('Erro ao carregar pets');
+
+                const pets = await response.json();
+
+                pets.forEach(pet => {
+                    const option = document.createElement('option');
+                    option.value = pet.nome;
+                    option.textContent = `${pet.nome} (${pet.especie || 'Pet'})`;
+                    option.dataset.petId = pet.id;
+                    petSelect.appendChild(option);
+                });
+
+                if (pets.length === 0) {
+                    const option = document.createElement('option');
+                    option.value = "";
+                    option.textContent = "Nenhum pet cadastrado para este cliente";
+                    option.disabled = true;
+                    petSelect.appendChild(option);
+                }
+            } catch (error) {
+                console.error('Erro ao carregar pets:', error);
+            }
+        }
+
+        // Event listener para quando o cliente é selecionado
+        document.addEventListener('DOMContentLoaded', function() {
+            const clienteSelect = document.getElementById('clienteSelect');
+            clienteSelect.addEventListener('change', function() {
+                carregarPetsDoCliente(this.value);
+            });
+
+            // Carregar clientes ao iniciar
+            carregarClientes();
+        });
 
         // Função para carregar agendamentos do backend
         async function carregarAgendamentos() {
@@ -2389,6 +2479,14 @@
             document.getElementById('confirmarMoverModal').classList.add('show');
         }
 
+        // Função utilitária para formatar data local sem problemas de fuso horário
+        function formatarDataParaBackend(data) {
+            const ano = data.getFullYear();
+            const mes = String(data.getMonth() + 1).padStart(2, '0');
+            const dia = String(data.getDate()).padStart(2, '0');
+            return `${ano}-${mes}-${dia}`;
+        }
+
         async function confirmarMovimentacao() {
             if (!movimentacaoPendente) return;
 
@@ -2408,7 +2506,7 @@
                     body: JSON.stringify({
                         sala: novaSala,
                         horario: novoHorario,
-                        data: novaData.toISOString().split('T')[0],
+                        data: formatarDataParaBackend(novaData),
                         cliente: agendamento.cliente,
                         pet: agendamento.pet,
                         status: agendamento.status,
@@ -2542,7 +2640,9 @@
             const agendamento = agendamentos.find(a => a.id === id);
             if (!agendamento) return;
 
-            const horario = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            const agora = new Date();
+            const horario = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            const dataCheckin = agora.toLocaleDateString('pt-BR');
 
             try {
                 const response = await fetch(`/api/agendamentos/${id}`, {
@@ -2550,7 +2650,9 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         checkin: {
-                            horario: horario
+                            realizado: true,
+                            horario: horario,
+                            data: dataCheckin
                         }
                     })
                 });
@@ -2602,8 +2704,16 @@
             if (!agendamentoEditando) return;
 
             document.getElementById('modalTitle').textContent = 'Editar Agendamento';
-            document.getElementById('clienteInput').value = agendamentoEditando.cliente;
-            document.getElementById('petInput').value = agendamentoEditando.pet;
+
+            // Para edição, definir o cliente e carregar seus pets
+            const clienteSelect = document.getElementById('clienteSelect');
+            clienteSelect.value = agendamentoEditando.cliente;
+
+            // Carregar pets do cliente e depois selecionar o pet correto
+            carregarPetsDoCliente(agendamentoEditando.cliente).then(() => {
+                document.getElementById('petSelect').value = agendamentoEditando.pet;
+            });
+
             document.getElementById('salaSelect').value = agendamentoEditando.sala;
             document.getElementById('obsTextarea').value = agendamentoEditando.obs;
 
@@ -2677,6 +2787,13 @@
             form.querySelectorAll('input, select, textarea').forEach(el => {
                 el.disabled = false;
             });
+
+            // Resetar select de pets
+            const petSelect = document.getElementById('petSelect');
+            petSelect.innerHTML = '<option value="">Selecione um pet</option>';
+
+            // Recarregar clientes para garantir lista atualizada
+            carregarClientes();
 
             const salaSelect = document.getElementById('salaSelect');
             const dataHoraInput = document.getElementById('dataHoraInput');
@@ -2824,11 +2941,21 @@
         document.getElementById('agendamentoForm').addEventListener('submit', async function (e) {
             e.preventDefault();
 
-            const clienteInput = document.getElementById('clienteInput');
-            const petInput = document.getElementById('petInput');
+            const clienteSelect = document.getElementById('clienteSelect');
+            const petSelect = document.getElementById('petSelect');
             const salaSelect = document.getElementById('salaSelect');
             const dataHoraInput = document.getElementById('dataHoraInput');
             const obsTextarea = document.getElementById('obsTextarea');
+
+            // Validar seleção de cliente e pet
+            if (!clienteSelect.value) {
+                mostrarToast('Por favor, selecione um cliente', 'error');
+                return;
+            }
+            if (!petSelect.value) {
+                mostrarToast('Por favor, selecione um pet', 'error');
+                return;
+            }
 
             const dataHora = new Date(dataHoraInput.value);
             const horario = dataHoraInput.value.split('T')[1];
@@ -2847,8 +2974,8 @@
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            cliente: clienteInput.value,
-                            pet: petInput.value,
+                            cliente: clienteSelect.value,
+                            pet: petSelect.value,
                             sala: salaSelect.value,
                             data: dataStr,
                             horario: horario,
@@ -2864,8 +2991,8 @@
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            cliente: clienteInput.value,
-                            pet: petInput.value,
+                            cliente: clienteSelect.value,
+                            pet: petSelect.value,
                             sala: salaSelect.value,
                             data: dataStr,
                             horario: horario,
