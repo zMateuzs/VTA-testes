@@ -404,6 +404,25 @@
             background: #B91C1C;
         }
 
+        .btn-success {
+            background: var(--vta-green);
+            color: var(--white);
+        }
+
+        .btn-success:hover {
+            background: var(--vta-green-dark);
+        }
+
+        .btn-success.checkin-realizado {
+            background: var(--vta-green-dark);
+            opacity: 0.9;
+            cursor: default;
+        }
+
+        .btn-success.checkin-realizado:hover {
+            transform: none;
+        }
+
         /* Grade de agendamento */
         .agenda-grid {
             background: var(--white);
@@ -1462,8 +1481,10 @@
             </div>
             <form id="agendamentoForm">
                 <div class="form-group">
-                    <label for="clienteInput">Cliente</label>
-                    <input type="text" id="clienteInput" required>
+                    <label for="clienteSelect">Cliente</label>
+                    <select id="clienteSelect" required>
+                        <option value="">Selecione um cliente</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label for="petInput">Animal (Pet)</label>
@@ -1501,6 +1522,10 @@
             </div>
             <div id="detalhesContent"></div>
             <div class="modal-actions">
+                <button class="btn btn-success" id="btnCheckin" onclick="realizarCheckin()">
+                    <i class="fas fa-check-circle"></i>
+                    <span id="textoCheckin">Check-in</span>
+                </button>
                 <button class="btn btn-primary" onclick="editarAgendamento()">
                     <i class="fas fa-edit"></i>
                     Editar
@@ -1901,7 +1926,11 @@
 
             agendamento.sala = novaSala;
             agendamento.horario = novoHorario;
-            agendamento.data = novaData;
+
+            // Copiar a data corretamente sem mudar de dia
+            const dataAtualizada = new Date(novaData);
+            dataAtualizada.setHours(0, 0, 0, 0);
+            agendamento.data = dataAtualizada;
 
             salvarAgendamentos();
             fecharMover();
@@ -2457,10 +2486,32 @@
             });
         }
 
+        function carregarClientes() {
+            const clienteSelect = document.getElementById('clienteSelect');
+
+            // Carregar clientes do localStorage
+            const clientesData = localStorage.getItem('clientes');
+            const clientes = clientesData ? JSON.parse(clientesData) : [];
+
+            // Limpar e adicionar opção padrão
+            clienteSelect.innerHTML = '<option value="">Selecione um cliente</option>';
+
+            // Adicionar clientes do banco de dados
+            clientes.forEach(cliente => {
+                const option = document.createElement('option');
+                option.value = cliente.nome;
+                option.textContent = cliente.nome;
+                option.dataset.clienteId = cliente.id;
+                clienteSelect.appendChild(option);
+            });
+        }
+
         function novoAgendamento() {
             agendamentoEditando = null;
             document.getElementById('modalTitle').textContent = 'Novo Agendamento';
             document.getElementById('agendamentoForm').reset();
+
+            carregarClientes();
 
             const dataHora = new Date(estadoAtual.dataAtual);
             dataHora.setHours(8, 0, 0, 0);
@@ -2474,6 +2525,8 @@
             agendamentoEditando = null;
             document.getElementById('modalTitle').textContent = 'Novo Agendamento';
             document.getElementById('agendamentoForm').reset();
+
+            carregarClientes();
 
             document.getElementById('salaSelect').value = sala;
 
@@ -2522,6 +2575,20 @@
                 ` : ''}
             `;
 
+            // Atualizar botão de check-in
+            const btnCheckin = document.getElementById('btnCheckin');
+            const textoCheckin = document.getElementById('textoCheckin');
+
+            if (agendamento.checkin) {
+                btnCheckin.classList.add('checkin-realizado');
+                textoCheckin.innerHTML = '<i class="fas fa-check"></i> Check-in Realizado';
+                btnCheckin.disabled = true;
+            } else {
+                btnCheckin.classList.remove('checkin-realizado');
+                textoCheckin.textContent = 'Check-in';
+                btnCheckin.disabled = false;
+            }
+
             agendamentoEditando = agendamento;
             document.getElementById('modalDetalhes').classList.add('show');
         }
@@ -2531,11 +2598,32 @@
             agendamentoEditando = null;
         }
 
+        function realizarCheckin() {
+            if (!agendamentoEditando || agendamentoEditando.checkin) return;
+
+            agendamentoEditando.checkin = true;
+            agendamentoEditando.checkinData = new Date();
+
+            salvarAgendamentos();
+            mostrarToast('Check-in realizado com sucesso!', 'success');
+
+            // Atualizar o botão visualmente
+            const btnCheckin = document.getElementById('btnCheckin');
+            const textoCheckin = document.getElementById('textoCheckin');
+            btnCheckin.classList.add('checkin-realizado');
+            textoCheckin.innerHTML = '<i class="fas fa-check"></i> Check-in Realizado';
+            btnCheckin.disabled = true;
+
+            renderizarGrade();
+        }
+
         function editarAgendamento() {
             if (!agendamentoEditando) return;
 
+            carregarClientes();
+
             document.getElementById('modalTitle').textContent = 'Editar Agendamento';
-            document.getElementById('clienteInput').value = agendamentoEditando.cliente;
+            document.getElementById('clienteSelect').value = agendamentoEditando.cliente;
             document.getElementById('petInput').value = agendamentoEditando.pet;
             document.getElementById('salaSelect').value = agendamentoEditando.sala;
             document.getElementById('obsTextarea').value = agendamentoEditando.obs || '';
@@ -2591,7 +2679,7 @@
         document.getElementById('agendamentoForm').addEventListener('submit', function (e) {
             e.preventDefault();
 
-            const clienteInput = document.getElementById('clienteInput');
+            const clienteSelect = document.getElementById('clienteSelect');
             const petInput = document.getElementById('petInput');
             const salaSelect = document.getElementById('salaSelect');
             const veterinarioInput = document.getElementById('veterinarioInput');
@@ -2612,7 +2700,7 @@
             const horarioNormalizado = normalizarHorario(horario);
 
             if (agendamentoEditando) {
-                agendamentoEditando.cliente = clienteInput.value;
+                agendamentoEditando.cliente = clienteSelect.value;
                 agendamentoEditando.pet = petInput.value;
                 agendamentoEditando.sala = salaSelect.value;
                 agendamentoEditando.veterinario = veterinarioInput.value;
@@ -2625,7 +2713,7 @@
             } else {
                 const novoAgendamentoObj = {
                     id: proximoId++,
-                    cliente: clienteInput.value,
+                    cliente: clienteSelect.value,
                     pet: petInput.value,
                     sala: salaSelect.value,
                     veterinario: veterinarioInput.value,
