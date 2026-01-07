@@ -1556,12 +1556,11 @@
                         </button>
                     </div>
 
-                    <button class="btn btn-secondary" onclick="irParaHoje()">
-                        <i class="fas fa-calendar-day"></i>
-                        Hoje
-                    </button>
-
                     <div class="action-buttons">
+                        <button class="btn btn-secondary" onclick="irParaHoje()">
+                            <i class="fas fa-calendar-day"></i>
+                            Hoje
+                        </button>
                         <button class="btn btn-primary" onclick="novoAgendamento()">
                             <i class="fas fa-plus"></i>
                             Novo
@@ -1570,10 +1569,14 @@
                             <i class="fas fa-search"></i>
                             Buscar
                         </button>
-                        <button class="btn btn-secondary" id="btnVisualizacaoSemana"
-                            onclick="alternarVisualizacaoSemana()" style="display: none; min-width: 180px;">
+                        <button class="btn btn-secondary" id="btnVisualizacao"
+                            onclick="alternarVisualizacao()" style="min-width: 180px;">
                             <i class="fas fa-eye"></i>
                             <span id="textoVisualizacao">Horários Livres</span>
+                        </button>
+                        <button class="btn btn-secondary" onclick="imprimirAgendamentos()">
+                            <i class="fas fa-print"></i>
+                            Imprimir
                         </button>
                     </div>
                 </div>
@@ -1620,10 +1623,14 @@
                         <label>Sala:</label>
                         <select id="salaSelect" required>
                             <option value="">Selecione uma sala</option>
-                            <option value="sala1">Sala 1 - Consulta</option>
-                            <option value="sala2">Sala 2 - Cirurgia</option>
-                            <option value="sala3">Sala 3 - Raio-X</option>
-                            <option value="sala4">Sala 4 - Internação</option>
+                            <!-- Salas serão carregadas dinamicamente -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Profissional:</label>
+                        <select id="profissionalSelect">
+                            <option value="">Selecione um profissional (opcional)</option>
+                            <!-- Profissionais serão carregados dinamicamente -->
                         </select>
                     </div>
                     <div class="form-group">
@@ -1770,12 +1777,64 @@
 
         let agendamentos = []; // Inicialmente vazio, carregado do backend
         let clientesDisponiveis = []; // Lista de clientes do banco de dados
+        let profissionaisDisponiveis = []; // Lista de profissionais
+
+        // Salas configuráveis - podem ser carregadas do backend futuramente
+        let salasDisponiveis = [
+            { id: 'sala1', nome: 'Sala 1', tipo: 'Consulta', cor: 'var(--vta-green)', profissional: '' },
+            { id: 'sala2', nome: 'Sala 2', tipo: 'Cirurgia', cor: 'var(--vta-blue)', profissional: '' },
+            { id: 'sala3', nome: 'Sala 3', tipo: 'Raio-X', cor: 'var(--vta-orange)', profissional: '' },
+            { id: 'sala4', nome: 'Sala 4', tipo: 'Internação', cor: 'var(--vta-purple)', profissional: '' }
+        ];
 
         let proximoId = 0; // Gerado pelo backend
         let agendamentoParaExcluir = null;
         let agendamentoEditando = null;
         let movimentacaoPendente = null;
-        let visualizacaoSemana = 'agendados'; // 'agendados' ou 'livres'
+        let modoVisualizacao = 'agendados'; // 'agendados' ou 'livres' - funciona para dia e semana
+
+        // Função para normalizar horário quebrado para o slot mais próximo de 30 minutos
+        function normalizarHorarioParaSlot(horario) {
+            const [hora, minuto] = horario.split(':').map(Number);
+            const minutoNormalizado = minuto < 15 ? '00' : minuto < 45 ? '30' : '00';
+            const horaNormalizada = minuto >= 45 ? hora + 1 : hora;
+            return `${horaNormalizada.toString().padStart(2, '0')}:${minutoNormalizado}`;
+        }
+
+        // Função para obter cor da sala
+        function getCorSala(salaId) {
+            const sala = salasDisponiveis.find(s => s.id === salaId);
+            return sala ? sala.cor : 'var(--vta-green)';
+        }
+
+        // Função para verificar se sala está em uso no momento atual
+        function verificarSalaEmUso(salaId) {
+            const agora = new Date();
+            const horaAtual = `${agora.getHours().toString().padStart(2, '0')}:${agora.getMinutes().toString().padStart(2, '0')}`;
+
+            return agendamentos.some(a => {
+                if (a.sala !== salaId || a.status === 'cancelado') return false;
+                if (!mesmaData(a.data, agora)) return false;
+
+                // Verifica se o horário atual está dentro do período do agendamento (30 min)
+                const [horaAg, minAg] = a.horario.split(':').map(Number);
+                const [horaAt, minAt] = horaAtual.split(':').map(Number);
+
+                const inicioMin = horaAg * 60 + minAg;
+                const fimMin = inicioMin + 30;
+                const atualMin = horaAt * 60 + minAt;
+
+                return atualMin >= inicioMin && atualMin < fimMin;
+            });
+        }
+
+        // Função para obter status da sala
+        function getStatusSala(salaId) {
+            if (verificarSalaEmUso(salaId)) {
+                return { texto: 'Em Uso', classe: 'em-uso' };
+            }
+            return { texto: 'Disponível', classe: 'disponivel' };
+        }
 
         // Função para carregar clientes do backend
         async function carregarClientes() {
@@ -1849,6 +1908,67 @@
             }
         }
 
+        // Função para carregar salas do backend (ou usar padrão)
+        async function carregarSalas() {
+            try {
+                const response = await fetch('/api/salas');
+                if (response.ok) {
+                    const salas = await response.json();
+                    if (salas.length > 0) {
+                        salasDisponiveis = salas.map((s, i) => ({
+                            id: s.id || `sala${i + 1}`,
+                            nome: s.nome || `Sala ${i + 1}`,
+                            tipo: s.tipo || 'Geral',
+                            cor: s.cor || ['var(--vta-green)', 'var(--vta-blue)', 'var(--vta-orange)', 'var(--vta-purple)'][i % 4],
+                            profissional: s.profissional || ''
+                        }));
+                    }
+                }
+            } catch (error) {
+                console.log('Usando salas padrão');
+            }
+            atualizarSelectSalas();
+        }
+
+        // Função para atualizar o select de salas
+        function atualizarSelectSalas() {
+            const salaSelect = document.getElementById('salaSelect');
+            salaSelect.innerHTML = '<option value="">Selecione uma sala</option>';
+
+            salasDisponiveis.forEach(sala => {
+                const option = document.createElement('option');
+                option.value = sala.id;
+                option.textContent = `${sala.nome} - ${sala.tipo}`;
+                salaSelect.appendChild(option);
+            });
+        }
+
+        // Função para carregar profissionais do backend
+        async function carregarProfissionais() {
+            try {
+                const response = await fetch('/api/profissionais');
+                if (response.ok) {
+                    profissionaisDisponiveis = await response.json();
+                    atualizarSelectProfissionais();
+                }
+            } catch (error) {
+                console.log('Sem profissionais cadastrados');
+            }
+        }
+
+        // Função para atualizar o select de profissionais
+        function atualizarSelectProfissionais() {
+            const profSelect = document.getElementById('profissionalSelect');
+            profSelect.innerHTML = '<option value="">Selecione um profissional (opcional)</option>';
+
+            profissionaisDisponiveis.forEach(prof => {
+                const option = document.createElement('option');
+                option.value = prof.nome || prof.id;
+                option.textContent = prof.nome;
+                profSelect.appendChild(option);
+            });
+        }
+
         // Event listener para quando o cliente é selecionado
         document.addEventListener('DOMContentLoaded', function() {
             const clienteSelect = document.getElementById('clienteSelect');
@@ -1856,8 +1976,10 @@
                 carregarPetsDoCliente(this.value);
             });
 
-            // Carregar clientes ao iniciar
+            // Carregar dados ao iniciar
             carregarClientes();
+            carregarSalas();
+            carregarProfissionais();
         });
 
         // Função para carregar agendamentos do backend
@@ -1961,12 +2083,10 @@
         }
 
         function renderizarGrade() {
-            // Controlar visibilidade do botão de visualização
-            const btnVisualizacao = document.getElementById('btnVisualizacaoSemana');
-            if (estadoAtual.visualizacao === 'semana') {
-                btnVisualizacao.style.display = 'flex';
-            } else {
-                btnVisualizacao.style.display = 'none';
+            // Atualizar texto do botão de visualização
+            const textoVisualizacao = document.getElementById('textoVisualizacao');
+            if (textoVisualizacao) {
+                textoVisualizacao.textContent = modoVisualizacao === 'agendados' ? 'Horários Livres' : 'Horários Agendados';
             }
 
             switch (estadoAtual.visualizacao) {
@@ -1982,45 +2102,149 @@
             }
         }
 
+        // Função unificada para alternar visualização (dia e semana)
+        function alternarVisualizacao() {
+            if (modoVisualizacao === 'agendados') {
+                modoVisualizacao = 'livres';
+                mostrarToast('Mostrando horários livres', 'info');
+            } else {
+                modoVisualizacao = 'agendados';
+                mostrarToast('Mostrando horários agendados', 'info');
+            }
+            renderizarGrade();
+        }
+
+        // Função para imprimir agendamentos
+        function imprimirAgendamentos() {
+            const printWindow = window.open('', '_blank');
+            const dataFormatada = estadoAtual.dataAtual.toLocaleDateString('pt-BR', {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+            });
+
+            let agendamentosFiltrados = [];
+            if (estadoAtual.visualizacao === 'dia') {
+                agendamentosFiltrados = agendamentos.filter(a =>
+                    mesmaData(a.data, estadoAtual.dataAtual) && a.status !== 'cancelado'
+                );
+            } else if (estadoAtual.visualizacao === 'semana') {
+                const inicioSemana = getInicioSemana(estadoAtual.dataAtual);
+                const fimSemana = new Date(inicioSemana);
+                fimSemana.setDate(inicioSemana.getDate() + 6);
+                agendamentosFiltrados = agendamentos.filter(a =>
+                    a.data >= inicioSemana && a.data <= fimSemana && a.status !== 'cancelado'
+                );
+            } else {
+                const mes = estadoAtual.dataAtual.getMonth();
+                const ano = estadoAtual.dataAtual.getFullYear();
+                agendamentosFiltrados = agendamentos.filter(a =>
+                    a.data.getMonth() === mes && a.data.getFullYear() === ano && a.status !== 'cancelado'
+                );
+            }
+
+            agendamentosFiltrados.sort((a, b) => {
+                const dataCompare = a.data - b.data;
+                if (dataCompare !== 0) return dataCompare;
+                return a.horario.localeCompare(b.horario);
+            });
+
+            let html = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Agendamentos - ${dataFormatada}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; }
+                        h1 { color: #52B788; border-bottom: 2px solid #52B788; padding-bottom: 10px; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+                        th { background: #52B788; color: white; }
+                        tr:nth-child(even) { background: #f9f9f9; }
+                        .status-agendado { color: #F77F00; }
+                        .status-confirmado { color: #52B788; }
+                        .status-checkin { color: #2E86AB; font-weight: bold; }
+                        @media print { body { padding: 0; } }
+                    </style>
+                </head>
+                <body>
+                    <h1>Agenda VTA - ${dataFormatada}</h1>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Horário</th>
+                                <th>Cliente</th>
+                                <th>Pet</th>
+                                <th>Sala</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            agendamentosFiltrados.forEach(a => {
+                const temCheckin = a.checkin && a.checkin.realizado;
+                const statusClasse = temCheckin ? 'status-checkin' : `status-${a.status}`;
+                const statusTexto = temCheckin ? 'CHECK-IN ✓' : a.status.toUpperCase();
+                html += `
+                    <tr>
+                        <td>${a.data.toLocaleDateString('pt-BR')}</td>
+                        <td>${a.horario}</td>
+                        <td>${a.cliente}</td>
+                        <td>${a.pet}</td>
+                        <td>${getNomeSala(a.sala)}</td>
+                        <td class="${statusClasse}">${statusTexto}</td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                        </tbody>
+                    </table>
+                    <p style="margin-top: 20px; color: #666;">Total: ${agendamentosFiltrados.length} agendamento(s)</p>
+                </body>
+                </html>
+            `;
+
+            printWindow.document.write(html);
+            printWindow.document.close();
+            printWindow.print();
+        }
+
         function renderizarGradeDia() {
             const gridHeader = document.getElementById('gridHeader');
             const gridBody = document.getElementById('agendaGridBody');
             const horarios = gerarHorarios();
+            const numSalas = salasDisponiveis.length;
 
             gridBody.className = 'grid-body';
 
+            // Header dinâmico baseado nas salas disponíveis
             gridHeader.className = 'grid-header dia-view';
             gridHeader.style.display = 'grid';
-            gridHeader.style.gridTemplateColumns = '100px repeat(4, 1fr)';
-            gridHeader.innerHTML = `
-                <div class="grid-cell time-label">Horário</div>
-                <div class="grid-cell">
-                    <div class="sala-header">
-                        <div class="sala-nome">Sala 1</div>
-                        <div class="sala-status">Consulta</div>
+            gridHeader.style.gridTemplateColumns = `100px repeat(${numSalas}, 1fr)`;
+
+            let headerHTML = '<div class="grid-cell time-label">Horário</div>';
+            salasDisponiveis.forEach((sala, index) => {
+                const status = getStatusSala(sala.id);
+                const statusStyle = status.classe === 'em-uso' ? 'color: #D62828; font-weight: bold;' : 'opacity: 0.8;';
+                headerHTML += `
+                    <div class="grid-cell" style="background: ${sala.cor};">
+                        <div class="sala-header">
+                            <div class="sala-nome">${sala.nome}</div>
+                            <div class="sala-status">${sala.tipo}</div>
+                            <div class="sala-uso" style="font-size: 0.7rem; margin-top: 2px; ${statusStyle}">${status.texto}</div>
+                        </div>
                     </div>
-                </div>
-                <div class="grid-cell">
-                    <div class="sala-header">
-                        <div class="sala-nome">Sala 2</div>
-                        <div class="sala-status">Cirurgia</div>
-                    </div>
-                </div>
-                <div class="grid-cell">
-                    <div class="sala-header">
-                        <div class="sala-nome">Sala 3</div>
-                        <div class="sala-status">Raio-X</div>
-                    </div>
-                </div>
-                <div class="grid-cell">
-                    <div class="sala-header">
-                        <div class="sala-nome">Sala 4</div>
-                        <div class="sala-status">Internação</div>
-                    </div>
-                </div>
-            `;
+                `;
+            });
+            gridHeader.innerHTML = headerHTML;
 
             gridBody.innerHTML = '';
+
+            // Atualizar grid-row para número dinâmico de salas
+            const styleRow = document.createElement('style');
+            styleRow.textContent = `.grid-row { grid-template-columns: 100px repeat(${numSalas}, 1fr); }`;
+            gridBody.appendChild(styleRow);
 
             horarios.forEach(horario => {
                 const row = document.createElement('div');
@@ -2031,35 +2255,61 @@
                 timeCell.textContent = horario;
                 row.appendChild(timeCell);
 
-                for (let i = 1; i <= 4; i++) {
+                salasDisponiveis.forEach(sala => {
                     const appointmentCell = document.createElement('div');
                     appointmentCell.className = 'appointment-cell';
-                    appointmentCell.dataset.sala = `sala${i}`;
+                    appointmentCell.dataset.sala = sala.id;
                     appointmentCell.dataset.horario = horario;
 
                     appointmentCell.addEventListener('dragover', handleDragOver);
                     appointmentCell.addEventListener('drop', handleDrop);
 
-                    const agendamento = agendamentos.find(a =>
-                        a.sala === `sala${i}` &&
-                        a.horario === horario &&
-                        mesmaData(a.data, estadoAtual.dataAtual) &&
-                        a.status !== 'cancelado'
-                    );
+                    // Buscar agendamento considerando horários quebrados (normaliza para o slot)
+                    const agendamento = agendamentos.find(a => {
+                        if (a.sala !== sala.id || a.status === 'cancelado') return false;
+                        if (!mesmaData(a.data, estadoAtual.dataAtual)) return false;
+                        // Verifica horário exato OU horário normalizado
+                        const horarioNormalizado = normalizarHorarioParaSlot(a.horario);
+                        return a.horario === horario || horarioNormalizado === horario;
+                    });
 
-                    if (agendamento) {
-                        const appointmentDiv = criarElementoAgendamento(agendamento);
-                        appointmentCell.appendChild(appointmentDiv);
+                    if (modoVisualizacao === 'agendados') {
+                        // Modo agendados: mostra os agendamentos
+                        if (agendamento) {
+                            const appointmentDiv = criarElementoAgendamento(agendamento);
+                            appointmentCell.appendChild(appointmentDiv);
+                        }
+                    } else {
+                        // Modo livres: mostra indicador de disponível/ocupado
+                        if (agendamento) {
+                            // Ocupado
+                            appointmentCell.style.background = 'rgba(214, 40, 40, 0.1)';
+                            appointmentCell.innerHTML = `
+                                <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--vta-orange-dark); font-size: 0.8rem;">
+                                    <i class="fas fa-times-circle" style="margin-right: 5px;"></i> Ocupado
+                                </div>
+                            `;
+                        } else {
+                            // Disponível
+                            appointmentCell.style.background = 'rgba(82, 183, 136, 0.1)';
+                            appointmentCell.innerHTML = `
+                                <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--vta-green); font-size: 0.8rem;">
+                                    <i class="fas fa-check-circle" style="margin-right: 5px;"></i> Disponível
+                                </div>
+                            `;
+                        }
                     }
 
                     appointmentCell.onclick = (e) => {
-                        if (e.target === appointmentCell) {
-                            selecionarHorario(`sala${i}`, horario);
+                        if (e.target === appointmentCell || e.target.closest('.appointment-cell') === appointmentCell) {
+                            if (!agendamento) {
+                                selecionarHorario(sala.id, horario);
+                            }
                         }
                     };
 
                     row.appendChild(appointmentCell);
-                }
+                });
 
                 gridBody.appendChild(row);
             });
@@ -2103,23 +2353,16 @@
 
             gridBody.innerHTML = '';
 
-            const salas = [
-                { id: 'sala1', nome: 'Sala 1', tipo: 'Consulta' },
-                { id: 'sala2', nome: 'Sala 2', tipo: 'Cirurgia' },
-                { id: 'sala3', nome: 'Sala 3', tipo: 'Raio-X' },
-                { id: 'sala4', nome: 'Sala 4', tipo: 'Internação' }
-            ];
-
-            salas.forEach(sala => {
+            // Usar salas dinâmicas
+            salasDisponiveis.forEach(sala => {
                 const row = document.createElement('div');
                 row.className = 'week-grid-row';
 
                 const salaCell = document.createElement('div');
                 salaCell.className = 'time-cell';
+                salaCell.style.borderLeft = `4px solid ${sala.cor}`;
                 salaCell.innerHTML = `<strong>${sala.nome}</strong><br><small>${sala.tipo}</small>`;
                 row.appendChild(salaCell);
-
-
 
                 diasUteis.forEach(dia => {
                     const appointmentCell = document.createElement('div');
@@ -2141,22 +2384,27 @@
 
                     // Se tem agendamentos, criar visualização expansível
                     const todosHorarios = gerarHorarios();
-                    const horariosAgendados = agendamentosDaSala.map(a => a.horario);
+                    // Considerar horários quebrados na verificação
+                    const horariosAgendados = agendamentosDaSala.map(a => {
+                        const normalizado = normalizarHorarioParaSlot(a.horario);
+                        return normalizado;
+                    });
                     const horariosLivres = todosHorarios.filter(h => !horariosAgendados.includes(h));
 
                     appointmentCell.classList.add('expandable');
 
-                    if (visualizacaoSemana === 'agendados') {
+                    if (modoVisualizacao === 'agendados') {
                         // VISUALIZAÇÃO: HORÁRIOS AGENDADOS
                         if (agendamentosDaSala.length > 0) {
                             const resumoDiv = document.createElement('div');
                             resumoDiv.className = 'horarios-resumo';
+                            resumoDiv.style.background = sala.cor;
                             resumoDiv.innerHTML = `
-            <div class="contador-agendamentos">${agendamentosDaSala.length}</div>
-            <div class="icone-expandir">
-                <i class="fas fa-chevron-down"></i>
-            </div>
-        `;
+                                <div class="contador-agendamentos">${agendamentosDaSala.length}</div>
+                                <div class="icone-expandir">
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                            `;
                             appointmentCell.appendChild(resumoDiv);
 
                             const expandidoDiv = document.createElement('div');
@@ -2164,14 +2412,15 @@
 
                             agendamentosDaSala.forEach(agendamento => {
                                 const horarioItem = document.createElement('div');
-                                horarioItem.className = `horario-item ${agendamento.sala}`;
+                                horarioItem.className = `horario-item`;
+                                horarioItem.style.borderLeftColor = sala.cor;
                                 horarioItem.innerHTML = `
-                <div class="horario-tempo">${agendamento.horario}</div>
-                <div class="horario-info">
-                    <div class="horario-pet">${agendamento.pet}</div>
-                    <div class="horario-cliente">${agendamento.cliente}</div>
-                </div>
-            `;
+                                    <div class="horario-tempo">${agendamento.horario}</div>
+                                    <div class="horario-info">
+                                        <div class="horario-pet">${agendamento.pet}</div>
+                                        <div class="horario-cliente">${agendamento.cliente}</div>
+                                    </div>
+                                `;
 
                                 horarioItem.onclick = (e) => {
                                     e.stopPropagation();
@@ -2184,16 +2433,18 @@
                             appointmentCell.appendChild(expandidoDiv);
                         }
                     } else {
-                        // VISUALIZAÇÃO: HORÁRIOS LIVRES
-                        // Não mostrar nenhum resumo, apenas ícone para indicar que pode expandir
+                        // VISUALIZAÇÃO: HORÁRIOS LIVRES com cor da sala
                         if (horariosLivres.length > 0) {
                             const resumoDiv = document.createElement('div');
                             resumoDiv.className = 'horarios-resumo';
+                            resumoDiv.style.background = sala.cor;
+                            resumoDiv.style.opacity = '0.7';
                             resumoDiv.innerHTML = `
-            <div class="icone-expandir">
-                <i class="fas fa-clock"></i>
-            </div>
-        `;
+                                <div class="contador-agendamentos" style="font-size: 1.2rem;">${horariosLivres.length}</div>
+                                <div class="icone-expandir">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                            `;
                             appointmentCell.appendChild(resumoDiv);
 
                             const expandidoDiv = document.createElement('div');
@@ -2202,13 +2453,14 @@
                             horariosLivres.forEach(horario => {
                                 const horarioItem = document.createElement('div');
                                 horarioItem.className = 'horario-livre-item';
+                                horarioItem.style.borderLeftColor = sala.cor;
                                 horarioItem.innerHTML = `
-                <div class="horario-livre-tempo">${horario}</div>
-                <div class="horario-livre-status">
-                    <i class="fas fa-check-circle"></i>
-                    Disponível
-                </div>
-            `;
+                                    <div class="horario-livre-tempo">${horario}</div>
+                                    <div class="horario-livre-status" style="color: ${sala.cor};">
+                                        <i class="fas fa-check-circle"></i>
+                                        Disponível
+                                    </div>
+                                `;
 
                                 horarioItem.onclick = (e) => {
                                     e.stopPropagation();
@@ -2224,11 +2476,12 @@
                             // Se não há horários livres, mostrar indicador
                             const vazioDiv = document.createElement('div');
                             vazioDiv.className = 'horarios-resumo';
+                            vazioDiv.style.background = 'rgba(200, 200, 200, 0.3)';
                             vazioDiv.innerHTML = `
-            <div style="font-size: 0.8rem; opacity: 0.5;">
-                <i class="fas fa-ban"></i>
-            </div>
-        `;
+                                <div style="font-size: 0.8rem; opacity: 0.5; color: var(--gray-dark);">
+                                    <i class="fas fa-ban"></i> Lotado
+                                </div>
+                            `;
                             appointmentCell.appendChild(vazioDiv);
                         }
                     }
@@ -2548,26 +2801,37 @@
             mostrarToast(`Visualizando ${data.toLocaleDateString('pt-BR')}`, 'success');
         }
 
-        function getNomeSala(sala) {
-            const nomes = {
-                'sala1': 'Sala 1 - Consulta',
-                'sala2': 'Sala 2 - Cirurgia',
-                'sala3': 'Sala 3 - Raio-X',
-                'sala4': 'Sala 4 - Internação'
-            };
-            return nomes[sala] || sala;
+        function getNomeSala(salaId) {
+            const sala = salasDisponiveis.find(s => s.id === salaId);
+            return sala ? `${sala.nome} - ${sala.tipo}` : salaId;
         }
 
         function mostrarDetalhesAgendamento(agendamento) {
             const detalhesContent = document.getElementById('detalhesContent');
             const temCheckin = agendamento.checkin && agendamento.checkin.realizado;
+            const sala = salasDisponiveis.find(s => s.id === agendamento.sala);
+            const corSala = sala ? sala.cor : 'var(--vta-green)';
 
-            let statusHTML = `<span class="status-badge ${agendamento.status}">${agendamento.status.toUpperCase()}</span>`;
-            
+            // Status badges melhorados
+            let statusHTML = '';
+            const statusMap = {
+                'agendado': { texto: 'AGENDADO', cor: 'var(--vta-orange)', icone: 'fa-calendar-check' },
+                'confirmado': { texto: 'CONFIRMADO', cor: 'var(--vta-green)', icone: 'fa-check' },
+                'cancelado': { texto: 'CANCELADO', cor: 'var(--vta-orange-dark)', icone: 'fa-times' },
+                'concluido': { texto: 'CONCLUÍDO', cor: 'var(--vta-blue)', icone: 'fa-check-double' }
+            };
+
+            const statusInfo = statusMap[agendamento.status] || statusMap['agendado'];
+            statusHTML = `
+                <span class="status-badge" style="background: ${statusInfo.cor}; color: white; padding: 4px 12px; border-radius: 15px; font-size: 0.8rem;">
+                    <i class="fas ${statusInfo.icone}"></i> ${statusInfo.texto}
+                </span>
+            `;
+
             if (temCheckin) {
                 statusHTML += `
-                    <span class="status-badge checkin" style="margin-left: 0.5rem;">
-                        <i class="fas fa-check-circle"></i> CHECK-IN REALIZADO
+                    <span class="status-badge" style="background: var(--vta-green); color: white; padding: 4px 12px; border-radius: 15px; font-size: 0.8rem; margin-left: 0.5rem;">
+                        <i class="fas fa-check-circle"></i> CHECK-IN ✓
                     </span>
                     <div style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--gray-medium);">
                         📍 ${agendamento.checkin.data || ''} às ${agendamento.checkin.horario}
@@ -2576,25 +2840,37 @@
             }
 
             detalhesContent.innerHTML = `
-                <div class="detail-group">
-                    <div class="detail-label">Pet</div>
-                    <div class="detail-value">${agendamento.pet}</div>
-                </div>
-                <div class="detail-group">
-                    <div class="detail-label">Cliente</div>
-                    <div class="detail-value">${agendamento.cliente}</div>
-                </div>
-                <div class="detail-group">
-                    <div class="detail-label">Tipo de Atendimento</div>
-                    <div class="detail-value">${agendamento.tipo || 'Consulta'}</div>
+                <div style="border-left: 4px solid ${corSala}; padding-left: 15px; margin-bottom: 15px;">
+                    <div class="detail-group">
+                        <div class="detail-label">Pet</div>
+                        <div class="detail-value" style="font-size: 1.1rem; font-weight: 600;">${agendamento.pet}</div>
+                    </div>
+                    <div class="detail-group">
+                        <div class="detail-label">Cliente</div>
+                        <div class="detail-value">${agendamento.cliente}</div>
+                    </div>
                 </div>
                 <div class="detail-group">
                     <div class="detail-label">Sala</div>
-                    <div class="detail-value">${getNomeSala(agendamento.sala)}</div>
+                    <div class="detail-value">
+                        <span style="display: inline-flex; align-items: center; gap: 8px;">
+                            <span style="width: 12px; height: 12px; border-radius: 50%; background: ${corSala};"></span>
+                            ${getNomeSala(agendamento.sala)}
+                        </span>
+                    </div>
                 </div>
+                ${agendamento.profissional ? `
+                <div class="detail-group">
+                    <div class="detail-label">Profissional</div>
+                    <div class="detail-value"><i class="fas fa-user-md" style="margin-right: 5px;"></i>${agendamento.profissional}</div>
+                </div>
+                ` : ''}
                 <div class="detail-group">
                     <div class="detail-label">Data e Horário</div>
-                    <div class="detail-value">${agendamento.data.toLocaleDateString('pt-BR')} às ${agendamento.horario}</div>
+                    <div class="detail-value">
+                        <i class="fas fa-calendar-alt" style="margin-right: 5px; color: ${corSala};"></i>
+                        ${agendamento.data.toLocaleDateString('pt-BR')} às ${agendamento.horario}
+                    </div>
                 </div>
                 <div class="detail-group">
                     <div class="detail-label">Status</div>
@@ -2715,6 +2991,7 @@
             });
 
             document.getElementById('salaSelect').value = agendamentoEditando.sala;
+            document.getElementById('profissionalSelect').value = agendamentoEditando.profissional || '';
             document.getElementById('obsTextarea').value = agendamentoEditando.obs;
 
             const ano = agendamentoEditando.data.getFullYear();
@@ -2944,6 +3221,7 @@
             const clienteSelect = document.getElementById('clienteSelect');
             const petSelect = document.getElementById('petSelect');
             const salaSelect = document.getElementById('salaSelect');
+            const profissionalSelect = document.getElementById('profissionalSelect');
             const dataHoraInput = document.getElementById('dataHoraInput');
             const obsTextarea = document.getElementById('obsTextarea');
 
@@ -2977,6 +3255,7 @@
                             cliente: clienteSelect.value,
                             pet: petSelect.value,
                             sala: salaSelect.value,
+                            profissional: profissionalSelect.value || null,
                             data: dataStr,
                             horario: horario,
                             status: agendamentoEditando.status,
@@ -2994,6 +3273,7 @@
                             cliente: clienteSelect.value,
                             pet: petSelect.value,
                             sala: salaSelect.value,
+                            profissional: profissionalSelect.value || null,
                             data: dataStr,
                             horario: horario,
                             status: "agendado",
@@ -3028,21 +3308,7 @@
         atualizarPeriodo();
         // renderizarGrade(); // carregarAgendamentos já chama renderizarGrade
 
-        function alternarVisualizacaoSemana() {
-            const textoElement = document.getElementById('textoVisualizacao');
-
-            if (visualizacaoSemana === 'agendados') {
-                visualizacaoSemana = 'livres';
-                textoElement.textContent = 'Horários Agendados';
-                mostrarToast('Mostrando horários livres', 'info');
-            } else {
-                visualizacaoSemana = 'agendados';
-                textoElement.textContent = 'Horários Livres';
-                mostrarToast('Mostrando horários agendados', 'info');
-            }
-
-            renderizarGradeSemana();
-        }
+        // Função alternarVisualizacaoSemana removida - usar alternarVisualizacao() que é unificada
 
         function logout() {
             if (confirm('Tem certeza que deseja sair do sistema?')) {
