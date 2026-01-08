@@ -1116,6 +1116,37 @@
             box-shadow: 0 4px 12px rgba(247, 127, 0, 0.15);
         }
 
+        .confirm-icon.success {
+            background: linear-gradient(135deg, rgba(82, 183, 136, 0.1), rgba(116, 198, 157, 0.1));
+            color: var(--vta-green);
+            box-shadow: 0 4px 12px rgba(82, 183, 136, 0.15);
+        }
+
+        /* Indicador visual aprimorado para check-in realizado */
+        .appointment.checkin-realizado .appointment-checkin-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: linear-gradient(135deg, #40916C, #52B788);
+            color: white;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(64, 145, 108, 0.4);
+            border: 2px solid white;
+            animation: pulseCheckin 2s ease-in-out infinite;
+        }
+
+        @keyframes pulseCheckin {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
         .confirm-message {
             font-size: 1.4rem;
             color: var(--gray-dark);
@@ -1722,6 +1753,30 @@
         </div>
     </div>
 
+    <!-- Modal de Confirmação de Check-in -->
+    <div class="modal" id="confirmarCheckinModal">
+        <div class="modal-content confirm-modal-content">
+            <div class="confirm-icon success">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h3 class="confirm-message">Confirmar Check-in</h3>
+            <p class="confirm-submessage">Registrar chegada do paciente?</p>
+            <div class="info-box" id="checkinInfoBox">
+                <!-- Informações do agendamento -->
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="fecharConfirmacaoCheckin()" style="flex: 1;">
+                    <i class="fas fa-times"></i>
+                    Cancelar
+                </button>
+                <button class="btn btn-primary" onclick="confirmarCheckinReal()" style="background: linear-gradient(135deg, #52B788, #74C69D); flex: 1;">
+                    <i class="fas fa-check"></i>
+                    Confirmar Check-in
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal de Busca -->
     <div class="modal" id="buscarModal">
         <div class="modal-content">
@@ -1789,6 +1844,7 @@
 
         let proximoId = 0; // Gerado pelo backend
         let agendamentoParaExcluir = null;
+        let agendamentoParaCheckin = null;
         let agendamentoEditando = null;
         let movimentacaoPendente = null;
         let modoVisualizacao = 'agendados'; // 'agendados' ou 'livres' - funciona para dia e semana
@@ -2617,9 +2673,13 @@
             appointmentDiv.draggable = true;
             appointmentDiv.dataset.id = agendamento.id;
 
+            // Badge de check-in realizado
+            const checkinBadge = temCheckin ? '<div class="appointment-checkin-badge"><i class="fas fa-check"></i></div>' : '';
+
             if (mostrarSala) {
                 // Para expansões (semana) - mostra sala
                 appointmentDiv.innerHTML = `
+            ${checkinBadge}
             <div class="appointment-title">${agendamento.pet}</div>
             <div class="appointment-subtitle">${getNomeSala(agendamento.sala)}</div>
             <div class="appointment-time">${agendamento.horario}</div>
@@ -2627,6 +2687,7 @@
             } else {
                 // Para grade normal (dia) - mostra cliente e horário
                 appointmentDiv.innerHTML = `
+            ${checkinBadge}
             <div class="appointment-title">${agendamento.cliente}</div>
             <div class="appointment-subtitle">${agendamento.pet} • ${agendamento.horario}</div>
         `;
@@ -2884,7 +2945,7 @@
                 </div>
                 <div class="modal-actions">
                     ${!temCheckin ? `
-                        <button class="btn btn-primary" onclick="realizarCheckIn(${agendamento.id})" style="background: linear-gradient(135deg, #52B788, #74C69D); flex: 1;">
+                        <button class="btn btn-primary" onclick="solicitarCheckin(${agendamento.id})" style="background: linear-gradient(135deg, #52B788, #74C69D); flex: 1;">
                             <i class="fas fa-check-circle"></i>
                             Check-in
                         </button>
@@ -2910,6 +2971,48 @@
 
         function fecharDetalhes() {
             document.getElementById('detalhesModal').classList.remove('show');
+        }
+
+        // Funções para confirmação de check-in
+        function solicitarCheckin(id) {
+            agendamentoParaCheckin = agendamentos.find(a => a.id === id);
+            if (!agendamentoParaCheckin) return;
+
+            const salaConfig = salasDisponiveis.find(s => s.id === agendamentoParaCheckin.sala) || salasDisponiveis[0];
+            const corSala = salaConfig.cor;
+
+            const checkinInfoBox = document.getElementById('checkinInfoBox');
+            checkinInfoBox.innerHTML = `
+                <div class="info-box-title" style="color: ${corSala};">
+                    <i class="fas fa-paw" style="margin-right: 8px;"></i>
+                    ${agendamentoParaCheckin.pet}
+                </div>
+                <div class="info-box-subtitle">Tutor: ${agendamentoParaCheckin.cliente}</div>
+                <div class="info-box-detail">
+                    <i class="fas fa-calendar-alt"></i>
+                    ${agendamentoParaCheckin.data.toLocaleDateString('pt-BR')} às ${agendamentoParaCheckin.horario}
+                </div>
+                <div class="info-box-detail">
+                    <i class="fas fa-door-open"></i>
+                    ${salaConfig.nome} - ${salaConfig.tipo}
+                </div>
+            `;
+
+            fecharDetalhes();
+            document.getElementById('confirmarCheckinModal').classList.add('show');
+        }
+
+        function fecharConfirmacaoCheckin() {
+            document.getElementById('confirmarCheckinModal').classList.remove('show');
+            agendamentoParaCheckin = null;
+        }
+
+        async function confirmarCheckinReal() {
+            if (!agendamentoParaCheckin) return;
+
+            const id = agendamentoParaCheckin.id;
+            fecharConfirmacaoCheckin();
+            await realizarCheckIn(id);
         }
 
         async function realizarCheckIn(id) {
