@@ -1772,6 +1772,11 @@
         let pets = [];
         let dadosCadastroCarregados = false;
 
+        // Controle de atualização automática da agenda
+        const POLLING_INTERVAL_MS = 5000;
+        let agendaPollingId = null;
+        let carregandoAgendamentos = false;
+
         let proximoId = 0; // Gerado pelo backend
         let agendamentoParaExcluir = null;
         let agendamentoEditando = null;
@@ -1864,8 +1869,26 @@
             return pets.find(p => p.id === petId);
         }
 
+        function algumModalAberto() {
+            const modais = [
+                'agendamentoModal',
+                'detalhesModal',
+                'confirmarMoverModal',
+                'confirmarExclusaoModal',
+                'buscarModal'
+            ];
+            return modais.some((id) => {
+                const el = document.getElementById(id);
+                return el && el.classList.contains('show');
+            });
+        }
+
         // Função para carregar agendamentos do backend
-        async function carregarAgendamentos() {
+        async function carregarAgendamentos(force = false) {
+            if (carregandoAgendamentos) return;
+            if (!force && algumModalAberto()) return;
+
+            carregandoAgendamentos = true;
             try {
                 const response = await fetch('/api/agendamentos');
                 if (!response.ok) throw new Error('Erro ao carregar agendamentos');
@@ -1883,6 +1906,8 @@
             } catch (error) {
                 console.error('Erro:', error);
                 mostrarToast('Erro ao carregar agendamentos', 'error');
+            } finally {
+                carregandoAgendamentos = false;
             }
         }
 
@@ -2512,7 +2537,7 @@
 
                 if (!response.ok) throw new Error('Erro ao mover agendamento');
 
-                await carregarAgendamentos();
+                await carregarAgendamentos(true);
                 fecharMover();
                 mostrarToast('Agendamento movido com sucesso!', 'success');
             } catch (error) {
@@ -2651,7 +2676,7 @@
 
                 if (!response.ok) throw new Error('Erro ao realizar check-in');
 
-                await carregarAgendamentos();
+                await carregarAgendamentos(true);
                 
                 // Re-encontrar o agendamento atualizado para mostrar detalhes
                 const agendamentoAtualizado = agendamentos.find(a => a.id === id);
@@ -2679,7 +2704,7 @@
 
                 if (!response.ok) throw new Error('Erro ao desfazer check-in');
 
-                await carregarAgendamentos();
+                await carregarAgendamentos(true);
                 
                 const agendamentoAtualizado = agendamentos.find(a => a.id === id);
                 mostrarDetalhesAgendamento(agendamentoAtualizado);
@@ -2767,7 +2792,7 @@
 
                 if (!response.ok) throw new Error('Erro ao excluir agendamento');
 
-                await carregarAgendamentos();
+                await carregarAgendamentos(true);
                 fecharConfirmacao();
                 mostrarToast('Agendamento excluído com sucesso!', 'success');
             } catch (error) {
@@ -3030,7 +3055,7 @@
                     mostrarToast('Agendamento criado com sucesso!', 'success');
                 }
 
-                await carregarAgendamentos();
+                await carregarAgendamentos(true);
                 fecharModal();
                 this.reset();
             } catch (error) {
@@ -3048,9 +3073,27 @@
         `;
         document.head.appendChild(style);
         // Carregar cadastros e agendamentos
+        function iniciarAtualizacaoAutomatica() {
+            if (agendaPollingId) {
+                clearInterval(agendaPollingId);
+            }
+
+            agendaPollingId = setInterval(() => {
+                // Evita sobrescrever alterações enquanto o usuário edita
+                carregarAgendamentos(false);
+            }, POLLING_INTERVAL_MS);
+
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    carregarAgendamentos(false);
+                }
+            });
+        }
+
         (async () => {
             await carregarClientesEPets();
-            await carregarAgendamentos();
+            await carregarAgendamentos(true);
+            iniciarAtualizacaoAutomatica();
         })();
 
         atualizarPeriodo();
