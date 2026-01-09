@@ -1833,6 +1833,7 @@
         let agendamentos = []; // Inicialmente vazio, carregado do backend
         let clientesDisponiveis = []; // Lista de clientes do banco de dados
         let profissionaisDisponiveis = []; // Lista de profissionais
+        let gridRowDynamicStyle = null;
 
         // Salas configuráveis - podem ser carregadas do backend futuramente
         let salasDisponiveis = [
@@ -2297,13 +2298,18 @@
             const gridBody = document.getElementById('agendaGridBody');
             const horarios = gerarHorarios();
             const numSalas = salasDisponiveis.length;
+            const minColWidth = 180;
+            const templateColumns = `100px repeat(${numSalas}, minmax(${minColWidth}px, 1fr))`;
+            const gridMinWidth = 100 + (numSalas * minColWidth);
 
             gridBody.className = 'grid-body';
+            gridBody.style.minWidth = `${gridMinWidth}px`;
 
             // Header dinâmico baseado nas salas disponíveis
             gridHeader.className = 'grid-header dia-view';
             gridHeader.style.display = 'grid';
-            gridHeader.style.gridTemplateColumns = `100px repeat(${numSalas}, 1fr)`;
+            gridHeader.style.gridTemplateColumns = templateColumns;
+            gridHeader.style.minWidth = `${gridMinWidth}px`;
 
             let headerHTML = '<div class="grid-cell time-label">Horário</div>';
             salasDisponiveis.forEach((sala, index) => {
@@ -2324,9 +2330,13 @@
             gridBody.innerHTML = '';
 
             // Atualizar grid-row para número dinâmico de salas
-            const styleRow = document.createElement('style');
-            styleRow.textContent = `.grid-row { grid-template-columns: 100px repeat(${numSalas}, 1fr); }`;
-            gridBody.appendChild(styleRow);
+            if (gridRowDynamicStyle) {
+                gridRowDynamicStyle.remove();
+            }
+            gridRowDynamicStyle = document.createElement('style');
+            gridRowDynamicStyle.id = 'agenda-grid-row-template';
+            gridRowDynamicStyle.textContent = `.grid-row { grid-template-columns: ${templateColumns}; }`;
+            document.head.appendChild(gridRowDynamicStyle);
 
             horarios.forEach(horario => {
                 const row = document.createElement('div');
@@ -2405,6 +2415,8 @@
             gridBody.className = 'grid-body';
             gridBody.style.maxHeight = '600px';
             gridBody.style.overflowY = 'auto';
+            gridHeader.style.minWidth = '';
+            gridBody.style.minWidth = '';
 
             const inicioSemana = getInicioSemana(estadoAtual.dataAtual);
             const diasUteis = [];
@@ -2592,6 +2604,7 @@
             gridHeader.style.gridTemplateColumns = 'repeat(7, 1fr)';
             gridHeader.style.background = 'var(--vta-green)';
             gridHeader.style.color = 'var(--white)';
+            gridHeader.style.minWidth = '';
 
             const diasSemana = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
@@ -2607,6 +2620,7 @@
             gridBody.className = 'calendar-body';
             gridBody.style.maxHeight = 'none';
             gridBody.style.overflowY = 'visible';
+            gridBody.style.minWidth = '';
 
             const ano = estadoAtual.dataAtual.getFullYear();
             const mes = estadoAtual.dataAtual.getMonth();
@@ -2698,6 +2712,8 @@
             appointmentDiv.className = `appointment ${agendamento.sala} ${temCheckin ? 'checkin-realizado' : ''}`;
             appointmentDiv.draggable = true;
             appointmentDiv.dataset.id = agendamento.id;
+            const salaConfig = salasDisponiveis.find(s => s.id === agendamento.sala);
+            appointmentDiv.style.background = salaConfig ? salaConfig.cor : 'var(--vta-green)';
 
             // Badge de check-in realizado
             const checkinBadge = temCheckin ? '<div class="appointment-checkin-badge"><i class="fas fa-check"></i></div>' : '';

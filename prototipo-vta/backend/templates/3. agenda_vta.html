@@ -31,6 +31,8 @@
             --gray-light: #F8F9FA;
             --gray-medium: #6C757D;
             --gray-dark: #343A40;
+            --agenda-num-salas: 4;
+            --agenda-sala-min-width: 180px;
         }
 
         body {
@@ -337,14 +339,16 @@
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
             overscroll-behavior-inline: contain;
+            min-width: calc(100px + var(--agenda-num-salas, 4) * var(--agenda-sala-min-width, 180px));
         }
 
         .grid-header {
             display: grid;
-            grid-template-columns: 100px repeat(4, 1fr);
+            grid-template-columns: 100px repeat(var(--agenda-num-salas, 4), minmax(var(--agenda-sala-min-width, 180px), 1fr));
             background: var(--vta-green);
             color: var(--white);
             font-weight: 600;
+            min-width: calc(100px + var(--agenda-num-salas, 4) * var(--agenda-sala-min-width, 180px));
 
         }
 
@@ -793,11 +797,12 @@
         .grid-body {
             max-height: 600px;
             overflow-y: auto;
+            min-width: calc(100px + var(--agenda-num-salas, 4) * var(--agenda-sala-min-width, 180px));
         }
 
         .grid-row {
             display: grid;
-            grid-template-columns: 100px repeat(4, 1fr);
+            grid-template-columns: 100px repeat(var(--agenda-num-salas, 4), minmax(var(--agenda-sala-min-width, 180px), 1fr));
             border-bottom: 1px solid var(--gray-light);
         }
 
@@ -2089,11 +2094,14 @@
                 { nome: 'Sala 1', tipo: 'Consulta', status: 'disponivel', cor: 'var(--vta-green)' },
             ];
 
+            const minColWidth = 180;
+            document.documentElement.style.setProperty('--agenda-num-salas', listaSalas.length);
+            document.documentElement.style.setProperty('--agenda-sala-min-width', `${minColWidth}px`);
+
             gridBody.className = 'grid-body';
 
             gridHeader.className = 'grid-header dia-view';
             gridHeader.style.display = 'grid';
-            gridHeader.style.gridTemplateColumns = `100px repeat(${listaSalas.length}, 1fr)`;
             gridHeader.innerHTML = '<div class="grid-cell time-label">Horário</div>';
 
             listaSalas.forEach(sala => {
