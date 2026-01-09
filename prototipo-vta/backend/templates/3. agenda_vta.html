@@ -2508,13 +2508,24 @@
             document.getElementById('confirmarMoverModal').classList.add('show');
         }
 
+        function formatarDataParaBackend(data) {
+            const d = new Date(data);
+            d.setHours(0, 0, 0, 0); // evita virada de dia por fuso
+            const ano = d.getFullYear();
+            const mes = String(d.getMonth() + 1).padStart(2, '0');
+            const dia = String(d.getDate()).padStart(2, '0');
+            return `${ano}-${mes}-${dia}`;
+        }
+
         async function confirmarMovimentacao() {
             if (!movimentacaoPendente) return;
 
             const { agendamento, novaSala, novoHorario, novaData } = movimentacaoPendente;
+            const dataNormalizada = new Date(novaData);
+            dataNormalizada.setHours(0, 0, 0, 0);
 
             // VERIFICAÇÃO DE CONFLITO
-            if (verificarHorarioOcupado(novaSala, novaData, novoHorario, agendamento.id)) {
+            if (verificarHorarioOcupado(novaSala, dataNormalizada, novoHorario, agendamento.id)) {
                 mostrarToast('Erro: Já existe um agendamento neste horário e sala!', 'error');
                 fecharMover();
                 return;
@@ -2527,7 +2538,7 @@
                     body: JSON.stringify({
                         sala: novaSala,
                         horario: novoHorario,
-                        data: novaData.toISOString().split('T')[0],
+                        data: formatarDataParaBackend(dataNormalizada),
                         cliente: agendamento.cliente,
                         pet: agendamento.pet,
                         status: agendamento.status,
