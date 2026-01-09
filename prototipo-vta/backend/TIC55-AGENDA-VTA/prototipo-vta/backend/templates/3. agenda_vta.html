@@ -1592,6 +1592,10 @@
                             <i class="fas fa-calendar-day"></i>
                             Hoje
                         </button>
+                        <button class="btn btn-secondary" onclick="exportarAgenda()">
+                            <i class="fas fa-download"></i>
+                            Exportar
+                        </button>
                         <button class="btn btn-primary" onclick="novoAgendamento()">
                             <i class="fas fa-plus"></i>
                             Novo
@@ -2195,6 +2199,59 @@
                 mostrarToast('Mostrando horários agendados', 'info');
             }
             renderizarGrade();
+        }
+
+        // Exporta a agenda visível preservando o layout e permite salvar como PDF pelo diálogo de impressão
+        function exportarAgenda() {
+            const currentPeriod = document.getElementById('currentPeriod')?.textContent || 'Agenda';
+            const viewLabelMap = { dia: 'Dia', semana: 'Semana', mes: 'Mês' };
+            const viewLabel = viewLabelMap[estadoAtual.visualizacao] || 'Agenda';
+            const styleContent = Array.from(document.querySelectorAll('style')).map(s => s.textContent).join('\n');
+            const agendaGrid = document.querySelector('.agenda-grid')?.cloneNode(true);
+
+            if (!agendaGrid) {
+                alert('Não foi possível gerar o PDF da agenda agora. Tente novamente.');
+                return;
+            }
+
+            const scrollArea = agendaGrid.querySelector('.agenda-grid-scroll');
+            if (scrollArea) {
+                scrollArea.style.overflow = 'visible';
+                scrollArea.style.maxHeight = 'none';
+            }
+
+            const gridBodyExport = agendaGrid.querySelector('.grid-body');
+            if (gridBodyExport) {
+                gridBodyExport.style.maxHeight = 'none';
+            }
+
+            const exportWindow = window.open('', '_blank');
+            exportWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Agenda VTA - ${currentPeriod}</title>
+                    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+                    <style>
+                        ${styleContent}
+                        body { background: #FFFFFF; padding: 24px; }
+                        .agenda-grid { box-shadow: none; margin-top: 12px; }
+                        .agenda-grid-scroll { overflow: visible !important; }
+                        .grid-body { max-height: none !important; }
+                        .header, .sidebar { display: none; }
+                    </style>
+                </head>
+                <body>
+                    <h1 style="color: var(--gray-dark); margin-bottom: 6px;">Agenda VTA</h1>
+                    <div style="color: var(--gray-medium); margin-bottom: 14px;">${currentPeriod} • Visualização: ${viewLabel}</div>
+                    ${agendaGrid.outerHTML}
+                </body>
+                </html>
+            `);
+            exportWindow.document.close();
+            exportWindow.focus();
+            exportWindow.print();
         }
 
         // Função para imprimir agendamentos

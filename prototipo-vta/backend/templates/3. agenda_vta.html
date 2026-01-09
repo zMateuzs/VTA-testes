@@ -1576,6 +1576,11 @@
                         Hoje
                     </button>
 
+                    <button class="btn btn-secondary" onclick="exportarAgenda()">
+                        <i class="fas fa-download"></i>
+                        Exportar
+                    </button>
+
                     <div class="action-buttons">
                         <button class="btn btn-primary" onclick="novoAgendamento()">
                             <i class="fas fa-plus"></i>
@@ -2063,6 +2068,159 @@
             mostrarToast('Voltou para hoje!', 'success');
         }
 
+        // Exporta a grade atual preservando o layout para permitir salvar como PDF via impressão do navegador
+        function exportarAgenda() {
+            const currentPeriod = document.getElementById('currentPeriod')?.textContent || 'Agenda';
+            const viewLabelMap = { dia: 'Dia', semana: 'Semana', mes: 'Mês' };
+            const viewLabel = viewLabelMap[estadoAtual.visualizacao] || 'Agenda';
+            const styleContent = Array.from(document.querySelectorAll('style')).map(s => s.textContent).join('\n');
+            const agendaGrid = document.querySelector('.agenda-grid');
+
+            if (!agendaGrid) {
+                alert('Não foi possível gerar o PDF da agenda agora. Tente novamente.');
+                return;
+            }
+
+            // Monta cópias segmentadas por colunas para evitar quebra quando há muitas salas
+            const headerEl = agendaGrid.querySelector('.grid-header, .week-grid-header');
+            const bodyEl = agendaGrid.querySelector('.grid-body');
+            const timeColumnIdx = 0; // primeira coluna é horário/sala
+            const headerCells = headerEl ? Array.from(headerEl.children) : [];
+            const rows = bodyEl ? Array.from(bodyEl.children) : [];
+            const isWeekView = headerEl && headerEl.classList.contains('week-grid-header');
+            const totalCols = headerCells.length - (isWeekView ? 1 : 1); // desconsidera coluna de horário/sala
+
+            // Determinar o melhor layout baseada na quantidade de salas/dias
+            let targetPageSize = 'A4 landscape';
+            let targetColMin = 220;
+            let targetChunkSize = 4;
+
+            if (totalCols <= 4) {
+                 // Até 4 colunas: A4 Padrão
+                 targetPageSize = 'A4 landscape';
+                 targetColMin = 220;
+                 targetChunkSize = totalCols; 
+            } else if (totalCols <= 7) {
+                 // 5 a 7 colunas (Ex: Semana tem 5 dias): A4 Compacto
+                 targetPageSize = 'A4 landscape';
+                 targetColMin = 130;  
+                 targetChunkSize = totalCols; 
+            } else if (totalCols <= 10) {
+                 // 8 a 10 salas: A3 Paisagem
+                 targetPageSize = 'A3 landscape';
+                 targetColMin = 135; 
+                 targetChunkSize = totalCols;
+            } else {
+                 // Acima de 10: Divide em blocos no A3
+                 targetPageSize = 'A3 landscape';
+                 targetColMin = 135;
+                 targetChunkSize = 10;
+            }
+
+            const chunkSize = targetChunkSize > 0 ? targetChunkSize : 1; 
+            const colMin = targetColMin;
+            const pageCss = `@page { size: ${targetPageSize}; margin: 8mm; }`; 
+
+            function buildChunk(startIdx) {
+                const endIdx = Math.min(startIdx + chunkSize, totalCols);
+                const chunkCols = endIdx - startIdx;
+
+                const chunkHeader = document.createElement('div');
+                chunkHeader.className = headerEl.className; // Mantém a classe original (grid-header ou week-grid-header)
+                chunkHeader.style.display = 'grid';
+                chunkHeader.style.gridTemplateColumns = `100px repeat(${chunkCols}, minmax(${colMin}px, 1fr))`;
+                chunkHeader.style.minWidth = '0'; 
+
+                // tempo/sala (coluna fixa)
+                if (headerCells[timeColumnIdx]) {
+                    chunkHeader.appendChild(headerCells[timeColumnIdx].cloneNode(true));
+                }
+                for (let i = startIdx + 1; i <= endIdx; i++) {
+                    const cell = headerCells[i];
+                    if (cell) chunkHeader.appendChild(cell.cloneNode(true));
+                }
+
+                const chunkBody = document.createElement('div');
+                chunkBody.className = bodyEl.className || 'grid-body';
+                chunkBody.style.maxHeight = 'none';
+                chunkBody.style.overflow = 'visible';
+                chunkBody.style.minWidth = '0';
+
+                rows.forEach(r => {
+                    const cells = Array.from(r.children);
+                    const rowDiv = document.createElement('div');
+                    rowDiv.className = r.className; // Mantém grid-row ou week-grid-row
+                    rowDiv.style.display = 'grid';
+                    rowDiv.style.gridTemplateColumns = `100px repeat(${chunkCols}, minmax(${colMin}px, 1fr))`;
+                    
+                    // Em modo semana ou dia, células podem ter alturas diferentes, mas aqui forçamos grid row
+                    rowDiv.style.minHeight = isWeekView ? '120px' : 'auto'; 
+
+                    if (cells[timeColumnIdx]) {
+                        rowDiv.appendChild(cells[timeColumnIdx].cloneNode(true));
+                    }
+                    for (let i = startIdx + 1; i <= endIdx; i++) {
+                        const c = cells[i];
+                        if (c) rowDiv.appendChild(c.cloneNode(true));
+                    }
+
+                    chunkBody.appendChild(rowDiv);
+                });
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'agenda-grid';
+                wrapper.style.marginTop = '0'; // Removido margem extra entre chunks
+                wrapper.style.boxShadow = 'none';
+                wrapper.style.width = '100%'; // Ocupar toda a largura da página
+                wrapper.style.pageBreakInside = 'auto'; // Permitir quebra de página para evitar espaços em branco
+                wrapper.appendChild(chunkHeader);
+                wrapper.appendChild(chunkBody);
+                return wrapper.outerHTML;
+            }
+
+            const chunksHtml = [];
+            if (totalCols > 0) {
+                for (let start = 0; start < totalCols; start += chunkSize) {
+                    chunksHtml.push(buildChunk(start));
+                }
+            } else {
+                chunksHtml.push(agendaGrid.outerHTML);
+            }
+
+            const chunksGap = chunksHtml.length > 1 ? '24px' : '0';
+
+            const exportWindow = window.open('', '_blank');
+            exportWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Agenda VTA - ${currentPeriod}</title>
+                    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+                    <style>
+                        ${styleContent}
+                        ${pageCss}
+                        body { background: #FFFFFF; padding: 0; margin: 0; }
+                        .agenda-grid { box-shadow: none; margin-top: 5px; width: 100%; }
+                        .grid-body { max-height: none !important; overflow: visible !important; }
+                        .grid-header, .grid-row, .week-grid-header, .week-grid-row { grid-auto-columns: minmax(${colMin}px, 1fr); }
+                        .time-cell { min-width: 100px; }
+                        .print-wrapper { display: flex; flex-direction: column; gap: ${chunksGap}; overflow-x: hidden; width: 100%; }
+                        .header, .sidebar { display: none; }
+                    </style>
+                </head>
+                <body>
+                    <h1 style="color: var(--gray-dark); margin-bottom: 6px;">Agenda VTA</h1>
+                    <div style="color: var(--gray-medium); margin-bottom: 14px;">${currentPeriod} • Visualização: ${viewLabel}</div>
+                    <div class="print-wrapper">${chunksHtml.join('')}</div>
+                </body>
+                </html>
+            `);
+            exportWindow.document.close();
+            exportWindow.focus();
+            exportWindow.print();
+        }
+
         function renderizarGrade() {
             // Controlar visibilidade do botão de visualização
             const btnVisualizacao = document.getElementById('btnVisualizacaoSemana');
@@ -2098,10 +2256,13 @@
             document.documentElement.style.setProperty('--agenda-num-salas', listaSalas.length);
             document.documentElement.style.setProperty('--agenda-sala-min-width', `${minColWidth}px`);
 
+            const colStyle = `100px repeat(${listaSalas.length}, minmax(${minColWidth}px, 1fr))`;
+
             gridBody.className = 'grid-body';
 
             gridHeader.className = 'grid-header dia-view';
             gridHeader.style.display = 'grid';
+            gridHeader.style.gridTemplateColumns = colStyle;
             gridHeader.innerHTML = '<div class="grid-cell time-label">Horário</div>';
 
             listaSalas.forEach(sala => {
@@ -2122,6 +2283,8 @@
             horarios.forEach(horario => {
                 const row = document.createElement('div');
                 row.className = 'grid-row';
+                row.style.display = 'grid';
+                row.style.gridTemplateColumns = colStyle;
 
                 const timeCell = document.createElement('div');
                 timeCell.className = 'time-cell';
