@@ -822,6 +822,16 @@
             cursor: pointer;
         }
 
+        .appointment-cell.sala-bloqueada {
+            background: rgba(239, 68, 68, 0.1);
+            cursor: not-allowed;
+        }
+
+        .sala-bloqueada-header .sala-status {
+            color: var(--vta-orange-dark);
+            font-weight: 700;
+        }
+
         .appointment-cell:last-child {
             border-right: none;
         }
@@ -1767,6 +1777,7 @@
         };
 
         let agendamentos = []; // Inicialmente vazio, carregado do backend
+        let salasDisponiveis = [];
 
         let clientes = [];
         let pets = [];
@@ -1867,6 +1878,64 @@
 
         function getPetPorId(petId) {
             return pets.find(p => p.id === petId);
+        }
+
+        function normalizarSalaValor(valor) {
+            return String(valor || '').trim().toLowerCase();
+        }
+
+        async function carregarSalas() {
+            try {
+                const response = await fetch('/api/salas?withStats=1');
+                if (!response.ok) throw new Error('Falha ao obter salas');
+
+                const payload = await response.json();
+                salasDisponiveis = Array.isArray(payload.salas) ? payload.salas : payload;
+                preencherSelectSalas();
+                renderizarGrade();
+            } catch (error) {
+                console.error(error);
+                mostrarToast('Erro ao carregar salas', 'error');
+            }
+        }
+
+        function preencherSelectSalas() {
+            const salaSelect = document.getElementById('salaSelect');
+            const buscaSalaSelect = document.getElementById('buscaSalaSelect');
+
+            const selects = [salaSelect, buscaSalaSelect];
+            selects.forEach(select => {
+                if (!select) return;
+                const manterValor = select.value;
+                select.innerHTML = '';
+
+                const placeholder = document.createElement('option');
+                placeholder.value = '';
+                placeholder.textContent = select === buscaSalaSelect ? 'Todas as Salas' : 'Selecione uma sala';
+                select.appendChild(placeholder);
+
+                salasDisponiveis.forEach(sala => {
+                    const opt = document.createElement('option');
+                    opt.value = sala.nome;
+                    opt.textContent = sala.status === 'bloqueada' ? `${sala.nome} (Bloqueada)` : sala.nome;
+                    if (select === salaSelect && sala.status === 'bloqueada') {
+                        opt.disabled = true;
+                    }
+                    select.appendChild(opt);
+                });
+
+                select.value = manterValor;
+            });
+        }
+
+        function getSalaInfo(nomeSala) {
+            const alvo = normalizarSalaValor(nomeSala);
+            return salasDisponiveis.find(s => normalizarSalaValor(s.nome) === alvo || String(s.id) === alvo) || null;
+        }
+
+        function salaEstaBloqueada(nomeSala) {
+            const info = getSalaInfo(nomeSala);
+            return info ? info.status === 'bloqueada' : false;
         }
 
         function algumModalAberto() {
@@ -2016,38 +2085,29 @@
             const gridBody = document.getElementById('agendaGridBody');
             const horarios = gerarHorarios();
 
+            const listaSalas = salasDisponiveis.length ? salasDisponiveis : [
+                { nome: 'Sala 1', tipo: 'Consulta', status: 'disponivel', cor: 'var(--vta-green)' },
+            ];
+
             gridBody.className = 'grid-body';
 
             gridHeader.className = 'grid-header dia-view';
             gridHeader.style.display = 'grid';
-            gridHeader.style.gridTemplateColumns = '100px repeat(4, 1fr)';
-            gridHeader.innerHTML = `
-                <div class="grid-cell time-label">Horário</div>
-                <div class="grid-cell">
-                    <div class="sala-header">
-                        <div class="sala-nome">Sala 1</div>
-                        <div class="sala-status">Consulta</div>
+            gridHeader.style.gridTemplateColumns = `100px repeat(${listaSalas.length}, 1fr)`;
+            gridHeader.innerHTML = '<div class="grid-cell time-label">Horário</div>';
+
+            listaSalas.forEach(sala => {
+                const bloqueada = sala.status === 'bloqueada';
+                const headerCell = document.createElement('div');
+                headerCell.className = 'grid-cell';
+                headerCell.innerHTML = `
+                    <div class="sala-header ${bloqueada ? 'sala-bloqueada-header' : ''}">
+                        <div class="sala-nome">${sala.nome}</div>
+                        <div class="sala-status">${bloqueada ? 'Bloqueada' : (sala.tipo || '')}</div>
                     </div>
-                </div>
-                <div class="grid-cell">
-                    <div class="sala-header">
-                        <div class="sala-nome">Sala 2</div>
-                        <div class="sala-status">Cirurgia</div>
-                    </div>
-                </div>
-                <div class="grid-cell">
-                    <div class="sala-header">
-                        <div class="sala-nome">Sala 3</div>
-                        <div class="sala-status">Raio-X</div>
-                    </div>
-                </div>
-                <div class="grid-cell">
-                    <div class="sala-header">
-                        <div class="sala-nome">Sala 4</div>
-                        <div class="sala-status">Internação</div>
-                    </div>
-                </div>
-            `;
+                `;
+                gridHeader.appendChild(headerCell);
+            });
 
             gridBody.innerHTML = '';
 
@@ -2060,17 +2120,22 @@
                 timeCell.textContent = horario;
                 row.appendChild(timeCell);
 
-                for (let i = 1; i <= 4; i++) {
+                listaSalas.forEach(sala => {
                     const appointmentCell = document.createElement('div');
                     appointmentCell.className = 'appointment-cell';
-                    appointmentCell.dataset.sala = `sala${i}`;
+                    appointmentCell.dataset.sala = sala.nome;
                     appointmentCell.dataset.horario = horario;
+
+                    const bloqueada = sala.status === 'bloqueada';
+                    if (bloqueada) {
+                        appointmentCell.classList.add('sala-bloqueada');
+                    }
 
                     appointmentCell.addEventListener('dragover', handleDragOver);
                     appointmentCell.addEventListener('drop', handleDrop);
 
                     const agendamento = agendamentos.find(a =>
-                        a.sala === `sala${i}` &&
+                        normalizarSalaValor(a.sala) === normalizarSalaValor(sala.nome) &&
                         a.horario === horario &&
                         mesmaData(a.data, estadoAtual.dataAtual) &&
                         a.status !== 'cancelado'
@@ -2083,12 +2148,16 @@
 
                     appointmentCell.onclick = (e) => {
                         if (e.target === appointmentCell) {
-                            selecionarHorario(`sala${i}`, horario);
+                            if (bloqueada) {
+                                mostrarToast('Sala bloqueada. Selecione outra sala.', 'warning');
+                                return;
+                            }
+                            selecionarHorario(sala.nome, horario);
                         }
                     };
 
                     row.appendChild(appointmentCell);
-                }
+                });
 
                 gridBody.appendChild(row);
             });
@@ -2132,12 +2201,7 @@
 
             gridBody.innerHTML = '';
 
-            const salas = [
-                { id: 'sala1', nome: 'Sala 1', tipo: 'Consulta' },
-                { id: 'sala2', nome: 'Sala 2', tipo: 'Cirurgia' },
-                { id: 'sala3', nome: 'Sala 3', tipo: 'Raio-X' },
-                { id: 'sala4', nome: 'Sala 4', tipo: 'Internação' }
-            ];
+            const salas = salasDisponiveis.length ? salasDisponiveis : [{ nome: 'Sala 1', tipo: 'Consulta', status: 'disponivel', cor: 'var(--vta-green)' }];
 
             salas.forEach(sala => {
                 const row = document.createElement('div');
@@ -2154,14 +2218,19 @@
                     const appointmentCell = document.createElement('div');
                     appointmentCell.className = 'appointment-cell';
                     appointmentCell.dataset.data = dia.toISOString();
-                    appointmentCell.dataset.sala = sala.id;
+                    appointmentCell.dataset.sala = sala.nome;
                     appointmentCell.style.minHeight = '120px';
+
+                    const bloqueada = sala.status === 'bloqueada';
+                    if (bloqueada) {
+                        appointmentCell.classList.add('sala-bloqueada');
+                    }
 
                     appointmentCell.addEventListener('dragover', handleDragOver);
                     appointmentCell.addEventListener('drop', handleDrop);
 
                     const agendamentosDaSala = agendamentos.filter(a =>
-                        a.sala === sala.id &&
+                        normalizarSalaValor(a.sala) === normalizarSalaValor(sala.nome) &&
                         mesmaData(a.data, dia) &&
                         a.status !== 'cancelado'
                     );
@@ -2193,7 +2262,11 @@
 
                             agendamentosDaSala.forEach(agendamento => {
                                 const horarioItem = document.createElement('div');
-                                horarioItem.className = `horario-item ${agendamento.sala}`;
+                                horarioItem.className = 'horario-item';
+                                const salaInfo = getSalaInfo(agendamento.sala);
+                                if (salaInfo?.cor) {
+                                    horarioItem.style.borderLeftColor = salaInfo.cor;
+                                }
                                 horarioItem.innerHTML = `
                 <div class="horario-tempo">${agendamento.horario}</div>
                 <div class="horario-info">
@@ -2241,8 +2314,12 @@
 
                                 horarioItem.onclick = (e) => {
                                     e.stopPropagation();
+                                    if (sala.status === 'bloqueada') {
+                                        mostrarToast('Sala bloqueada. Selecione outra sala.', 'warning');
+                                        return;
+                                    }
                                     estadoAtual.dataAtual = new Date(dia);
-                                    selecionarHorario(sala.id, horario);
+                                    selecionarHorario(sala.nome, horario);
                                 };
 
                                 expandidoDiv.appendChild(horarioItem);
@@ -2265,8 +2342,12 @@
 
                     appointmentCell.onclick = (e) => {
                         if (e.target === appointmentCell) {
+                            if (bloqueada) {
+                                mostrarToast('Sala bloqueada. Selecione outra sala.', 'warning');
+                                return;
+                            }
                             estadoAtual.dataAtual = new Date(dia);
-                            selecionarHorario(sala.id, '08:00');
+                            selecionarHorario(sala.nome, '08:00');
                         }
                     };
 
@@ -2332,41 +2413,30 @@
                     const agendamentosNoDia = agendamentos.filter(a => mesmaData(a.data, dataAtual) && a.status !== 'cancelado');
 
                     // Contar agendamentos por sala
-                    const contadoresPorSala = {
-                        sala1: 0,
-                        sala2: 0,
-                        sala3: 0,
-                        sala4: 0
-                    };
+                    const contadoresPorSala = {};
+                    salasDisponiveis.forEach(s => {
+                        contadoresPorSala[normalizarSalaValor(s.nome)] = 0;
+                    });
 
                     agendamentosNoDia.forEach(a => {
-                        if (contadoresPorSala.hasOwnProperty(a.sala)) {
-                            contadoresPorSala[a.sala]++;
+                        const chave = normalizarSalaValor(a.sala);
+                        if (contadoresPorSala.hasOwnProperty(chave)) {
+                            contadoresPorSala[chave]++;
                         }
                     });
 
                     // Criar badges com nome da sala
                     let eventosHTML = '';
-                    const nomeSalas = {
-                        sala1: 'Consulta',
-                        sala2: 'Cirurgia',
-                        sala3: 'Raio-x',
-                        sala4: 'Interanação'
-                    };
 
-                    const coresSalas = {
-                        sala1: 'consulta',
-                        sala2: 'cirurgia',
-                        sala3: 'exame',
-                        sala4: 'internacao'
-                    };
-
-                    Object.keys(contadoresPorSala).forEach(sala => {
-                        if (contadoresPorSala[sala] > 0) {
+                    Object.entries(contadoresPorSala).forEach(([chave, total]) => {
+                        if (total > 0) {
+                            const salaInfo = salasDisponiveis.find(s => normalizarSalaValor(s.nome) === chave);
+                            const corBadge = salaInfo?.cor || 'var(--vta-green)';
+                            const nomeSala = salaInfo?.nome || chave;
                             eventosHTML += `
             <div class="event-group">
-                <div class="event-label">${nomeSalas[sala]}</div>
-                <div class="event-badge ${coresSalas[sala]}">${contadoresPorSala[sala]}</div>
+                <div class="event-label">${nomeSala}</div>
+                <div class="event-badge" style="background:${corBadge}">${total}</div>
             </div>
         `;
                         }
@@ -2389,9 +2459,14 @@
         function criarElementoAgendamento(agendamento, mostrarSala = false) {
             const appointmentDiv = document.createElement('div');
             const temCheckin = agendamento.checkin && agendamento.checkin.realizado;
-            appointmentDiv.className = `appointment ${agendamento.sala} ${temCheckin ? 'checkin-realizado' : ''}`;
+            appointmentDiv.className = `appointment ${temCheckin ? 'checkin-realizado' : ''}`;
             appointmentDiv.draggable = true;
             appointmentDiv.dataset.id = agendamento.id;
+
+            const salaInfo = getSalaInfo(agendamento.sala);
+            if (salaInfo?.cor) {
+                appointmentDiv.style.background = salaInfo.cor;
+            }
 
             if (mostrarSala) {
                 // Para expansões (semana) - mostra sala
@@ -2457,6 +2532,10 @@
             }
 
             if (novaSala && novoHorario && novaData) {
+                if (salaEstaBloqueada(novaSala)) {
+                    mostrarToast('Sala bloqueada. Movimentação não permitida.', 'warning');
+                    return;
+                }
                 solicitarMovimentacao(draggedAgendamento, novaSala, novoHorario, novaData);
             }
         }
@@ -2476,7 +2555,7 @@
                 if (idIgnorar && a.id === idIgnorar) return false;
                 
                 // Verifica se é a mesma sala, mesmo horário e mesma data
-                return a.sala === sala && 
+                return normalizarSalaValor(a.sala) === normalizarSalaValor(sala) && 
                        a.horario === horario && 
                        mesmaData(a.data, dataObj) &&
                        a.status !== 'cancelado';
@@ -2581,13 +2660,8 @@
         }
 
         function getNomeSala(sala) {
-            const nomes = {
-                'sala1': 'Sala 1 - Consulta',
-                'sala2': 'Sala 2 - Cirurgia',
-                'sala3': 'Sala 3 - Raio-X',
-                'sala4': 'Sala 4 - Internação'
-            };
-            return nomes[sala] || sala;
+            const info = getSalaInfo(sala);
+            return info ? info.nome : sala;
         }
 
         function mostrarDetalhesAgendamento(agendamento) {
@@ -2820,6 +2894,10 @@
                 mostrarToast('Aguarde carregar clientes e pets do sistema.', 'info');
                 return;
             }
+            if (sala && salaEstaBloqueada(sala)) {
+                mostrarToast('Sala bloqueada. Escolha outra sala.', 'warning');
+                return;
+            }
             agendamentoEditando = null;
             document.getElementById('modalTitle').textContent = 'Novo Agendamento';
             document.getElementById('agendamentoForm').reset();
@@ -3018,6 +3096,11 @@
             const horario = dataHoraInput.value.split('T')[1];
             const dataStr = dataHoraInput.value.split('T')[0];
 
+            if (salaEstaBloqueada(salaSelect.value)) {
+                mostrarToast('Sala bloqueada. Selecione outra sala.', 'warning');
+                return;
+            }
+
             // VERIFICAÇÃO DE CONFLITO
             const idIgnorar = agendamentoEditando ? agendamentoEditando.id : null;
             if (verificarHorarioOcupado(salaSelect.value, dataStr, horario, idIgnorar)) {
@@ -3102,6 +3185,7 @@
         }
 
         (async () => {
+            await carregarSalas();
             await carregarClientesEPets();
             await carregarAgendamentos(true);
             iniciarAtualizacaoAutomatica();

@@ -100,12 +100,31 @@ def create_tables():
             nome VARCHAR(100) NOT NULL,
             tipo VARCHAR(100),
             capacidade INTEGER,
-            status VARCHAR(20) DEFAULT 'ativo',
+            status VARCHAR(20) DEFAULT 'disponivel',
+            descricao TEXT,
             observacoes TEXT,
+            cor VARCHAR(20) DEFAULT '#52B788',
+            veterinario VARCHAR(120),
+            motivo_bloqueio VARCHAR(120),
+            observacoes_bloqueio TEXT,
+            previsao_liberacao TIMESTAMP,
+            data_bloqueio TIMESTAMP,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
         """
     )
+
+    # Garantir colunas adicionadas em instalações existentes
+    cur.execute("ALTER TABLE salas ALTER COLUMN status SET DEFAULT 'disponivel';")
+    cur.execute("UPDATE salas SET status = 'disponivel' WHERE status = 'ativo';")
+    cur.execute("ALTER TABLE salas ADD COLUMN IF NOT EXISTS descricao TEXT;")
+    cur.execute("ALTER TABLE salas ADD COLUMN IF NOT EXISTS cor VARCHAR(20) DEFAULT '#52B788';")
+    cur.execute("ALTER TABLE salas ADD COLUMN IF NOT EXISTS veterinario VARCHAR(120);")
+    cur.execute("ALTER TABLE salas ADD COLUMN IF NOT EXISTS motivo_bloqueio VARCHAR(120);")
+    cur.execute("ALTER TABLE salas ADD COLUMN IF NOT EXISTS observacoes_bloqueio TEXT;")
+    cur.execute("ALTER TABLE salas ADD COLUMN IF NOT EXISTS previsao_liberacao TIMESTAMP;")
+    cur.execute("ALTER TABLE salas ADD COLUMN IF NOT EXISTS data_bloqueio TIMESTAMP;")
+    cur.execute("CREATE UNIQUE INDEX IF NOT EXISTS salas_nome_idx ON salas (lower(nome));")
 
     print("Criando tabela notificacoes...")
     cur.execute(
@@ -157,13 +176,16 @@ def create_tables():
     cur.execute("SELECT COUNT(*) FROM salas")
     if cur.fetchone()[0] == 0:
         salas_iniciais = [
-            ('Consultório 1', 'Consulta', 1, 'ativo', 'Sala principal de atendimento'),
-            ('Consultório 2', 'Consulta', 1, 'ativo', 'Sala secundária'),
-            ('Centro Cirúrgico', 'Cirurgia', 1, 'ativo', 'Equipado para procedimentos complexos'),
-            ('Sala de Banho', 'Banho e Tosa', 2, 'ativo', 'Área úmida'),
+            ('Consultório 1', 'consulta', 1, 'disponivel', 'Sala principal de atendimento', '#52B788', 'Dr(a). Equipe'),
+            ('Consultório 2', 'consulta', 1, 'disponivel', 'Sala secundária', '#2E86AB', 'Dr(a). Equipe'),
+            ('Centro Cirúrgico', 'cirurgia', 1, 'disponivel', 'Equipado para procedimentos complexos', '#F77F00', 'Dr(a). Cirurgia'),
+            ('Sala de Exames', 'exame', 1, 'disponivel', 'Sala para exames de imagem', '#9D4EDD', 'Dr(a). Diagnóstico'),
         ]
         cur.executemany(
-            "INSERT INTO salas (nome, tipo, capacidade, status, observacoes) VALUES (%s, %s, %s, %s, %s)",
+            """
+            INSERT INTO salas (nome, tipo, capacidade, status, descricao, cor, veterinario)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """,
             salas_iniciais,
         )
 

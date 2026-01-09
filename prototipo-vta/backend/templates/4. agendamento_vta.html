@@ -1436,6 +1436,7 @@
         let agendamentos = [];
         let agendamentosFiltrados = [];
         let agendamentoEditando = null;
+        let salasDisponiveis = [];
         
         // Paginação
         let paginaAtual = 1;
@@ -1444,7 +1445,7 @@
         // Inicialização
         document.addEventListener('DOMContentLoaded', function() {
             carregarHorarios();
-            carregarAgendamentos();
+            carregarSalas().then(carregarAgendamentos);
             configurarFiltros();
             configurarAutocompleteCliente();
             // configurarFormulario(); // Não precisamos mais configurar o change do cliente
@@ -1472,6 +1473,59 @@
                 opt2.textContent = `${hStr}:30`;
                 select.appendChild(opt2);
             }
+        }
+
+        function normalizarSalaValor(valor) {
+            return String(valor || '').trim().toLowerCase();
+        }
+
+        async function carregarSalas() {
+            try {
+                const resp = await fetch('/api/salas?withStats=1');
+                if (!resp.ok) throw new Error('Erro ao carregar salas');
+                const payload = await resp.json();
+                salasDisponiveis = Array.isArray(payload.salas) ? payload.salas : payload;
+                preencherSelectSalas();
+            } catch (error) {
+                console.error('Erro:', error);
+                mostrarToast('Erro ao carregar salas', 'error');
+            }
+        }
+
+        function preencherSelectSalas() {
+            const salaSelect = document.getElementById('sala');
+            const salaFilter = document.getElementById('salaFilter');
+            const selects = [salaSelect, salaFilter];
+
+            selects.forEach(select => {
+                if (!select) return;
+                const valorAtual = select.value;
+                select.innerHTML = '';
+
+                const placeholder = document.createElement('option');
+                placeholder.value = '';
+                placeholder.textContent = select === salaFilter ? 'Todas as salas' : 'Selecione a sala...';
+                select.appendChild(placeholder);
+
+                salasDisponiveis.forEach(sala => {
+                    const opt = document.createElement('option');
+                    opt.value = sala.nome;
+                    opt.textContent = sala.status === 'bloqueada' ? `${sala.nome} (Bloqueada)` : sala.nome;
+                    select.appendChild(opt);
+                });
+
+                select.value = valorAtual;
+            });
+        }
+
+        function getSalaInfo(nomeSala) {
+            const alvo = normalizarSalaValor(nomeSala);
+            return salasDisponiveis.find(s => normalizarSalaValor(s.nome) === alvo || String(s.id) === alvo) || null;
+        }
+
+        function salaEstaBloqueada(nomeSala) {
+            const info = getSalaInfo(nomeSala);
+            return info ? info.status === 'bloqueada' : false;
         }
 
         // Definir data atual no formulário
@@ -1665,7 +1719,7 @@
 
                 // Filtro de sala
                 if (sala) {
-                    passa = passa && agendamento.sala.includes(sala);
+                    passa = passa && normalizarSalaValor(agendamento.sala) === normalizarSalaValor(sala);
                 }
 
                 // Filtro de data
@@ -1908,6 +1962,11 @@
             const sala = document.getElementById('sala').value;
             const salaTexto = document.getElementById('sala').selectedOptions[0]?.textContent;
 
+            if (salaEstaBloqueada(sala)) {
+                mostrarToast('Sala bloqueada. Selecione outra sala.', 'warning');
+                return;
+            }
+
             // Verificar conflitos antes de salvar
             if (!validarConflitosHorario(data, horario, sala, agendamentoEditando)) {
                 mostrarToast(`Não é possível agendar! A ${salaTexto} já está ocupada neste horário.`, 'error');
@@ -2014,30 +2073,12 @@
         }
 
         function formatarSala(salaValue) {
-            // Normalizar entrada para string
-            const val = String(salaValue).toLowerCase();
-            
-            const mapaSalas = {
-                '1': { nome: 'Sala 1', tipo: 'Consulta' },
-                '2': { nome: 'Sala 2', tipo: 'Consulta' },
-                '3': { nome: 'Sala 3', tipo: 'Cirurgia' },
-                '4': { nome: 'Sala 4', tipo: 'Exame' },
-                'sala1': { nome: 'Sala 1', tipo: 'Consulta' },
-                'sala2': { nome: 'Sala 2', tipo: 'Consulta' },
-                'sala3': { nome: 'Sala 3', tipo: 'Cirurgia' },
-                'sala4': { nome: 'Sala 4', tipo: 'Exame' },
-                'consultório 1': { nome: 'Sala 1', tipo: 'Consulta' },
-                'consultório 2': { nome: 'Sala 2', tipo: 'Consulta' },
-                'cirurgia': { nome: 'Sala 3', tipo: 'Cirurgia' },
-                'raio-x': { nome: 'Sala 4', tipo: 'Exame' }
-            };
-
-            const sala = mapaSalas[val] || { nome: salaValue, tipo: '-' };
+            const info = getSalaInfo(salaValue) || { nome: salaValue, tipo: '-' };
             
             return `
                 <div>
-                    <strong>${sala.nome}</strong><br>
-                    <small class="text-muted">${sala.tipo}</small>
+                    <strong>${info.nome}</strong><br>
+                    <small class="text-muted">${info.tipo || '-'}</small>
                 </div>
             `;
         }
@@ -2089,7 +2130,7 @@
             const conflitos = agendamentos.filter(a => 
                 a.data === data && 
                 a.horario === horario && 
-                a.sala === sala && 
+                normalizarSalaValor(a.sala) === normalizarSalaValor(sala) && 
                 a.id !== agendamentoId &&
                 a.status !== 'cancelado'
             );

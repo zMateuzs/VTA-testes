@@ -6,7 +6,7 @@ import io
 import psycopg2
 from psycopg2 import extras
 from werkzeug.security import check_password_hash, generate_password_hash
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from dotenv import load_dotenv
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
@@ -80,6 +80,153 @@ def update_appointment_statuses(conn):
         cur.close()
     except Exception as e:
         print(f"Erro na atualização automática de status: {e}")
+
+
+def ensure_salas_columns(conn):
+    """Garante que a tabela salas tenha as colunas usadas pelo frontend/backend."""
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+            ALTER TABLE salas ADD COLUMN IF NOT EXISTS descricao TEXT;
+            ALTER TABLE salas ADD COLUMN IF NOT EXISTS observacoes TEXT;
+            ALTER TABLE salas ADD COLUMN IF NOT EXISTS cor VARCHAR(20) DEFAULT '#52B788';
+            ALTER TABLE salas ADD COLUMN IF NOT EXISTS veterinario VARCHAR(120);
+            ALTER TABLE salas ADD COLUMN IF NOT EXISTS motivo_bloqueio VARCHAR(120);
+            ALTER TABLE salas ADD COLUMN IF NOT EXISTS observacoes_bloqueio TEXT;
+            ALTER TABLE salas ADD COLUMN IF NOT EXISTS previsao_liberacao TIMESTAMP;
+            ALTER TABLE salas ADD COLUMN IF NOT EXISTS data_bloqueio TIMESTAMP;
+            ALTER TABLE salas ALTER COLUMN status SET DEFAULT 'disponivel';
+        """)
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        print(f"Erro ao garantir colunas de salas: {e}")
+    finally:
+        cur.close()
+
+
+def _normalize_sala_status(db_status: str) -> str:
+    """Normaliza o status da sala para valores usados no frontend."""
+    if not db_status:
+        return 'disponivel'
+    status = str(db_status).lower()
+    return 'disponivel' if status == 'ativo' else status
+
+
+def _time_to_minutes(time_value) -> int:
+    try:
+        if isinstance(time_value, str):
+            parts = time_value.split(':')
+            return int(parts[0]) * 60 + int(parts[1])
+        return time_value.hour * 60 + time_value.minute
+    except Exception:
+        return None
+
+
+def build_salas_snapshot(conn):
+    """
+    Retorna a lista de salas enriquecida com ocupação do dia e um resumo de estatísticas.
+    A ocupação é considerada "ativa" para agendamentos de hoje cujo horário atual está dentro
+    da janela de 60 minutos do início do agendamento e que não estão cancelados ou realizados.
+    """
+    ensure_salas_columns(conn)
+    cur = conn.cursor()
+    cur.execute(
+        """
+        SELECT id, nome, tipo, capacidade, status, descricao, observacoes, cor, veterinario,
+               motivo_bloqueio, observacoes_bloqueio, previsao_liberacao, data_bloqueio, created_at
+        FROM salas
+        ORDER BY nome
+        """
+    )
+    salas_db = cur.fetchall()
+
+    today_str = date.today().isoformat()
+    cur.execute(
+        """
+        SELECT sala, cliente, pet, data_agendamento, horario, status, observacoes
+        FROM agendamentos
+        WHERE data_agendamento = %s AND status NOT IN ('cancelado')
+        ORDER BY horario
+        """,
+        (today_str,),
+    )
+    agendamentos_hoje = cur.fetchall()
+
+    now_minutes = _time_to_minutes(datetime.now().time())
+    ocupacoes = {}
+
+    for ag in agendamentos_hoje:
+        status_ag = (ag['status'] or '').lower()
+        if status_ag in ('cancelado',):
+            continue
+
+        start_minutes = _time_to_minutes(ag['horario'])
+        if start_minutes is None:
+            continue
+
+        fim_minutes = start_minutes + 60
+        if start_minutes <= now_minutes < fim_minutes and status_ag != 'realizado':
+            chave = str(ag['sala']).strip().lower()
+            try:
+                inicio_str = str(ag['horario'])[:5]
+                inicio_dt = datetime.strptime(inicio_str, '%H:%M')
+                fim_str = (inicio_dt + timedelta(minutes=60)).strftime('%H:%M')
+            except Exception:
+                inicio_str = str(ag['horario'])[:5]
+                fim_str = ''
+
+            ocupacoes[chave] = {
+                'cliente': ag['cliente'],
+                'pet': ag['pet'],
+                'veterinario': 'Dr. VTA',
+                'inicio': inicio_str,
+                'fim': fim_str,
+            }
+
+    salas_list = []
+    stats = {'total': 0, 'disponiveis': 0, 'ocupadas': 0, 'bloqueadas': 0}
+
+    for sala in salas_db:
+        status_norm = _normalize_sala_status(sala['status'])
+        key = sala['nome'].strip().lower()
+        ocupacao_atual = ocupacoes.get(key)
+
+        if status_norm == 'bloqueada':
+            final_status = 'bloqueada'
+        elif ocupacao_atual:
+            final_status = 'ocupada'
+        else:
+            final_status = status_norm or 'disponivel'
+
+        stats['total'] += 1
+        if final_status == 'disponivel':
+            stats['disponiveis'] += 1
+        elif final_status == 'ocupada':
+            stats['ocupadas'] += 1
+        elif final_status == 'bloqueada':
+            stats['bloqueadas'] += 1
+
+        salas_list.append({
+            'id': sala['id'],
+            'nome': sala['nome'],
+            'tipo': sala['tipo'],
+            'capacidade': sala['capacidade'] or 1,
+            'status': final_status,
+            'descricao': sala['descricao'] or sala['observacoes'],
+            'observacoes': sala['observacoes'],
+            'cor': sala['cor'] or '#52B788',
+            'veterinario': sala['veterinario'] or 'Dr(a).',
+            'motivo_bloqueio': sala['motivo_bloqueio'],
+            'observacoes_bloqueio': sala['observacoes_bloqueio'],
+            'previsao_liberacao': sala['previsao_liberacao'],
+            'data_bloqueio': sala['data_bloqueio'],
+            'created_at': sala['created_at'],
+            'ocupacaoAtual': ocupacao_atual,
+        })
+
+    cur.close()
+    return salas_list, stats
 
 # --- ROTAS DE PÁGINAS E AUTENTICAÇÃO ---
 
@@ -164,19 +311,11 @@ def dashboard():
         cur.execute("SELECT COUNT(DISTINCT cliente) FROM agendamentos")
         clientes_ativos_count = cur.fetchone()[0]
         
-        # 3. Salas Disponíveis e Ocupadas
-        # Buscando agendamentos de hoje para calcular ocupação e listar na agenda
+        # 3. Salas e agenda de hoje (ocupar/disponibilizar de acordo com agendamentos)
         cur.execute("SELECT * FROM agendamentos WHERE data_agendamento = %s ORDER BY horario", (today_str,))
         agendamentos_hoje = cur.fetchall()
-        
-        TOTAL_SALAS = 5 # Definindo um total fixo de salas para o sistema
-        occupied_rooms = set()
-        
-        now = datetime.now()
-        current_minutes = now.hour * 60 + now.minute
-        
+
         agenda_items = []
-        
         sala_nomes = {
             '1': 'Consultório 1',
             '2': 'Consultório 2',
@@ -187,40 +326,24 @@ def dashboard():
             'sala3': 'Cirurgia',
             'sala4': 'Raio-X'
         }
-        
+
         for ag in agendamentos_hoje:
             sala_val = str(ag['sala'])
             sala_display = sala_nomes.get(sala_val, sala_val)
-            
-            # Processamento para Agenda de Hoje
-            item = {
+            agenda_items.append({
                 'horario': str(ag['horario'])[:5],
                 'pet': ag['pet'],
                 'servico': ag['observacoes'] if ag['observacoes'] else 'Consulta',
                 'sala': sala_display,
                 'cliente': ag['cliente'],
-                'veterinario': 'Dr. VTA', # Placeholder
+                'veterinario': 'Dr. VTA',
                 'status': ag['status']
-            }
-            agenda_items.append(item)
-            
-            # Cálculo de Salas Ocupadas (Assumindo duração de 1h)
-            try:
-                h_str = str(ag['horario'])
-                parts = h_str.split(':')
-                h = int(parts[0])
-                m = int(parts[1])
-                start_minutes = h * 60 + m
-                
-                # Se o horário atual está dentro da janela de 1h do agendamento
-                if start_minutes <= current_minutes < start_minutes + 60:
-                    occupied_rooms.add(ag['sala'])
-            except Exception as e:
-                print(f"Erro ao processar horário: {e}")
-                pass
-                
-        salas_ocupadas_count = len(occupied_rooms)
-        salas_disponiveis_count = max(0, TOTAL_SALAS - salas_ocupadas_count)
+            })
+
+        # Estatísticas de salas com base na tabela e ocupação atual
+        salas_snapshot, sala_stats = build_salas_snapshot(conn)
+        salas_disponiveis_count = sala_stats['disponiveis']
+        salas_ocupadas_count = sala_stats['ocupadas']
         
         # 4. Notificações
         cur.execute("SELECT * FROM notificacoes ORDER BY created_at DESC LIMIT 5")
@@ -241,7 +364,7 @@ def dashboard():
         return render_template('2. dashboard_vta.html', 
                             consultas_hoje=0,
                             clientes_ativos=0,
-                            salas_disponiveis=5,
+                            salas_disponiveis=0,
                             salas_ocupadas=0,
                             agenda_hoje=[],
                             notificacoes=[])
@@ -271,37 +394,17 @@ def dashboard_stats():
         cur.execute("SELECT COUNT(DISTINCT cliente) FROM agendamentos")
         clientes_ativos_count = cur.fetchone()[0]
         
-        # 3. Salas
-        cur.execute("SELECT * FROM agendamentos WHERE data_agendamento = %s AND status != 'cancelado' ORDER BY horario", (today_str,))
-        agendamentos_hoje = cur.fetchall()
-        
-        TOTAL_SALAS = 5
-        occupied_rooms = set()
-        now = datetime.now()
-        current_minutes = now.hour * 60 + now.minute
-        
-        for ag in agendamentos_hoje:
-            try:
-                h_str = str(ag['horario'])
-                parts = h_str.split(':')
-                h = int(parts[0])
-                m = int(parts[1])
-                start_minutes = h * 60 + m
-                if start_minutes <= current_minutes < start_minutes + 60:
-                    occupied_rooms.add(ag['sala'])
-            except:
-                pass
-                
-        salas_ocupadas_count = len(occupied_rooms)
-        salas_disponiveis_count = max(0, TOTAL_SALAS - salas_ocupadas_count)
-        
+        _, sala_stats = build_salas_snapshot(conn)
+
         cur.close()
         
         return jsonify({
             "consultas_hoje": consultas_hoje_count,
             "clientes_ativos": clientes_ativos_count,
-            "salas_disponiveis": salas_disponiveis_count,
-            "salas_ocupadas": salas_ocupadas_count
+            "salas_disponiveis": sala_stats['disponiveis'],
+            "salas_ocupadas": sala_stats['ocupadas'],
+            "salas_bloqueadas": sala_stats['bloqueadas'],
+            "salas_total": sala_stats['total']
         })
     except Exception as e:
         print(f"Erro API stats: {e}")
@@ -1064,11 +1167,6 @@ def gerar_relatorio_dashboard_pdf():
         cur.execute("SELECT * FROM agendamentos WHERE data_agendamento = %s ORDER BY horario", (today_str,))
         agendamentos_hoje = cur.fetchall()
         
-        TOTAL_SALAS = 5
-        occupied_rooms = set()
-        now = datetime.now()
-        current_minutes = now.hour * 60 + now.minute
-        
         agenda_items = []
         sala_nomes = {
             '1': 'Consultório 1', '2': 'Consultório 2', '3': 'Cirurgia', '4': 'Raio-X',
@@ -1079,30 +1177,20 @@ def gerar_relatorio_dashboard_pdf():
             sala_val = str(ag['sala'])
             sala_display = sala_nomes.get(sala_val, sala_val)
             
-            item = {
+            agenda_items.append({
                 'horario': str(ag['horario'])[:5],
                 'pet': ag['pet'],
                 'servico': ag['observacoes'] if ag['observacoes'] else 'Consulta',
                 'sala': sala_display,
                 'cliente': ag['cliente']
-            }
-            agenda_items.append(item)
-            
-            try:
-                h_str = str(ag['horario'])
-                parts = h_str.split(':')
-                h = int(parts[0])
-                m = int(parts[1])
-                start_minutes = h * 60 + m
-                if start_minutes <= current_minutes < start_minutes + 60:
-                    occupied_rooms.add(ag['sala'])
-            except:
-                pass
-                
-        salas_ocupadas_count = len(occupied_rooms)
-        salas_disponiveis_count = max(0, TOTAL_SALAS - salas_ocupadas_count)
+            })
         
         cur.close()
+
+        _, sala_stats = build_salas_snapshot(conn)
+        salas_disponiveis_count = sala_stats['disponiveis']
+        salas_ocupadas_count = sala_stats['ocupadas']
+        salas_bloqueadas_count = sala_stats['bloqueadas']
         
         # --- Geração do PDF ---
         buffer = io.BytesIO()
@@ -1133,6 +1221,8 @@ def gerar_relatorio_dashboard_pdf():
         y -= 20
         c.drawString(50, y, f"Clientes Ativos: {clientes_ativos_count}")
         c.drawString(250, y, f"Salas Ocupadas: {salas_ocupadas_count}")
+        y -= 20
+        c.drawString(50, y, f"Salas Bloqueadas: {salas_bloqueadas_count}")
         
         # Agenda de Hoje
         y -= 50
@@ -1240,6 +1330,17 @@ def create_agendamento():
     try:
         conn = get_db_connection()
         cur = conn.cursor()
+
+        sala_nome = data.get('sala')
+        if sala_nome:
+            cur.execute("SELECT status FROM salas WHERE lower(nome) = lower(%s)", (sala_nome,))
+            sala_db = cur.fetchone()
+            if not sala_db:
+                cur.close()
+                return jsonify({"message": "Sala informada não existe."}), 400
+            if _normalize_sala_status(sala_db['status']) == 'bloqueada':
+                cur.close()
+                return jsonify({"message": "Sala está bloqueada e não pode receber agendamentos."}), 400
         
         cur.execute(
             """
@@ -1327,6 +1428,17 @@ def update_agendamento(id):
                     (False, 'agendado', id),
                 )
         else:
+            sala_nome = data.get('sala')
+            if sala_nome:
+                cur.execute("SELECT status FROM salas WHERE lower(nome) = lower(%s)", (sala_nome,))
+                sala_db = cur.fetchone()
+                if not sala_db:
+                    cur.close()
+                    return jsonify({"message": "Sala informada não existe."}), 400
+                if _normalize_sala_status(sala_db['status']) == 'bloqueada':
+                    cur.close()
+                    return jsonify({"message": "Sala está bloqueada e não pode receber agendamentos."}), 400
+
             cur.execute(
                 """
                 UPDATE agendamentos 
@@ -1615,28 +1727,11 @@ def list_salas():
     conn = None
     try:
         conn = get_db_connection()
-        cur = conn.cursor()
-        
-        cur.execute("SELECT * FROM salas ORDER BY nome")
-        salas = cur.fetchall()
-        
-        salas_list = []
-        for sala in salas:
-            salas_list.append({
-                'id': sala['id'],
-                'nome': sala['nome'],
-                'tipo': sala['tipo'],
-                'capacidade': sala['capacidade'],
-                'status': sala['status'],
-                'observacoes': sala['observacoes'],
-                # Adicionando campos extras para compatibilidade com o frontend
-                'cor': '#52B788', # Default color or store in DB if needed
-                'veterinario': 'Dr(a).', # Placeholder
-                'descricao': sala['observacoes'],
-                'ocupacaoAtual': None # Placeholder logic for now
-            })
-            
-        cur.close()
+        salas_list, stats = build_salas_snapshot(conn)
+        include_stats = request.args.get('withStats') == '1'
+
+        if include_stats:
+            return jsonify({'salas': salas_list, 'stats': stats}), 200
         return jsonify(salas_list), 200
     except Exception as e:
         print(f"Erro ao listar salas: {e}")
@@ -1650,31 +1745,43 @@ def create_sala():
     if 'user_id' not in session:
         return jsonify({"message": "Não autorizado"}), 401
     
-    data = request.json
+    data = request.json or {}
+    nome = (data.get('nome') or '').strip()
+    if not nome:
+        return jsonify({"message": "Nome da sala é obrigatório"}), 400
+
     conn = None
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        
+
+        cur.execute("SELECT 1 FROM salas WHERE lower(nome) = lower(%s)", (nome,))
+        if cur.fetchone():
+            cur.close()
+            return jsonify({"message": "Já existe uma sala com este nome."}), 409
+
         cur.execute(
             """
-            INSERT INTO salas (nome, tipo, capacidade, status, observacoes)
-            VALUES (%s, %s, %s, %s, %s)
+            INSERT INTO salas (nome, tipo, capacidade, status, descricao, observacoes, cor, veterinario)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING id
             """,
             (
-                data.get('nome'),
+                nome,
                 data.get('tipo'),
-                data.get('capacidade'),
-                data.get('status', 'disponivel'),
+                data.get('capacidade') or 1,
+                _normalize_sala_status(data.get('status')),
                 data.get('descricao'),
+                data.get('observacoes'),
+                data.get('cor') or '#52B788',
+                data.get('veterinario') or 'Dr(a).',
             ),
         )
-        
+
         new_id = cur.fetchone()[0]
         conn.commit()
         cur.close()
-        
+
         return jsonify({"message": "Sala criada com sucesso", "id": new_id}), 201
     except Exception as e:
         print(f"Erro ao criar sala: {e}")
@@ -1688,31 +1795,59 @@ def update_sala(id):
     if 'user_id' not in session:
         return jsonify({"message": "Não autorizado"}), 401
     
-    data = request.json
+    data = request.json or {}
+    nome = (data.get('nome') or '').strip()
+    if not nome:
+        return jsonify({"message": "Nome da sala é obrigatório"}), 400
+
     conn = None
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        
+
+        cur.execute("SELECT * FROM salas WHERE id = %s", (id,))
+        sala_db = cur.fetchone()
+        if not sala_db:
+            cur.close()
+            return jsonify({"message": "Sala não encontrada"}), 404
+
+        cur.execute("SELECT 1 FROM salas WHERE lower(nome) = lower(%s) AND id != %s", (nome, id))
+        if cur.fetchone():
+            cur.close()
+            return jsonify({"message": "Já existe uma sala com este nome."}), 409
+
+        novo_status = _normalize_sala_status(data.get('status') or sala_db['status'])
+        bloquear = novo_status == 'bloqueada'
+
         cur.execute(
             """
             UPDATE salas 
-            SET nome=%s, tipo=%s, capacidade=%s, status=%s, observacoes=%s
+            SET nome=%s, tipo=%s, capacidade=%s, status=%s, descricao=%s, observacoes=%s,
+                cor=%s, veterinario=%s,
+                motivo_bloqueio=%s, observacoes_bloqueio=%s, previsao_liberacao=%s,
+                data_bloqueio=CASE WHEN %s THEN COALESCE(data_bloqueio, NOW()) ELSE NULL END
             WHERE id=%s
             """,
             (
-                data.get('nome'),
+                nome,
                 data.get('tipo'),
-                data.get('capacidade'),
-                data.get('status'),
-                data.get('descricao'),
+                data.get('capacidade') or sala_db['capacidade'] or 1,
+                novo_status,
+                data.get('descricao') or sala_db['descricao'],
+                data.get('observacoes') or sala_db['observacoes'],
+                data.get('cor') or sala_db['cor'],
+                data.get('veterinario') or sala_db['veterinario'],
+                data.get('motivo_bloqueio') if bloquear else None,
+                data.get('observacoes_bloqueio') if bloquear else None,
+                data.get('previsao_liberacao') if bloquear else None,
+                bloquear,
                 id,
             ),
         )
-        
+
         conn.commit()
         cur.close()
-        
+
         return jsonify({"message": "Sala atualizada com sucesso"}), 200
     except Exception as e:
         print(f"Erro ao atualizar sala: {e}")
@@ -1730,9 +1865,27 @@ def delete_sala(id):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        
+        cur.execute("SELECT nome FROM salas WHERE id = %s", (id,))
+        sala_row = cur.fetchone()
+        if not sala_row:
+            cur.close()
+            return jsonify({"message": "Sala não encontrada"}), 404
+
+        cur.execute(
+            """
+            SELECT 1 FROM agendamentos 
+            WHERE lower(sala) = lower(%s)
+              AND status NOT IN ('cancelado','realizado')
+              AND data_agendamento >= CURRENT_DATE
+            LIMIT 1
+            """,
+            (sala_row['nome'],),
+        )
+        if cur.fetchone():
+            cur.close()
+            return jsonify({"message": "Sala possui agendamentos futuros ou ativos e não pode ser excluída."}), 409
+
         cur.execute("DELETE FROM salas WHERE id = %s", (id,))
-        
         conn.commit()
         cur.close()
         
@@ -1740,6 +1893,86 @@ def delete_sala(id):
     except Exception as e:
         print(f"Erro ao excluir sala: {e}")
         return jsonify({"message": "Erro ao excluir sala"}), 500
+    finally:
+        if conn:
+            conn.close()
+
+
+@app.route('/api/salas/<int:id>/bloquear', methods=['POST'])
+def bloquear_sala(id):
+    if 'user_id' not in session:
+        return jsonify({"message": "Não autorizado"}), 401
+
+    data = request.json or {}
+    motivo = data.get('motivo')
+    if not motivo:
+        return jsonify({"message": "Motivo do bloqueio é obrigatório"}), 400
+
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM salas WHERE id = %s", (id,))
+        sala_db = cur.fetchone()
+        if not sala_db:
+            cur.close()
+            return jsonify({"message": "Sala não encontrada"}), 404
+
+        cur.execute(
+            """
+            UPDATE salas
+            SET status='bloqueada', motivo_bloqueio=%s, observacoes_bloqueio=%s,
+                previsao_liberacao=%s, data_bloqueio=NOW()
+            WHERE id=%s
+            """,
+            (
+                motivo,
+                data.get('observacoes'),
+                data.get('previsao_liberacao'),
+                id,
+            ),
+        )
+        conn.commit()
+        cur.close()
+        return jsonify({"message": "Sala bloqueada com sucesso"}), 200
+    except Exception as e:
+        print(f"Erro ao bloquear sala: {e}")
+        return jsonify({"message": "Erro ao bloquear sala"}), 500
+    finally:
+        if conn:
+            conn.close()
+
+
+@app.route('/api/salas/<int:id>/desbloquear', methods=['POST'])
+def desbloquear_sala(id):
+    if 'user_id' not in session:
+        return jsonify({"message": "Não autorizado"}), 401
+
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM salas WHERE id = %s", (id,))
+        sala_db = cur.fetchone()
+        if not sala_db:
+            cur.close()
+            return jsonify({"message": "Sala não encontrada"}), 404
+
+        cur.execute(
+            """
+            UPDATE salas
+            SET status='disponivel', motivo_bloqueio=NULL, observacoes_bloqueio=NULL,
+                previsao_liberacao=NULL, data_bloqueio=NULL
+            WHERE id=%s
+            """,
+            (id,)
+        )
+        conn.commit()
+        cur.close()
+        return jsonify({"message": "Sala desbloqueada com sucesso"}), 200
+    except Exception as e:
+        print(f"Erro ao desbloquear sala: {e}")
+        return jsonify({"message": "Erro ao desbloquear sala"}), 500
     finally:
         if conn:
             conn.close()
